@@ -40,7 +40,9 @@ class Student extends Model
     ];
 
     /**
-     * Get the user associated with the student
+     * Get the user associated with the student.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function user()
     {
@@ -48,7 +50,9 @@ class Student extends Model
     }
 
     /**
-     * Get the department this student belongs to
+     * Get the department this student belongs to.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function department()
     {
@@ -56,7 +60,9 @@ class Student extends Model
     }
 
     /**
-     * Get the academic year this student was admitted
+     * Get the academic year this student was admitted.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function academicYear()
     {
@@ -64,7 +70,9 @@ class Student extends Model
     }
 
     /**
-     * Get all enrollments for this student
+     * Get all enrollments for this student.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function enrollments()
     {
@@ -72,7 +80,9 @@ class Student extends Model
     }
 
     /**
-     * Get current semester enrollments
+     * Get current semester enrollments for the active academic year.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function currentEnrollments()
     {
@@ -83,7 +93,11 @@ class Student extends Model
     }
 
     /**
-     * Get enrollments for a specific academic year and semester
+     * Get enrollments for a specific academic year and semester.
+     *
+     * @param int $academicYearId The academic year ID
+     * @param string $semester The semester ('first' or 'second')
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function enrollmentsForSemester($academicYearId, $semester)
     {

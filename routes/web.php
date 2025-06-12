@@ -16,6 +16,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\GradeController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\GlobalSearchController;
 
@@ -119,8 +120,23 @@ Route::middleware(['auth'])->group(function () {
     // Exam Routes
     Route::middleware(['permission:view-exams'])->group(function () {
         Route::resource('exams', ExamController::class);
+        Route::post('exams/{exam}/start', [ExamController::class, 'start'])->name('exams.start');
+        Route::post('exams/{exam}/complete', [ExamController::class, 'complete'])->name('exams.complete');
+        Route::post('exams/{exam}/cancel', [ExamController::class, 'cancel'])->name('exams.cancel');
+        Route::get('exams/upcoming', [ExamController::class, 'upcoming'])->name('exams.upcoming');
     });
-    
+
+    // Grade/Result Routes
+    Route::middleware(['permission:view-grades'])->group(function () {
+        Route::resource('grades', GradeController::class)->except(['create', 'store']);
+        Route::get('exams/{exam}/grades/create', [GradeController::class, 'createForExam'])->name('grades.create-for-exam');
+        Route::post('exams/{exam}/grades', [GradeController::class, 'storeForExam'])->name('grades.store-for-exam');
+        Route::get('students/{student}/results', [GradeController::class, 'studentResults'])->name('grades.student-results');
+        Route::get('exams/{exam}/results', [GradeController::class, 'examResults'])->name('grades.exam-results');
+        Route::get('result-sheet', [GradeController::class, 'resultSheet'])->name('grades.result-sheet');
+        Route::post('grades/calculate-final', [GradeController::class, 'calculateFinalGrades'])->name('grades.calculate-final');
+    });
+
     // Finance Routes
     Route::middleware(['permission:view-finances'])->prefix('finance')->name('finance.')->group(function () {
         // Fee Routes

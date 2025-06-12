@@ -20,61 +20,82 @@ class StudentController extends Controller
     }
 
     /**
-     * Display a listing of students
+     * Display a listing of students with optimized performance.
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
      */
     public function index(Request $request)
     {
         $this->authorize('view-students');
 
-        $departments = Department::active()->get();
-        $academicYears = AcademicYear::orderBy('name', 'desc')->get();
+        // Cache filter options for better performance
+        $departments = cache()->remember('active_departments', 300, function () {
+            return Department::active()->select('id', 'name', 'code')->get();
+        });
+
+        $academicYears = cache()->remember('academic_years_desc', 300, function () {
+            return AcademicYear::select('id', 'name', 'start_year', 'end_year')
+                ->orderBy('name', 'desc')
+                ->get();
+        });
 
         // Get filters
-        $selectedDepartment = $request->get('department_id');
-        $selectedLevel = $request->get('level');
-        $selectedStatus = $request->get('status');
-        $selectedAcademicYear = $request->get('academic_year_id');
-        $search = $request->get('search');
+        $filters = $request->only([
+            'department_id', 'level', 'status', 'academic_year_id', 'search'
+        ]);
 
-        // Build query
-        $students = Student::with(['user', 'department', 'academicYear'])
-            ->when($selectedDepartment, function ($query) use ($selectedDepartment) {
-                return $query->where('department_id', $selectedDepartment);
-            })
-            ->when($selectedLevel, function ($query) use ($selectedLevel) {
-                return $query->where('current_level', $selectedLevel);
-            })
-            ->when($selectedStatus, function ($query) use ($selectedStatus) {
-                return $query->where('status', $selectedStatus);
-            })
-            ->when($selectedAcademicYear, function ($query) use ($selectedAcademicYear) {
-                return $query->where('academic_year_id', $selectedAcademicYear);
-            })
-            ->when($search, function ($query) use ($search) {
-                return $query->where(function ($q) use ($search) {
-                    $q->where('matric_number', 'like', "%{$search}%")
+        // Build optimized query with selective eager loading
+        $studentsQuery = Student::select([
+                'id', 'user_id', 'matric_number', 'department_id',
+                'academic_year_id', 'current_level', 'status', 'cgpa', 'created_at'
+            ])
+            ->with([
+                'user:id,first_name,last_name,email,phone',
+                'department:id,name,code',
+                'academicYear:id,name,start_year,end_year'
+            ]);
+
+        // Apply filters efficiently
+        if (!empty($filters['department_id'])) {
+            $studentsQuery->where('department_id', $filters['department_id']);
+        }
+
+        if (!empty($filters['level'])) {
+            $studentsQuery->where('current_level', $filters['level']);
+        }
+
+        if (!empty($filters['status'])) {
+            $studentsQuery->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['academic_year_id'])) {
+            $studentsQuery->where('academic_year_id', $filters['academic_year_id']);
+        }
+
+        // Optimized search with database indexes
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $studentsQuery->where(function ($query) use ($search) {
+                $query->where('matric_number', 'like', "%{$search}%")
                       ->orWhereHas('user', function ($userQuery) use ($search) {
-                          $userQuery->where('first_name', 'like', "%{$search}%")
-                                   ->orWhere('last_name', 'like', "%{$search}%")
+                          $userQuery->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"])
                                    ->orWhere('email', 'like', "%{$search}%");
                       });
-                });
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            });
+        }
 
-        // Get statistics
-        $stats = $this->getStudentStats($selectedDepartment, $selectedLevel, $selectedStatus);
+        // Use index-friendly ordering
+        $students = $studentsQuery->orderBy('id', 'desc')->paginate(20);
+
+        // Get statistics with optimized single query
+        $stats = $this->getOptimizedStudentStats($filters);
 
         return view('students.index', compact(
             'students',
             'departments',
             'academicYears',
-            'selectedDepartment',
-            'selectedLevel',
-            'selectedStatus',
-            'selectedAcademicYear',
-            'search',
+            'filters',
             'stats'
         ));
     }
@@ -186,29 +207,68 @@ class StudentController extends Controller
     }
 
     /**
-     * Display the specified student
+     * Display the specified student with optimized loading.
+     *
+     * @param Student $student
+     * @return \Illuminate\View\View
      */
     public function show(Student $student)
     {
         $this->authorize('view-students');
 
-        $student->load(['user', 'department.faculty', 'academicYear']);
+        // Load relationships efficiently with selective fields
+        $student->load([
+            'user:id,first_name,last_name,email,phone,date_of_birth,gender,address',
+            'department.faculty:id,name,code',
+            'academicYear:id,name,start_year,end_year,is_current'
+        ]);
 
-        // Get current academic year enrollments
-        $currentAcademicYear = AcademicYear::current();
-        $currentEnrollments = $student->enrollmentsForSemester($currentAcademicYear->id, 'first')
-            ->with(['class.course', 'class.instructor.user'])
+        // Get current academic year efficiently
+        $currentAcademicYear = cache()->remember('current_academic_year', 300, function () {
+            return AcademicYear::current();
+        });
+
+        // Optimized current enrollments query
+        $currentEnrollments = Enrollment::select([
+                'id', 'student_id', 'class_id', 'academic_year_id',
+                'semester', 'status', 'enrollment_date', 'total_score', 'final_grade'
+            ])
+            ->with([
+                'class:id,course_id,instructor_id,section,capacity',
+                'class.course:id,title,code,credit_units',
+                'class.instructor.user:id,first_name,last_name'
+            ])
+            ->where('student_id', $student->id)
+            ->where('academic_year_id', $currentAcademicYear->id)
+            ->where('semester', 'first')
+            ->where('status', 'enrolled')
             ->get();
 
-        // Get academic history
-        $academicHistory = Enrollment::where('student_id', $student->id)
-            ->with(['class.course', 'academicYear'])
+        // Optimized academic history with single query and grouping
+        $academicHistory = Enrollment::select([
+                'id', 'student_id', 'class_id', 'academic_year_id',
+                'semester', 'status', 'enrollment_date', 'total_score', 'final_grade'
+            ])
+            ->with([
+                'class:id,course_id,section',
+                'class.course:id,title,code,credit_units',
+                'academicYear:id,name,start_year,end_year'
+            ])
+            ->where('student_id', $student->id)
             ->orderBy('academic_year_id', 'desc')
             ->orderBy('semester', 'desc')
             ->get()
             ->groupBy(['academic_year_id', 'semester']);
 
-        return view('students.show', compact('student', 'currentEnrollments', 'academicHistory'));
+        // Calculate performance metrics
+        $performanceMetrics = $this->calculateStudentPerformanceMetrics($student);
+
+        return view('students.show', compact(
+            'student',
+            'currentEnrollments',
+            'academicHistory',
+            'performanceMetrics'
+        ));
     }
 
     /**
@@ -338,30 +398,98 @@ class StudentController extends Controller
     }
 
     /**
-     * Get student statistics
+     * Get optimized student statistics with single query.
+     *
+     * @param array $filters
+     * @return array
      */
-    private function getStudentStats($departmentId = null, $level = null, $status = null)
+    private function getOptimizedStudentStats(array $filters = []): array
     {
         $query = Student::query();
 
-        if ($departmentId) {
-            $query->where('department_id', $departmentId);
+        // Apply same filters as main query
+        if (!empty($filters['department_id'])) {
+            $query->where('department_id', $filters['department_id']);
         }
 
-        if ($level) {
-            $query->where('current_level', $level);
+        if (!empty($filters['level'])) {
+            $query->where('current_level', $filters['level']);
         }
 
-        if ($status) {
-            $query->where('status', $status);
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
         }
+
+        if (!empty($filters['academic_year_id'])) {
+            $query->where('academic_year_id', $filters['academic_year_id']);
+        }
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('matric_number', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"])
+                               ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Single query to get all statistics
+        $stats = $query->selectRaw('
+            COUNT(*) as total,
+            SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active,
+            SUM(CASE WHEN status = "graduated" THEN 1 ELSE 0 END) as graduated,
+            SUM(CASE WHEN status = "suspended" THEN 1 ELSE 0 END) as suspended,
+            SUM(CASE WHEN status = "withdrawn" THEN 1 ELSE 0 END) as withdrawn,
+            SUM(CASE WHEN status = "deferred" THEN 1 ELSE 0 END) as deferred,
+            AVG(cgpa) as average_cgpa
+        ')->first();
 
         return [
-            'total' => $query->count(),
-            'active' => $query->where('status', 'active')->count(),
-            'graduated' => $query->where('status', 'graduated')->count(),
-            'suspended' => $query->where('status', 'suspended')->count(),
-            'withdrawn' => $query->where('status', 'withdrawn')->count(),
+            'total' => $stats->total ?? 0,
+            'active' => $stats->active ?? 0,
+            'graduated' => $stats->graduated ?? 0,
+            'suspended' => $stats->suspended ?? 0,
+            'withdrawn' => $stats->withdrawn ?? 0,
+            'deferred' => $stats->deferred ?? 0,
+            'average_cgpa' => round($stats->average_cgpa ?? 0, 2),
+        ];
+    }
+
+    /**
+     * Calculate student performance metrics efficiently.
+     *
+     * @param Student $student
+     * @return array
+     */
+    private function calculateStudentPerformanceMetrics(Student $student): array
+    {
+        // Use single query to get all enrollment statistics
+        $enrollmentStats = Enrollment::where('student_id', $student->id)
+            ->selectRaw('
+                COUNT(*) as total_enrollments,
+                SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed_courses,
+                SUM(CASE WHEN status = "failed" THEN 1 ELSE 0 END) as failed_courses,
+                SUM(CASE WHEN status = "enrolled" THEN 1 ELSE 0 END) as current_enrollments,
+                AVG(CASE WHEN total_score IS NOT NULL THEN total_score ELSE NULL END) as average_score
+            ')
+            ->first();
+
+        // Calculate completion rate
+        $completionRate = $enrollmentStats->total_enrollments > 0
+            ? round(($enrollmentStats->completed_courses / $enrollmentStats->total_enrollments) * 100, 2)
+            : 0;
+
+        return [
+            'total_enrollments' => $enrollmentStats->total_enrollments ?? 0,
+            'completed_courses' => $enrollmentStats->completed_courses ?? 0,
+            'failed_courses' => $enrollmentStats->failed_courses ?? 0,
+            'current_enrollments' => $enrollmentStats->current_enrollments ?? 0,
+            'average_score' => round($enrollmentStats->average_score ?? 0, 2),
+            'completion_rate' => $completionRate,
+            'cgpa' => $student->cgpa ?? 0,
+            'total_credits' => $student->total_credits_earned ?? 0,
         ];
     }
 }

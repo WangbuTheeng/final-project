@@ -2,183 +2,341 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreExamRequest;
+use App\Http\Requests\UpdateExamRequest;
 use App\Models\Exam;
-use App\Models\Course;
+use App\Models\ClassSection;
+use App\Models\AcademicYear;
+use App\Services\ExamService;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+use Illuminate\Http\JsonResponse;
 
+/**
+ * Class ExamController
+ *
+ * Handles exam management operations following Laravel best practices.
+ *
+ * @package App\Http\Controllers
+ */
 class ExamController extends Controller
 {
     /**
+     * The exam service instance.
+     *
+     * @var ExamService
+     */
+    protected ExamService $examService;
+
+    /**
      * Create a new controller instance.
      *
+     * @param ExamService $examService
      * @return void
      */
-    public function __construct()
+    public function __construct(ExamService $examService)
     {
         $this->middleware('auth');
+        $this->examService = $examService;
     }
 
     /**
      * Display a listing of the exams.
      *
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return View
      */
-    public function index()
+    public function index(Request $request): View
     {
-        // Check if user has permission to view exams
         $this->authorize('view-exams');
 
-        $exams = Exam::with('course')->orderBy('created_at', 'desc')->paginate(15);
-        return view('exams.index', compact('exams'));
+        // Get filter parameters
+        $filters = $request->only([
+            'exam_type', 'semester', 'status', 'academic_year_id', 'class_id', 'search'
+        ]);
+
+        // Get paginated exams
+        $exams = $this->examService->getPaginatedExams($filters, 15);
+
+        // Get statistics
+        $statistics = $this->examService->getExamStatistics($filters);
+
+        // Get filter options
+        $examTypes = Exam::getExamTypes();
+        $semesters = Exam::getSemesters();
+        $statuses = Exam::getStatuses();
+        $academicYears = AcademicYear::orderBy('name', 'desc')->get();
+        $classes = ClassSection::with('course')->get();
+
+        return view('exams.index', compact(
+            'exams',
+            'statistics',
+            'examTypes',
+            'semesters',
+            'statuses',
+            'academicYears',
+            'classes',
+            'filters'
+        ));
     }
 
     /**
      * Show the form for creating a new exam.
      *
-     * @return \Illuminate\Http\Response
+     * @return View
      */
-    public function create()
+    public function create(): View
     {
-        // Check if user has permission to create exams
         $this->authorize('create-exams');
-        
-        $courses = Course::all();
-        return view('exams.create', compact('courses'));
+
+        // Get form options
+        $examTypes = Exam::getExamTypes();
+        $semesters = Exam::getSemesters();
+        $academicYears = AcademicYear::active()->get();
+        $classes = ClassSection::with(['course', 'instructor.user'])->get();
+
+        return view('exams.create', compact(
+            'examTypes',
+            'semesters',
+            'academicYears',
+            'classes'
+        ));
     }
 
     /**
      * Store a newly created exam in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param StoreExamRequest $request
+     * @return RedirectResponse
      */
-    public function store(Request $request)
+    public function store(StoreExamRequest $request): RedirectResponse
     {
-        // Check if user has permission to create exams
-        $this->authorize('create-exams');
-        
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'course_id' => ['required', 'exists:courses,id'],
-            'total_marks' => ['required', 'numeric', 'min:0'],
-            'theory_marks' => ['nullable', 'numeric', 'min:0'],
-            'practical_marks' => ['nullable', 'numeric', 'min:0'],
-            'passing_marks' => ['required', 'numeric', 'min:0', 'lte:total_marks'],
-        ]);
+        try {
+            $exam = $this->examService->createExam($request->validatedWithDefaults());
 
-        // Ensure theory + practical marks = total marks if both are provided
-        if ($request->filled('theory_marks') && $request->filled('practical_marks')) {
-            $totalCalculated = $request->theory_marks + $request->practical_marks;
-            if ($totalCalculated != $request->total_marks) {
-                return redirect()->back()
-                    ->with('error', 'Theory marks + practical marks must equal total marks')
-                    ->withInput();
-            }
+            return redirect()->route('exams.index')
+                ->with('success', "Exam '{$exam->title}' created successfully.");
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error creating exam: ' . $e->getMessage())
+                ->withInput();
         }
-
-        Exam::create([
-            'name' => $request->name,
-            'course_id' => $request->course_id,
-            'total_marks' => $request->total_marks,
-            'theory_marks' => $request->theory_marks,
-            'practical_marks' => $request->practical_marks,
-            'passing_marks' => $request->passing_marks,
-        ]);
-
-        return redirect()->route('exams.index')
-            ->with('success', 'Exam created successfully.');
     }
 
     /**
      * Display the specified exam.
      *
-     * @param  \App\Models\Exam  $exam
-     * @return \Illuminate\Http\Response
+     * @param Exam $exam
+     * @return View
      */
-    public function show(Exam $exam)
+    public function show(Exam $exam): View
     {
-        // Check if user has permission to view exams
         $this->authorize('view-exams');
-        
-        $exam->load('course');
-        return view('exams.show', compact('exam'));
+
+        // Load relationships
+        $exam->load([
+            'classSection.course',
+            'academicYear',
+            'creator',
+            'grades.student.user'
+        ]);
+
+        // Get exam students
+        $students = $this->examService->getExamStudents($exam);
+
+        // Get exam statistics
+        $gradeStats = $exam->grades()
+            ->selectRaw('
+                COUNT(*) as total_graded,
+                AVG(score) as average_score,
+                MAX(score) as highest_score,
+                MIN(score) as lowest_score,
+                SUM(CASE WHEN letter_grade != "F" THEN 1 ELSE 0 END) as passed_count
+            ')
+            ->first();
+
+        return view('exams.show', compact('exam', 'students', 'gradeStats'));
     }
 
     /**
      * Show the form for editing the specified exam.
      *
-     * @param  \App\Models\Exam  $exam
-     * @return \Illuminate\Http\Response
+     * @param Exam $exam
+     * @return View|RedirectResponse
      */
     public function edit(Exam $exam)
     {
-        // Check if user has permission to edit exams
         $this->authorize('edit-exams');
-        
-        $courses = Course::all();
-        return view('exams.edit', compact('exam', 'courses'));
+
+        // Check if exam can be edited
+        if (!$this->examService->canEditExam($exam)) {
+            return redirect()->route('exams.show', $exam)
+                ->with('error', 'This exam cannot be edited because it has associated grades or is completed.');
+        }
+
+        // Get form options
+        $examTypes = Exam::getExamTypes();
+        $semesters = Exam::getSemesters();
+        $statuses = Exam::getStatuses();
+        $academicYears = AcademicYear::active()->get();
+        $classes = ClassSection::with(['course', 'instructor.user'])->get();
+
+        return view('exams.edit', compact(
+            'exam',
+            'examTypes',
+            'semesters',
+            'statuses',
+            'academicYears',
+            'classes'
+        ));
     }
 
     /**
      * Update the specified exam in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Exam  $exam
-     * @return \Illuminate\Http\Response
+     * @param UpdateExamRequest $request
+     * @param Exam $exam
+     * @return RedirectResponse
      */
-    public function update(Request $request, Exam $exam)
+    public function update(UpdateExamRequest $request, Exam $exam): RedirectResponse
     {
-        // Check if user has permission to edit exams
-        $this->authorize('edit-exams');
-        
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'course_id' => ['required', 'exists:courses,id'],
-            'total_marks' => ['required', 'numeric', 'min:0'],
-            'theory_marks' => ['nullable', 'numeric', 'min:0'],
-            'practical_marks' => ['nullable', 'numeric', 'min:0'],
-            'passing_marks' => ['required', 'numeric', 'min:0', 'lte:total_marks'],
-        ]);
-
-        // Ensure theory + practical marks = total marks if both are provided
-        if ($request->filled('theory_marks') && $request->filled('practical_marks')) {
-            $totalCalculated = $request->theory_marks + $request->practical_marks;
-            if ($totalCalculated != $request->total_marks) {
-                return redirect()->back()
-                    ->with('error', 'Theory marks + practical marks must equal total marks')
-                    ->withInput();
-            }
+        // Check if exam can be edited
+        if (!$this->examService->canEditExam($exam)) {
+            return redirect()->route('exams.show', $exam)
+                ->with('error', 'This exam cannot be edited because it has associated grades or is completed.');
         }
 
-        $exam->name = $request->name;
-        $exam->course_id = $request->course_id;
-        $exam->total_marks = $request->total_marks;
-        $exam->theory_marks = $request->theory_marks;
-        $exam->practical_marks = $request->practical_marks;
-        $exam->passing_marks = $request->passing_marks;
-        $exam->save();
+        try {
+            $this->examService->updateExam($exam, $request->validated());
 
-        return redirect()->route('exams.index')
-            ->with('success', 'Exam updated successfully.');
+            return redirect()->route('exams.show', $exam)
+                ->with('success', "Exam '{$exam->title}' updated successfully.");
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error updating exam: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
      * Remove the specified exam from storage.
      *
-     * @param  \App\Models\Exam  $exam
-     * @return \Illuminate\Http\Response
+     * @param Exam $exam
+     * @return RedirectResponse
      */
-    public function destroy(Exam $exam)
+    public function destroy(Exam $exam): RedirectResponse
     {
-        // Check if user has permission to delete exams
         $this->authorize('delete-exams');
-        
-        // Check if there are any grades associated with this exam
-        // This should be implemented based on your specific relationships
-        
-        $exam->delete();
-        
-        return redirect()->route('exams.index')
-            ->with('success', 'Exam deleted successfully.');
+
+        try {
+            $this->examService->deleteExam($exam);
+
+            return redirect()->route('exams.index')
+                ->with('success', 'Exam deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', $e->getMessage());
+        }
     }
+
+    /**
+     * Start an exam (AJAX endpoint).
+     *
+     * @param Exam $exam
+     * @return JsonResponse
+     */
+    public function start(Exam $exam): JsonResponse
+    {
+        $this->authorize('edit-exams');
+
+        try {
+            $this->examService->startExam($exam);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Exam started successfully.',
+                'status' => $exam->status
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Complete an exam (AJAX endpoint).
+     *
+     * @param Exam $exam
+     * @return JsonResponse
+     */
+    public function complete(Exam $exam): JsonResponse
+    {
+        $this->authorize('edit-exams');
+
+        try {
+            $this->examService->completeExam($exam);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Exam completed successfully.',
+                'status' => $exam->status
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Cancel an exam (AJAX endpoint).
+     *
+     * @param Exam $exam
+     * @return JsonResponse
+     */
+    public function cancel(Exam $exam): JsonResponse
+    {
+        $this->authorize('edit-exams');
+
+        try {
+            $this->examService->cancelExam($exam);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Exam cancelled successfully.',
+                'status' => $exam->status
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Get upcoming exams (AJAX endpoint).
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function upcoming(Request $request): JsonResponse
+    {
+        $this->authorize('view-exams');
+
+        $classId = $request->get('class_id');
+        $limit = $request->get('limit', 10);
+
+        $upcomingExams = $this->examService->getUpcomingExams($classId, $limit);
+
+        return response()->json([
+            'success' => true,
+            'data' => $upcomingExams
+        ]);
+    }
+}
 } 

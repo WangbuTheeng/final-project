@@ -84,46 +84,139 @@ Route::middleware(['auth'])->group(function () {
 
     // Course Routes
     Route::middleware(['permission:view-courses'])->group(function () {
-        Route::resource('courses', CourseController::class);
+        Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
+        Route::get('courses/{course}', [CourseController::class, 'show'])->name('courses.show');
+    });
+
+    Route::middleware(['permission:create-courses'])->group(function () {
+        Route::get('courses/create', [CourseController::class, 'create'])->name('courses.create');
+        Route::post('courses', [CourseController::class, 'store'])->name('courses.store');
+    });
+
+    Route::middleware(['permission:edit-courses'])->group(function () {
+        Route::get('courses/{course}/edit', [CourseController::class, 'edit'])->name('courses.edit');
+        Route::put('courses/{course}', [CourseController::class, 'update'])->name('courses.update');
+        Route::patch('courses/{course}', [CourseController::class, 'update']);
+    });
+
+    Route::middleware(['permission:delete-courses'])->group(function () {
+        Route::delete('courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
     });
 
     // Class Section Routes
     Route::middleware(['permission:view-classes'])->group(function () {
-        Route::resource('classes', ClassSectionController::class);
+        Route::get('classes', [ClassSectionController::class, 'index'])->name('classes.index');
+        Route::get('classes/{classSection}', [ClassSectionController::class, 'show'])->name('classes.show');
+    });
+
+    Route::middleware(['permission:create-classes'])->group(function () {
+        Route::get('classes/create', [ClassSectionController::class, 'create'])->name('classes.create');
+        Route::post('classes', [ClassSectionController::class, 'store'])->name('classes.store');
+    });
+
+    Route::middleware(['permission:edit-classes'])->group(function () {
+        Route::get('classes/{classSection}/edit', [ClassSectionController::class, 'edit'])->name('classes.edit');
+        Route::put('classes/{classSection}', [ClassSectionController::class, 'update'])->name('classes.update');
+        Route::patch('classes/{classSection}', [ClassSectionController::class, 'update']);
         Route::post('classes/{classSection}/assign-instructor', [ClassSectionController::class, 'assignInstructor'])
             ->name('classes.assign-instructor');
     });
 
+    Route::middleware(['permission:delete-classes'])->group(function () {
+        Route::delete('classes/{classSection}', [ClassSectionController::class, 'destroy'])->name('classes.destroy');
+    });
+
     // Subject Routes
     Route::middleware(['permission:view-courses'])->group(function () {
-        Route::resource('subjects', SubjectController::class);
+        Route::get('subjects', [SubjectController::class, 'index'])->name('subjects.index');
+        Route::get('subjects/{subject}', [SubjectController::class, 'show'])->name('subjects.show');
         Route::get('classes/{class}/subjects', [SubjectController::class, 'getByClass'])
             ->name('subjects.by-class');
     });
 
+    Route::middleware(['permission:create-courses'])->group(function () {
+        Route::get('subjects/create', [SubjectController::class, 'create'])->name('subjects.create');
+        Route::post('subjects', [SubjectController::class, 'store'])->name('subjects.store');
+    });
+
+    Route::middleware(['permission:edit-courses'])->group(function () {
+        Route::get('subjects/{subject}/edit', [SubjectController::class, 'edit'])->name('subjects.edit');
+        Route::put('subjects/{subject}', [SubjectController::class, 'update'])->name('subjects.update');
+        Route::patch('subjects/{subject}', [SubjectController::class, 'update']);
+    });
+
+    Route::middleware(['permission:delete-courses'])->group(function () {
+        Route::delete('subjects/{subject}', [SubjectController::class, 'destroy'])->name('subjects.destroy');
+    });
+
     // Student Management Routes
     Route::middleware(['permission:view-students'])->group(function () {
-        Route::resource('students', StudentController::class);
+        Route::get('students', [StudentController::class, 'index'])->name('students.index');
+        Route::get('students/{student}', [StudentController::class, 'show'])->name('students.show');
+    });
+
+    Route::middleware(['permission:create-students'])->group(function () {
+        Route::get('students/create', [StudentController::class, 'create'])->name('students.create');
+        Route::post('students', [StudentController::class, 'store'])->name('students.store');
+    });
+
+    Route::middleware(['permission:edit-students'])->group(function () {
+        Route::get('students/{student}/edit', [StudentController::class, 'edit'])->name('students.edit');
+        Route::put('students/{student}', [StudentController::class, 'update'])->name('students.update');
+        Route::patch('students/{student}', [StudentController::class, 'update']);
+    });
+
+    Route::middleware(['permission:delete-students'])->group(function () {
+        Route::delete('students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
     });
 
     // Enrollment Management Routes
     Route::middleware(['permission:view-enrollments'])->group(function () {
-        Route::resource('enrollments', EnrollmentController::class)->except(['edit', 'update']);
+        Route::get('enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
+        Route::get('enrollments/{enrollment}', [EnrollmentController::class, 'show'])->name('enrollments.show');
+    });
+
+    Route::middleware(['permission:create-enrollments'])->group(function () {
+        Route::get('enrollments/create', [EnrollmentController::class, 'create'])->name('enrollments.create');
+        Route::post('enrollments', [EnrollmentController::class, 'store'])->name('enrollments.store');
         Route::get('enrollments/bulk-create', [EnrollmentController::class, 'bulkCreate'])
             ->name('enrollments.bulk-create');
         Route::post('enrollments/bulk-store', [EnrollmentController::class, 'bulkStore'])
             ->name('enrollments.bulk-store');
+    });
+
+    Route::middleware(['permission:edit-enrollments'])->group(function () {
         Route::post('enrollments/{enrollment}/drop', [EnrollmentController::class, 'drop'])
             ->name('enrollments.drop');
+    });
+
+    Route::middleware(['permission:delete-enrollments'])->group(function () {
+        Route::delete('enrollments/{enrollment}', [EnrollmentController::class, 'destroy'])->name('enrollments.destroy');
     });
     
     // Exam Routes
     Route::middleware(['permission:view-exams'])->group(function () {
-        Route::resource('exams', ExamController::class);
+        Route::get('exams', [ExamController::class, 'index'])->name('exams.index');
+        Route::get('exams/{exam}', [ExamController::class, 'show'])->name('exams.show');
+        Route::get('exams/upcoming', [ExamController::class, 'upcoming'])->name('exams.upcoming');
+    });
+
+    Route::middleware(['permission:create-exams'])->group(function () {
+        Route::get('exams/create', [ExamController::class, 'create'])->name('exams.create');
+        Route::post('exams', [ExamController::class, 'store'])->name('exams.store');
+    });
+
+    Route::middleware(['permission:edit-exams'])->group(function () {
+        Route::get('exams/{exam}/edit', [ExamController::class, 'edit'])->name('exams.edit');
+        Route::put('exams/{exam}', [ExamController::class, 'update'])->name('exams.update');
+        Route::patch('exams/{exam}', [ExamController::class, 'update']);
         Route::post('exams/{exam}/start', [ExamController::class, 'start'])->name('exams.start');
         Route::post('exams/{exam}/complete', [ExamController::class, 'complete'])->name('exams.complete');
         Route::post('exams/{exam}/cancel', [ExamController::class, 'cancel'])->name('exams.cancel');
-        Route::get('exams/upcoming', [ExamController::class, 'upcoming'])->name('exams.upcoming');
+    });
+
+    Route::middleware(['permission:delete-exams'])->group(function () {
+        Route::delete('exams/{exam}', [ExamController::class, 'destroy'])->name('exams.destroy');
     });
 
     // Grade/Result Routes

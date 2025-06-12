@@ -20,7 +20,7 @@ class CourseController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('view-courses');
 
         $query = Course::with(['faculty', 'department'])
             ->withCount('classes');
@@ -76,7 +76,7 @@ class CourseController extends Controller
      */
     public function create()
     {
-        $this->authorize('manage-courses');
+        $this->authorize('create-courses');
 
         $faculties = Faculty::active()->orderBy('name')->get();
         $departments = Department::active()->with('faculty')->orderBy('name')->get();
@@ -95,7 +95,7 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('create-courses');
 
         $request->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -141,7 +141,7 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('view-courses');
 
         $course->load(['faculty', 'department', 'classes.academicYear', 'prerequisiteCourses']);
 
@@ -153,7 +153,7 @@ class CourseController extends Controller
      */
     public function edit(Course $course)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('edit-courses');
 
         $faculties = Faculty::active()->orderBy('name')->get();
         $departments = Department::active()->with('faculty')->orderBy('name')->get();
@@ -172,7 +172,7 @@ class CourseController extends Controller
      */
     public function update(Request $request, Course $course)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('edit-courses');
 
         $request->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -218,7 +218,7 @@ class CourseController extends Controller
      */
     public function destroy(Course $course)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('delete-courses');
 
         if (!$course->canBeDeleted()) {
             return redirect()->route('courses.index')

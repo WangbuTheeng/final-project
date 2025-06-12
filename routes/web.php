@@ -83,31 +83,31 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Course Routes
-    Route::middleware(['permission:manage-courses'])->group(function () {
+    Route::middleware(['permission:view-courses'])->group(function () {
         Route::resource('courses', CourseController::class);
     });
 
     // Class Section Routes
-    Route::middleware(['permission:manage-classes'])->group(function () {
+    Route::middleware(['permission:view-classes'])->group(function () {
         Route::resource('classes', ClassSectionController::class);
         Route::post('classes/{classSection}/assign-instructor', [ClassSectionController::class, 'assignInstructor'])
             ->name('classes.assign-instructor');
     });
 
     // Subject Routes
-    Route::middleware(['permission:manage-courses'])->group(function () {
+    Route::middleware(['permission:view-courses'])->group(function () {
         Route::resource('subjects', SubjectController::class);
         Route::get('classes/{class}/subjects', [SubjectController::class, 'getByClass'])
             ->name('subjects.by-class');
     });
 
     // Student Management Routes
-    Route::middleware(['permission:manage-students'])->group(function () {
+    Route::middleware(['permission:view-students'])->group(function () {
         Route::resource('students', StudentController::class);
     });
 
     // Enrollment Management Routes
-    Route::middleware(['permission:manage-enrollments'])->group(function () {
+    Route::middleware(['permission:view-enrollments'])->group(function () {
         Route::resource('enrollments', EnrollmentController::class)->except(['edit', 'update']);
         Route::get('enrollments/bulk-create', [EnrollmentController::class, 'bulkCreate'])
             ->name('enrollments.bulk-create');
@@ -127,7 +127,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Grade/Result Routes
-    Route::middleware(['permission:view-grades'])->group(function () {
+    Route::middleware(['permission:view-exams'])->group(function () {
         Route::resource('grades', GradeController::class)->except(['create', 'store']);
         Route::get('exams/{exam}/grades/create', [GradeController::class, 'createForExam'])->name('grades.create-for-exam');
         Route::post('exams/{exam}/grades', [GradeController::class, 'storeForExam'])->name('grades.store-for-exam');

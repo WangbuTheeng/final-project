@@ -32,7 +32,7 @@ class RolesAndPermissionsSeeder extends Seeder
             // Financial Management
             'view-finances', 'manage-fees', 'create-invoices', 'process-payments',
             // Teaching Management
-            'view-classes', 'create-classes', 'edit-classes', 'assign-homework',
+            'view-classes', 'create-classes', 'edit-classes', 'delete-classes', 'assign-homework',
             'grade-assignments', 'view-student-progress',
             // Settings/Dashboard
             'access-admin-dashboard', 'access-teacher-dashboard', 'access-examiner-dashboard', 
@@ -66,10 +66,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'assign-roles-to-users', 'assign-permissions-to-roles',
             'view-courses', 'create-courses', 'edit-courses', 'delete-courses',
             'view-students', 'create-students', 'edit-students', 'delete-students',
-            'view-enrollments', 'manage-enrollments', 'create-enrollments', 'drop-enrollments',
+            'view-enrollments', 'create-enrollments', 'edit-enrollments', 'delete-enrollments',
             'view-exams', 'create-exams', 'edit-exams', 'delete-exams',
             'view-finances', 'manage-fees',
-            'view-classes', 'create-classes', 'edit-classes',
+            'view-classes', 'create-classes', 'edit-classes', 'delete-classes',
             'access-admin-dashboard', 'manage-settings',
         ];
         $adminRole->givePermissionTo($adminPermissions);
@@ -93,7 +93,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-classes', 'edit-classes', 'assign-homework',
             'grade-assignments', 'view-student-progress',
             'view-students', 'view-courses',
-            'view-enrollments', 'manage-enrollments',
+            'view-enrollments', 'edit-enrollments',
             'access-teacher-dashboard',
         ]);
 

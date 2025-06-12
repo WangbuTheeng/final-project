@@ -22,7 +22,7 @@ class StoreExamRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('create-exams');
+        return $this->user() && ($this->user()->can('create-exams') || $this->user()->hasRole(['Super Admin', 'Admin']));
     }
 
     /**

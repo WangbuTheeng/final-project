@@ -22,7 +22,7 @@ class UpdateExamRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('edit-exams');
+        return $this->user() && ($this->user()->can('edit-exams') || $this->user()->hasRole(['Super Admin', 'Admin']));
     }
 
     /**

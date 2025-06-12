@@ -20,7 +20,7 @@ class SubjectController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('manage-courses'); // Using course permission as subjects are part of classes
+        $this->authorize('view-courses'); // Using course permission as subjects are part of classes
 
         $query = Subject::with(['class.course.faculty', 'instructor'])
             ->withCount(['class']);
@@ -75,7 +75,7 @@ class SubjectController extends Controller
      */
     public function create(Request $request)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('create-courses');
 
         $classes = ClassSection::with(['course.faculty', 'instructor'])->active()->orderBy('name')->get();
         
@@ -99,7 +99,7 @@ class SubjectController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('create-courses');
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -161,7 +161,7 @@ class SubjectController extends Controller
      */
     public function show(Subject $subject)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('view-courses');
 
         $subject->load(['class.course.faculty', 'class.academicYear', 'instructor']);
 
@@ -179,7 +179,7 @@ class SubjectController extends Controller
      */
     public function edit(Subject $subject)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('edit-courses');
 
         $classes = ClassSection::with(['course.faculty', 'instructor'])->active()->orderBy('name')->get();
         
@@ -199,7 +199,7 @@ class SubjectController extends Controller
      */
     public function update(Request $request, Subject $subject)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('edit-courses');
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -261,7 +261,7 @@ class SubjectController extends Controller
      */
     public function destroy(Subject $subject)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('delete-courses');
 
         if (!$subject->canBeDeleted()) {
             return back()->with('error', 'This subject cannot be deleted as it has associated data.');
@@ -281,6 +281,8 @@ class SubjectController extends Controller
      */
     public function getByClass(ClassSection $class)
     {
+        $this->authorize('view-courses');
+
         $subjects = $class->activeSubjects()->get();
         return response()->json($subjects);
     }

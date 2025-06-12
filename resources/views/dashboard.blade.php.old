@@ -1,0 +1,342 @@
+@extends('layouts.dashboard')
+
+@section('page-title')
+    {{ __('Dashboard') }}
+@endsection
+
+@section('content')
+    <h4 class="text-lg font-medium text-gray-800 mb-4">Welcome, {{ $user->name }}!</h4>
+    <p class="text-gray-600 mb-6">You are logged in as a <span class="font-semibold">{{ $role }}</span></p>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Super Admin Dashboard Widgets -->
+        @role('Super Admin')
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-indigo-100">
+                        <i class="fas fa-users text-indigo-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h5 class="text-lg font-medium text-gray-800">User Management</h5>
+                        <p class="text-sm text-gray-600">Manage all users and their roles</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ route('users.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        Manage Users
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100">
+                        <i class="fas fa-calendar-alt text-blue-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h5 class="text-lg font-medium text-gray-800">Academic Year</h5>
+                        <p class="text-sm text-gray-600">Manage academic years</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ route('academic-years.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        Manage Years
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100">
+                        <i class="fas fa-cogs text-green-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h5 class="text-lg font-medium text-gray-800">College Settings</h5>
+                        <p class="text-sm text-gray-600">Configure college settings</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100">
+                        <i class="fas fa-history text-purple-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h5 class="text-lg font-medium text-gray-800">Audit Logs</h5>
+                        <p class="text-sm text-gray-600">View system activity logs</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        View Logs
+                    </a>
+                </div>
+            </div>
+        </div>
+        @endrole
+                        
+                        @can('view-courses')
+                        <li class="list-group-item">
+                            <a href="#">Courses</a>
+                        </li>
+                        @endcan
+                        
+                        @can('view-students')
+                        <li class="list-group-item">
+                            <a href="#">Students</a>
+                        </li>
+                        @endcan
+                        
+                        @can('view-exams')
+                        <li class="list-group-item">
+                            <a href="#">Examinations</a>
+                        </li>
+                        @endcan
+                        
+                        @can('view-finances')
+                        <li class="list-group-item">
+                            <a href="#">Financial Management</a>
+                        </li>
+                        @endcan
+                        
+                        @can('view-classes')
+                        <li class="list-group-item">
+                            <a href="#">Classes</a>
+                        </li>
+                        @endcan
+                        
+                        <li class="list-group-item">
+                            <a href="#">My Profile</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>{{ __('Dashboard') }}</span>
+                    <span class="badge bg-primary">{{ $role }}</span>
+                </div>
+
+                <div class="card-body">
+                    @if (session('status'))
+                        <div class="alert alert-success" role="alert">
+                            {{ session('status') }}
+                        </div>
+                    @endif
+
+                    <h4>Welcome, {{ $user->name }}!</h4>
+                    <p>You are logged in as a <strong>{{ $role }}</strong></p>
+                    
+                    <div class="row mt-4">
+                        <!-- Super Admin Dashboard Widgets -->
+                        @role('Super Admin')
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">User Management</h5>
+                                    <p class="card-text">Manage all users and their roles</p>
+                                    <a href="#" class="btn btn-primary btn-sm">Manage Users</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Academic Year</h5>
+                                    <p class="card-text">Manage academic years</p>
+                                    <a href="#" class="btn btn-primary btn-sm">Manage Years</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">College Settings</h5>
+                                    <p class="card-text">Configure college settings</p>
+                                    <a href="#" class="btn btn-primary btn-sm">Settings</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Audit Logs</h5>
+                                    <p class="card-text">View system activity logs</p>
+                                    <a href="#" class="btn btn-primary btn-sm">View Logs</a>
+                                </div>
+                            </div>
+                        </div>
+                        @endrole
+                        
+                        <!-- Admin Dashboard Widgets -->
+                        @role('Admin')
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">User Management</h5>
+                                    <p class="card-text">Manage users and their roles</p>
+                                    <a href="#" class="btn btn-primary btn-sm">Manage Users</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Fee Management</h5>
+                                    <p class="card-text">Manage fees and dues</p>
+                                    <a href="#" class="btn btn-primary btn-sm">Manage Fees</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Invoices</h5>
+                                    <p class="card-text">Manage student invoices</p>
+                                    <a href="#" class="btn btn-primary btn-sm">View Invoices</a>
+                                </div>
+                            </div>
+                        </div>
+                        @endrole
+                        
+                        <!-- Teacher Dashboard Widgets -->
+                        @role('Teacher')
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">My Classes</h5>
+                                    <p class="card-text">View and manage your classes</p>
+                                    <a href="#" class="btn btn-primary btn-sm">View Classes</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Enter Grades</h5>
+                                    <p class="card-text">Enter student grades</p>
+                                    <a href="#" class="btn btn-primary btn-sm">Enter Grades</a>
+                                </div>
+                            </div>
+                        </div>
+                        @endrole
+                        
+                        <!-- Examiner Dashboard Widgets -->
+                        @role('Examiner')
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Create Exams</h5>
+                                    <p class="card-text">Create new exams</p>
+                                    <a href="#" class="btn btn-primary btn-sm">Create Exam</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Results</h5>
+                                    <p class="card-text">Generate exam results</p>
+                                    <a href="#" class="btn btn-primary btn-sm">Generate Results</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Promotions</h5>
+                                    <p class="card-text">Manage student promotions</p>
+                                    <a href="#" class="btn btn-primary btn-sm">Manage Promotions</a>
+                                </div>
+                            </div>
+                        </div>
+                        @endrole
+                        
+                        <!-- Accountant Dashboard Widgets -->
+                        @role('Accountant')
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Invoices</h5>
+                                    <p class="card-text">Manage student invoices</p>
+                                    <a href="#" class="btn btn-primary btn-sm">Manage Invoices</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Payments</h5>
+                                    <p class="card-text">Process student payments</p>
+                                    <a href="#" class="btn btn-primary btn-sm">Process Payments</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Dues</h5>
+                                    <p class="card-text">View student dues</p>
+                                    <a href="#" class="btn btn-primary btn-sm">View Dues</a>
+                                </div>
+                            </div>
+                        </div>
+                        @endrole
+                        
+                        <!-- Student Dashboard Widgets -->
+                        @role('Student')
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">My Grades</h5>
+                                    <p class="card-text">View your grades</p>
+                                    <a href="#" class="btn btn-primary btn-sm">View Grades</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Fee Status</h5>
+                                    <p class="card-text">View your fee status</p>
+                                    <a href="#" class="btn btn-primary btn-sm">View Fee Status</a>
+                                </div>
+                            </div>
+                        </div>
+                        @endrole
+                    </div>
+                    
+                    @if(count($permissions) > 0)
+                    <div class="mt-4">
+                        <h5>Your Permissions:</h5>
+                        <div class="row">
+                            @foreach($permissions as $permission)
+                                <div class="col-md-4 mb-1">
+                                    <span class="badge bg-secondary">{{ $permission }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection 

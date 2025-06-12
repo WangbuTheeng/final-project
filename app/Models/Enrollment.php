@@ -1,0 +1,303 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Enrollment extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'student_id',
+        'class_id',
+        'academic_year_id',
+        'semester',
+        'status',
+        'enrollment_date',
+        'drop_date',
+        'drop_reason',
+        'attendance_percentage',
+        'ca_score',
+        'exam_score',
+        'total_score',
+        'final_grade'
+    ];
+
+    protected $casts = [
+        'enrollment_date' => 'date',
+        'drop_date' => 'date',
+        'attendance_percentage' => 'decimal:2',
+        'ca_score' => 'decimal:2',
+        'exam_score' => 'decimal:2',
+        'total_score' => 'decimal:2'
+    ];
+
+    protected $dates = [
+        'enrollment_date',
+        'drop_date',
+        'deleted_at'
+    ];
+
+    /**
+     * Get the student that owns the enrollment
+     */
+    public function student()
+    {
+        return $this->belongsTo(Student::class);
+    }
+
+    /**
+     * Get the class section for this enrollment
+     */
+    public function class()
+    {
+        return $this->belongsTo(ClassSection::class, 'class_id');
+    }
+
+    /**
+     * Get the academic year for this enrollment
+     */
+    public function academicYear()
+    {
+        return $this->belongsTo(AcademicYear::class);
+    }
+
+    /**
+     * Scope to get enrollments by status
+     */
+    public function scopeByStatus($query, $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    /**
+     * Scope to get enrollments by semester
+     */
+    public function scopeBySemester($query, $semester)
+    {
+        return $query->where('semester', $semester);
+    }
+
+    /**
+     * Scope to get enrollments by academic year
+     */
+    public function scopeByAcademicYear($query, $academicYearId)
+    {
+        return $query->where('academic_year_id', $academicYearId);
+    }
+
+    /**
+     * Scope to get current enrollments
+     */
+    public function scopeCurrent($query)
+    {
+        $currentAcademicYear = AcademicYear::current();
+        return $query->where('academic_year_id', $currentAcademicYear->id)
+                    ->where('status', 'enrolled');
+    }
+
+    /**
+     * Scope to get active enrollments
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'enrolled');
+    }
+
+    /**
+     * Get course through class relationship
+     */
+    public function getCourseAttribute()
+    {
+        return $this->class->course ?? null;
+    }
+
+    /**
+     * Get course code
+     */
+    public function getCourseCodeAttribute()
+    {
+        return $this->course->code ?? 'N/A';
+    }
+
+    /**
+     * Get course title
+     */
+    public function getCourseTitleAttribute()
+    {
+        return $this->course->title ?? 'N/A';
+    }
+
+    /**
+     * Get credit units
+     */
+    public function getCreditUnitsAttribute()
+    {
+        return $this->course->credit_units ?? 0;
+    }
+
+    /**
+     * Check if enrollment can be dropped
+     */
+    public function canBeDropped()
+    {
+        // Can only drop if currently enrolled and within drop period
+        if ($this->status !== 'enrolled') {
+            return false;
+        }
+
+        // Check if within drop period (e.g., first 4 weeks of semester)
+        $dropDeadline = $this->enrollment_date->addWeeks(4);
+        return now()->lte($dropDeadline);
+    }
+
+    /**
+     * Drop the enrollment
+     */
+    public function drop($reason = null)
+    {
+        if (!$this->canBeDropped()) {
+            throw new \Exception('Enrollment cannot be dropped at this time.');
+        }
+
+        $this->update([
+            'status' => 'dropped',
+            'drop_date' => now(),
+            'drop_reason' => $reason
+        ]);
+
+        // Update class enrollment count
+        $this->class->decrement('current_enrollment');
+
+        return true;
+    }
+
+    /**
+     * Calculate final grade based on CA and Exam scores
+     */
+    public function calculateFinalGrade()
+    {
+        if (is_null($this->ca_score) || is_null($this->exam_score)) {
+            return null;
+        }
+
+        $total = $this->ca_score + $this->exam_score;
+        $this->update(['total_score' => $total]);
+
+        // Determine letter grade
+        $letterGrade = $this->getLetterGrade($total);
+        $this->update(['final_grade' => $letterGrade]);
+
+        // Update enrollment status based on grade
+        $status = ($letterGrade === 'F') ? 'failed' : 'completed';
+        $this->update(['status' => $status]);
+
+        return $letterGrade;
+    }
+
+    /**
+     * Get letter grade from total score
+     */
+    private function getLetterGrade($score)
+    {
+        if ($score >= 70) {
+            return 'A';
+        } elseif ($score >= 60) {
+            return 'B';
+        } elseif ($score >= 50) {
+            return 'C';
+        } elseif ($score >= 45) {
+            return 'D';
+        } elseif ($score >= 40) {
+            return 'E';
+        } else {
+            return 'F';
+        }
+    }
+
+    /**
+     * Get grade point for the final grade
+     */
+    public function getGradePointAttribute()
+    {
+        $gradePoints = [
+            'A' => 5.0,
+            'B' => 4.0,
+            'C' => 3.0,
+            'D' => 2.0,
+            'E' => 1.0,
+            'F' => 0.0
+        ];
+
+        return $gradePoints[$this->final_grade] ?? 0.0;
+    }
+
+    /**
+     * Check if enrollment is passed
+     */
+    public function isPassed()
+    {
+        return in_array($this->final_grade, ['A', 'B', 'C', 'D', 'E']);
+    }
+
+    /**
+     * Check if enrollment is failed
+     */
+    public function isFailed()
+    {
+        return $this->final_grade === 'F';
+    }
+
+    /**
+     * Get status badge color for UI
+     */
+    public function getStatusBadgeColorAttribute()
+    {
+        return match($this->status) {
+            'enrolled' => 'success',
+            'completed' => 'primary',
+            'failed' => 'danger',
+            'dropped' => 'warning',
+            default => 'secondary'
+        };
+    }
+
+    /**
+     * Get formatted enrollment date
+     */
+    public function getFormattedEnrollmentDateAttribute()
+    {
+        return $this->enrollment_date->format('M d, Y');
+    }
+
+    /**
+     * Get formatted drop date
+     */
+    public function getFormattedDropDateAttribute()
+    {
+        return $this->drop_date ? $this->drop_date->format('M d, Y') : null;
+    }
+
+    /**
+     * Boot method to handle model events
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // When enrollment is created, increment class enrollment count
+        static::created(function ($enrollment) {
+            $enrollment->class->increment('current_enrollment');
+        });
+
+        // When enrollment is deleted, decrement class enrollment count
+        static::deleted(function ($enrollment) {
+            if ($enrollment->status === 'enrolled') {
+                $enrollment->class->decrement('current_enrollment');
+            }
+        });
+    }
+}

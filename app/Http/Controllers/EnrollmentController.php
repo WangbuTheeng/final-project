@@ -24,7 +24,7 @@ class EnrollmentController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('manage-enrollments');
+        $this->authorize('view-enrollments');
 
         $currentAcademicYear = AcademicYear::current();
         $academicYears = AcademicYear::orderBy('name', 'desc')->get();
@@ -74,7 +74,7 @@ class EnrollmentController extends Controller
      */
     public function create(Request $request)
     {
-        $this->authorize('manage-enrollments');
+        $this->authorize('create-enrollments');
 
         $currentAcademicYear = AcademicYear::current();
         $academicYears = AcademicYear::active()->get();
@@ -127,7 +127,7 @@ class EnrollmentController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('manage-enrollments');
+        $this->authorize('create-enrollments');
 
         $request->validate([
             'student_id' => 'required|exists:students,id',
@@ -191,7 +191,7 @@ class EnrollmentController extends Controller
      */
     public function bulkCreate()
     {
-        $this->authorize('manage-enrollments');
+        $this->authorize('create-enrollments');
 
         $currentAcademicYear = AcademicYear::current();
         $academicYears = AcademicYear::active()->get();
@@ -205,7 +205,7 @@ class EnrollmentController extends Controller
      */
     public function bulkStore(Request $request)
     {
-        $this->authorize('manage-enrollments');
+        $this->authorize('create-enrollments');
 
         $request->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
@@ -299,7 +299,7 @@ class EnrollmentController extends Controller
      */
     public function drop(Request $request, Enrollment $enrollment)
     {
-        $this->authorize('manage-enrollments');
+        $this->authorize('edit-enrollments');
 
         $request->validate([
             'drop_reason' => 'required|string|max:500'

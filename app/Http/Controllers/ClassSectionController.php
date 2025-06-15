@@ -21,7 +21,7 @@ class ClassSectionController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('manage-classes');
+        $this->authorize('view-classes');
 
         $query = ClassSection::with(['course.department', 'academicYear', 'instructor'])
             ->withCount('enrollments');
@@ -82,7 +82,7 @@ class ClassSectionController extends Controller
      */
     public function create()
     {
-        $this->authorize('manage-classes');
+        $this->authorize('create-classes');
 
         $courses = Course::active()->with('department')->orderBy('code')->get();
         $academicYears = AcademicYear::active()->orderBy('start_date', 'desc')->get();
@@ -99,7 +99,7 @@ class ClassSectionController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('manage-classes');
+        $this->authorize('create-classes');
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -159,7 +159,7 @@ class ClassSectionController extends Controller
      */
     public function show(ClassSection $classSection)
     {
-        $this->authorize('manage-classes');
+        $this->authorize('view-classes');
 
         $classSection->load(['course.department', 'academicYear', 'instructor', 'enrollments.student.user']);
 
@@ -171,7 +171,7 @@ class ClassSectionController extends Controller
      */
     public function edit(ClassSection $classSection)
     {
-        $this->authorize('manage-classes');
+        $this->authorize('edit-classes');
 
         $courses = Course::active()->with('department')->orderBy('code')->get();
         $academicYears = AcademicYear::active()->orderBy('start_date', 'desc')->get();
@@ -189,7 +189,7 @@ class ClassSectionController extends Controller
      */
     public function update(Request $request, ClassSection $classSection)
     {
-        $this->authorize('manage-classes');
+        $this->authorize('edit-classes');
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -251,7 +251,7 @@ class ClassSectionController extends Controller
      */
     public function destroy(ClassSection $classSection)
     {
-        $this->authorize('manage-classes');
+        $this->authorize('delete-classes');
 
         if (!$classSection->canBeDeleted()) {
             return redirect()->route('classes.index')
@@ -274,7 +274,7 @@ class ClassSectionController extends Controller
      */
     public function assignInstructor(Request $request, ClassSection $classSection)
     {
-        $this->authorize('manage-classes');
+        $this->authorize('edit-classes');
 
         $request->validate([
             'instructor_id' => ['required', 'exists:users,id'],

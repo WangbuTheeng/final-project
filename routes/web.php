@@ -221,13 +221,27 @@ Route::middleware(['auth'])->group(function () {
 
     // Grade/Result Routes
     Route::middleware(['permission:view-exams'])->group(function () {
-        Route::resource('grades', GradeController::class)->except(['create', 'store']);
+        Route::get('grades', [GradeController::class, 'index'])->name('grades.index');
+        Route::get('grades/{grade}', [GradeController::class, 'show'])->name('grades.show');
         Route::get('exams/{exam}/grades/create', [GradeController::class, 'createForExam'])->name('grades.create-for-exam');
-        Route::post('exams/{exam}/grades', [GradeController::class, 'storeForExam'])->name('grades.store-for-exam');
         Route::get('students/{student}/results', [GradeController::class, 'studentResults'])->name('grades.student-results');
         Route::get('exams/{exam}/results', [GradeController::class, 'examResults'])->name('grades.exam-results');
         Route::get('result-sheet', [GradeController::class, 'resultSheet'])->name('grades.result-sheet');
+    });
+
+    Route::middleware(['permission:create-exams'])->group(function () {
+        Route::post('exams/{exam}/grades', [GradeController::class, 'storeForExam'])->name('grades.store-for-exam');
+    });
+
+    Route::middleware(['permission:edit-exams'])->group(function () {
+        Route::get('grades/{grade}/edit', [GradeController::class, 'edit'])->name('grades.edit');
+        Route::put('grades/{grade}', [GradeController::class, 'update'])->name('grades.update');
+        Route::patch('grades/{grade}', [GradeController::class, 'update']);
         Route::post('grades/calculate-final', [GradeController::class, 'calculateFinalGrades'])->name('grades.calculate-final');
+    });
+
+    Route::middleware(['permission:delete-exams'])->group(function () {
+        Route::delete('grades/{grade}', [GradeController::class, 'destroy'])->name('grades.destroy');
     });
 
     // Finance Routes

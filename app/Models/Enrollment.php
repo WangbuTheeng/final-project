@@ -95,8 +95,11 @@ class Enrollment extends Model
     public function scopeCurrent($query)
     {
         $currentAcademicYear = AcademicYear::current();
-        return $query->where('academic_year_id', $currentAcademicYear->id)
-                    ->where('status', 'enrolled');
+        if ($currentAcademicYear) {
+            return $query->where('academic_year_id', $currentAcademicYear->id)
+                        ->where('status', 'enrolled');
+        }
+        return $query->where('status', 'enrolled');
     }
 
     /**
@@ -181,6 +184,13 @@ class Enrollment extends Model
     public function calculateFinalGrade()
     {
         if (is_null($this->ca_score) || is_null($this->exam_score)) {
+            // If scores are not available, set status to pending_grade and return null
+            $this->update([
+                'total_score' => null,
+                'final_grade' => null,
+                'status' => 'pending_grade' // New status for un-graded enrollments
+            ]);
+            $this->student->updateCGPA(); // Recalculate CGPA after status change
             return null;
         }
 
@@ -194,6 +204,9 @@ class Enrollment extends Model
         // Update enrollment status based on grade
         $status = ($letterGrade === 'F') ? 'failed' : 'completed';
         $this->update(['status' => $status]);
+
+        // Recalculate student's CGPA after enrollment status/grade update
+        $this->student->updateCGPA();
 
         return $letterGrade;
     }
@@ -261,6 +274,7 @@ class Enrollment extends Model
             'completed' => 'primary',
             'failed' => 'danger',
             'dropped' => 'warning',
+            'pending_grade' => 'info', // Color for new status
             default => 'secondary'
         };
     }
@@ -290,13 +304,13 @@ class Enrollment extends Model
 
         // When enrollment is created, increment class enrollment count
         static::created(function ($enrollment) {
-            $enrollment->class->increment('current_enrollment');
+            $enrollment->class->increment('enrolled_count'); // Changed to enrolled_count
         });
 
         // When enrollment is deleted, decrement class enrollment count
         static::deleted(function ($enrollment) {
             if ($enrollment->status === 'enrolled') {
-                $enrollment->class->decrement('current_enrollment');
+                $enrollment->class->decrement('enrolled_count'); // Changed to enrolled_count
             }
         });
     }

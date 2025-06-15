@@ -43,12 +43,12 @@
         <!-- Academic Structure -->
         @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Teacher'))
         <li>
-            <div x-data="{ open: {{ request()->routeIs('faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*') ? 'true' : 'false' }} }" class="space-y-1">
+            <div x-data="{ open: {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*') ? 'true' : 'false' }} }" class="space-y-1">
                 <button
                     @click="open = !open"
-                    class="{{ request()->routeIs('faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}
+                    class="{{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}
                 >
-                    <i class="fas fa-university mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                    <i class="fas fa-university mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                     <span class="flex-1 text-left">Academic Structure</span>
                     <i class="fas transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                 </button>
@@ -60,7 +60,11 @@
                      x-transition:leave-start="transform opacity-100 translate-y-0"
                      x-transition:leave-end="transform opacity-0 -translate-y-2"
                      class="pl-12 space-y-1"
-                     {{ request()->routeIs('faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*') ? '' : 'style="display: none;"' }}>
+                     {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*') ? '' : 'style="display: none;"' }}>
+                    <a href="{{ route('academic-years.index') }}" class="{{ request()->routeIs('academic-years.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('academic-years.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-calendar-alt mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('academic-years.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Academic Years
+                    </a>
                     @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                     <a href="{{ route('faculties.index') }}" class="{{ request()->routeIs('faculties.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('faculties.*') ? 'style=background-color:#37a2bc;' : '' }}>
                         <i class="fas fa-university mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('faculties.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
@@ -96,39 +100,76 @@
         @endif
 
         <!-- Course Management -->
-        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Teacher'))
-        <li>
-            <div x-data="{ open: false }" class="space-y-1">
-                <button
-                    @click="open = !open"
-                    class="text-gray-700 hover:bg-gray-50 hover:text-teal-600 group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out"
-                >
-                    <i class="fas fa-graduation-cap mr-3 flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-teal-500"></i>
-                    <span class="flex-1 text-left">Course Management</span>
-                    <i class="fas transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-                </button>
-            </div>
-        </li>
-        @endif
+      
 
         <!-- Student Management -->
-        @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Super Admin'))
+        @if(auth()->user()->can('manage-students') || auth()->user()->can('view-students') || auth()->user()->can('manage-enrollments'))
         <li>
-            <div x-data="{ open: false }" class="space-y-1">
+            <div x-data="{ open: {{ request()->routeIs('students.*', 'enrollments.*') ? 'true' : 'false' }} }" class="space-y-1">
                 <button
                     @click="open = !open"
-                    class="text-gray-700 hover:bg-gray-50 hover:text-teal-600 group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out"
+                    class="{{ request()->routeIs('students.*', 'enrollments.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('students.*', 'enrollments.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}
                 >
-                    <i class="fas fa-user-graduate mr-3 flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-teal-500"></i>
+                    <i class="fas fa-user-graduate mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('students.*', 'enrollments.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                     <span class="flex-1 text-left">Student Management</span>
                     <i class="fas transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                 </button>
+                <div x-show="open"
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="transform opacity-0 -translate-y-2"
+                     x-transition:enter-end="transform opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-100"
+                     x-transition:leave-start="transform opacity-100 translate-y-0"
+                     x-transition:leave-end="transform opacity-0 -translate-y-2"
+                     class="pl-12 space-y-1"
+                     {{ request()->routeIs('students.*', 'enrollments.*') ? '' : 'style="display: none;"' }}>
+
+                    @can('view-students')
+                    <a href="{{ route('students.index') }}" class="{{ request()->routeIs('students.index') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('students.index') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-list mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('students.index') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        All Students
+                    </a>
+                    @endcan
+
+                    @can('manage-students')
+                    <a href="{{ route('students.create') }}" class="{{ request()->routeIs('students.create') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('students.create') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-user-plus mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('students.create') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Add New Student
+                    </a>
+                    @endcan
+
+                    @can('manage-enrollments')
+                    <a href="{{ route('enrollments.index') }}" class="{{ request()->routeIs('enrollments.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('enrollments.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-clipboard-list mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('enrollments.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Enrollments
+                    </a>
+
+                    <a href="{{ route('enrollments.bulk-create') }}" class="{{ request()->routeIs('enrollments.bulk-create') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('enrollments.bulk-create') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-users-cog mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('enrollments.bulk-create') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Bulk Enrollment
+                    </a>
+                    @endcan
+
+                    @can('view-students')
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out">
+                        <i class="fas fa-chart-line mr-3 flex-shrink-0 h-4 w-4 text-gray-400 group-hover:text-gray-600"></i>
+                        Student Reports
+                    </a>
+                    @endcan
+
+                    @can('manage-students')
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out">
+                        <i class="fas fa-upload mr-3 flex-shrink-0 h-4 w-4 text-gray-400 group-hover:text-gray-600"></i>
+                        Bulk Import
+                    </a>
+                    @endcan
+                </div>
             </div>
         </li>
         @endif
 
         <!-- Admission Management -->
-        @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Super Admin'))
+        <!-- @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Super Admin'))
         <li>
             <div x-data="{ open: false }" class="space-y-1">
                 <button
@@ -141,10 +182,10 @@
                 </button>
             </div>
         </li>
-        @endif
+        @endif -->
 
         <!-- Class Management -->
-        @if(auth()->user()->hasRole('Teacher') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Super Admin'))
+        <!-- @if(auth()->user()->hasRole('Teacher') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Super Admin'))
         <li>
             <div x-data="{ open: false }" class="space-y-1">
                 <button
@@ -157,20 +198,45 @@
                 </button>
             </div>
         </li>
-        @endif
+        @endif -->
 
         <!-- Exam Management -->
-        @if(auth()->user()->hasRole('Examiner') || auth()->user()->hasRole('Super Admin'))
+        @if(auth()->user()->hasRole('Teacher') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Super Admin'))
         <li>
-            <div x-data="{ open: false }" class="space-y-1">
+            <div x-data="{ open: {{ request()->routeIs('exams.*', 'grades.*') ? 'true' : 'false' }} }" class="space-y-1">
                 <button
                     @click="open = !open"
-                    class="text-gray-700 hover:bg-gray-50 hover:text-teal-600 group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out"
+                    class="{{ request()->routeIs('exams.*', 'grades.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('exams.*', 'grades.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}
                 >
-                    <i class="fas fa-file-alt mr-3 flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-teal-500"></i>
+                    <i class="fas fa-file-alt mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('exams.*', 'grades.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                     <span class="flex-1 text-left">Exam Management</span>
                     <i class="fas transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                 </button>
+                <div x-show="open"
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="transform opacity-0 -translate-y-2"
+                     x-transition:enter-end="transform opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-100"
+                     x-transition:leave-start="transform opacity-100 translate-y-0"
+                     x-transition:leave-end="transform opacity-0 -translate-y-2"
+                     class="pl-12 space-y-1"
+                     {{ request()->routeIs('exams.*', 'grades.*') ? '' : 'style="display: none;"' }}>
+
+                    <a href="{{ route('exams.index') }}" class="{{ request()->routeIs('exams.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('exams.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-file-alt mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('exams.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Exams
+                    </a>
+
+                    <a href="{{ route('grades.index') }}" class="{{ request()->routeIs('grades.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('grades.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-graduation-cap mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('grades.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Grades
+                    </a>
+
+                    <a href="{{ route('grades.bulk-entry') }}" class="{{ request()->routeIs('grades.bulk-entry') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('grades.bulk-entry') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-edit mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('grades.bulk-entry') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Bulk Grade Entry
+                    </a>
+                </div>
             </div>
         </li>
         @endif
@@ -283,10 +349,10 @@
         @endif
 
         <!-- Activity Logs -->
-        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
+        @if(auth()->user()->hasRole('Super Admin'))
         <li>
-            <a href="#" class="text-gray-700 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out">
-                <i class="fas fa-history mr-3 flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-gray-600"></i>
+            <a href="{{ route('activity-logs.index') }}" class="{{ request()->routeIs('activity-logs.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50' }} group flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out {{ request()->routeIs('activity-logs.*') ? '' : 'hover:text-gray-900' }}" {{ request()->routeIs('activity-logs.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}>
+                <i class="fas fa-history mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('activity-logs.*') ? 'text-white' : 'text-gray-400' }} {{ request()->routeIs('activity-logs.*') ? '' : 'group-hover:text-gray-600' }}"></i>
                 Activity Logs
             </a>
         </li>

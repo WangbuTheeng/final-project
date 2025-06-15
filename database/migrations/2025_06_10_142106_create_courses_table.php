@@ -16,18 +16,19 @@ return new class extends Migration
             $table->string('title');
             $table->string('code')->unique(); // e.g., "CSC101", "MTH201"
             $table->text('description')->nullable();
-            $table->foreignId('department_id')->constrained('departments')->onDelete('cascade');
+            $table->foreignId('faculty_id')->constrained('faculties')->onDelete('cascade'); // Added faculty_id
+            $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('set null'); // Made department_id nullable and set null on delete
             $table->integer('credit_units')->default(3);
-            $table->integer('level')->default(100); // 100, 200, 300, 400, 500
-            $table->enum('semester', ['first', 'second', 'both'])->default('first');
+            $table->enum('organization_type', ['yearly', 'semester'])->default('yearly'); // Course organization type
+            $table->integer('year')->nullable(); // For yearly organization
+            $table->integer('semester_period')->nullable(); // For semester organization
             $table->enum('course_type', ['core', 'elective', 'general'])->default('core');
-            $table->json('prerequisites')->nullable(); // Array of prerequisite course IDs
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             // Indexes
-            $table->index(['department_id', 'level', 'semester']);
-            $table->index(['level', 'semester']);
+            $table->index(['faculty_id', 'department_id', 'organization_type']);
+            $table->index(['year', 'semester_period']);
             $table->index('is_active');
         });
     }

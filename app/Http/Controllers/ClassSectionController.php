@@ -6,6 +6,7 @@ use App\Models\ClassSection;
 use App\Models\Course;
 use App\Models\AcademicYear;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -34,6 +35,12 @@ class ClassSectionController extends Controller
             $currentYear = AcademicYear::current();
             if ($currentYear) {
                 $query->where('academic_year_id', $currentYear->id);
+            } else {
+                // If no current academic year, try to get any active academic year
+                $activeYear = AcademicYear::where('is_active', true)->first();
+                if ($activeYear) {
+                    $query->where('academic_year_id', $activeYear->id);
+                }
             }
         }
 
@@ -67,11 +74,11 @@ class ClassSectionController extends Controller
         $classes = $query->orderBy('name')->paginate(15);
 
         // Get filter options
-        $academicYears = AcademicYear::active()->orderBy('start_date', 'desc')->get();
+        $academicYears = AcademicYear::where('is_active', true)->orderBy('start_date', 'desc')->get();
         $instructors = User::whereHas('roles', function($query) {
             $query->whereIn('name', ['Teacher', 'Admin', 'Super Admin']);
         })->orderBy('name')->get();
-        $semesters = ['first', 'second'];
+        $semesters = [1, 2, 3, 4, 5, 6, 7, 8];
         $statuses = ['active', 'completed', 'cancelled'];
 
         return view('classes.index', compact('classes', 'academicYears', 'instructors', 'semesters', 'statuses'));
@@ -85,13 +92,25 @@ class ClassSectionController extends Controller
         $this->authorize('manage-classes');
 
         $courses = Course::active()->with('department')->orderBy('code')->get();
-        $academicYears = AcademicYear::active()->orderBy('start_date', 'desc')->get();
+        $academicYears = AcademicYear::where('is_active', true)->orderBy('start_date', 'desc')->get();
         $instructors = User::whereHas('roles', function($query) {
             $query->whereIn('name', ['Teacher', 'Admin', 'Super Admin']);
         })->orderBy('name')->get();
-        $semesters = ['first', 'second'];
+        $semesters = [1, 2, 3, 4, 5, 6, 7, 8];
 
         return view('classes.create', compact('courses', 'academicYears', 'instructors', 'semesters'));
+    }
+
+    public function getCourseType(Request $request)
+    {
+        $courseId = $request->input('course_id');
+        $course = Course::find($courseId);
+
+        if ($course) {
+            return response()->json(['type' => $course->organization_type]);
+        }
+
+        return response()->json(['type' => null]);
     }
 
     /**
@@ -101,12 +120,15 @@ class ClassSectionController extends Controller
     {
         $this->authorize('manage-classes');
 
-        $request->validate([
+        // Determine if the course is semester-based or yearly-based before validation
+        $course = Course::find($request->course_id);
+        $isSemesterBased = ($course && $course->organization_type === 'semester');
+
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'course_id' => ['required', 'exists:courses,id'],
             'academic_year_id' => ['required', 'exists:academic_years,id'],
             'instructor_id' => ['nullable', 'exists:users,id'],
-            'semester' => ['required', 'in:first,second'],
             'room' => ['nullable', 'string', 'max:100'],
             'capacity' => ['required', 'integer', 'min:1', 'max:500'],
             'start_date' => ['nullable', 'date'],
@@ -115,13 +137,29 @@ class ClassSectionController extends Controller
             'schedule.*.day' => ['required_with:schedule', 'string'],
             'schedule.*.time' => ['required_with:schedule', 'string'],
             'schedule.*.duration' => ['nullable', 'string'],
-        ]);
+        ];
+
+        if ($isSemesterBased) {
+            $rules['semester'] = ['required', 'integer', 'in:1,2,3,4,5,6,7,8'];
+            $rules['year'] = ['nullable']; // Ensure year is not required
+        } else {
+            $rules['year'] = ['required', 'integer', 'in:1,2,3,4'];
+            $rules['semester'] = ['nullable']; // Ensure semester is not required
+        }
+
+        $request->validate($rules);
 
         try {
-            // Check for duplicate class in same academic year and semester
+            // Check for duplicate class in same academic year and semester/year
             $existingClass = ClassSection::where('course_id', $request->course_id)
                 ->where('academic_year_id', $request->academic_year_id)
-                ->where('semester', $request->semester)
+                ->where(function ($query) use ($request, $isSemesterBased) {
+                    if ($isSemesterBased) {
+                        $query->where('semester', $request->semester);
+                    } else {
+                        $query->where('year', $request->year);
+                    }
+                })
                 ->where('name', $request->name)
                 ->first();
 
@@ -136,7 +174,8 @@ class ClassSectionController extends Controller
                 'course_id' => $request->course_id,
                 'academic_year_id' => $request->academic_year_id,
                 'instructor_id' => $request->instructor_id,
-                'semester' => $request->semester,
+                'semester' => $request->semester ?? null,
+                'year' => $request->year ?? null,
                 'room' => $request->room,
                 'capacity' => $request->capacity,
                 'start_date' => $request->start_date,
@@ -157,46 +196,67 @@ class ClassSectionController extends Controller
     /**
      * Display the specified class section.
      */
-    public function show(ClassSection $classSection)
+    public function show(ClassSection $class)
     {
         $this->authorize('manage-classes');
 
-        $classSection->load(['course.department', 'academicYear', 'instructor', 'enrollments.student.user']);
+        // Load relationships with null safety
+        $class->load(['course.department', 'academicYear', 'instructor', 'enrollments.student.user']);
 
-        return view('classes.show', compact('classSection'));
+        // Check if critical relationships exist
+        if (!$class->course) {
+            Log::warning('Class section accessed with missing course', [
+                'class_id' => $class->id,
+                'class_name' => $class->name,
+                'course_id' => $class->course_id
+            ]);
+        }
+
+        if (!$class->academicYear) {
+            Log::warning('Class section accessed with missing academic year', [
+                'class_id' => $class->id,
+                'class_name' => $class->name,
+                'academic_year_id' => $class->academic_year_id
+            ]);
+        }
+
+        return view('classes.show', compact('class'));
     }
 
     /**
      * Show the form for editing the specified class section.
      */
-    public function edit(ClassSection $classSection)
+    public function edit(ClassSection $class)
     {
         $this->authorize('manage-classes');
 
         $courses = Course::active()->with('department')->orderBy('code')->get();
-        $academicYears = AcademicYear::active()->orderBy('start_date', 'desc')->get();
+        $academicYears = AcademicYear::where('is_active', true)->orderBy('start_date', 'desc')->get();
         $instructors = User::whereHas('roles', function($query) {
             $query->whereIn('name', ['Teacher', 'Admin', 'Super Admin']);
         })->orderBy('name')->get();
-        $semesters = ['first', 'second'];
+        $semesters = [1, 2, 3, 4, 5, 6, 7, 8];
         $statuses = ['active', 'completed', 'cancelled'];
 
-        return view('classes.edit', compact('classSection', 'courses', 'academicYears', 'instructors', 'semesters', 'statuses'));
+        return view('classes.edit', compact('class', 'courses', 'academicYears', 'instructors', 'semesters', 'statuses'));
     }
 
     /**
      * Update the specified class section in storage.
      */
-    public function update(Request $request, ClassSection $classSection)
+    public function update(Request $request, ClassSection $class)
     {
         $this->authorize('manage-classes');
 
-        $request->validate([
+        // Determine if the course is semester-based or yearly-based before validation
+        $course = Course::find($request->course_id);
+        $isSemesterBased = ($course && $course->organization_type === 'semester');
+
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'course_id' => ['required', 'exists:courses,id'],
             'academic_year_id' => ['required', 'exists:academic_years,id'],
             'instructor_id' => ['nullable', 'exists:users,id'],
-            'semester' => ['required', 'in:first,second'],
             'room' => ['nullable', 'string', 'max:100'],
             'capacity' => ['required', 'integer', 'min:1', 'max:500'],
             'start_date' => ['nullable', 'date'],
@@ -206,29 +266,46 @@ class ClassSectionController extends Controller
             'schedule.*.day' => ['required_with:schedule', 'string'],
             'schedule.*.time' => ['required_with:schedule', 'string'],
             'schedule.*.duration' => ['nullable', 'string'],
-        ]);
+        ];
+
+        if ($isSemesterBased) {
+            $rules['semester'] = ['required', 'integer', 'in:1,2,3,4,5,6,7,8'];
+            $rules['year'] = ['nullable']; // Ensure year is not required
+        } else {
+            $rules['year'] = ['required', 'integer', 'in:1,2,3,4'];
+            $rules['semester'] = ['nullable']; // Ensure semester is not required
+        }
+
+        $request->validate($rules);
 
         try {
-            // Check for duplicate class in same academic year and semester (excluding current)
+            // Check for duplicate class in same academic year and semester/year (excluding current)
             $existingClass = ClassSection::where('course_id', $request->course_id)
                 ->where('academic_year_id', $request->academic_year_id)
-                ->where('semester', $request->semester)
+                ->where(function ($query) use ($request, $isSemesterBased) {
+                    if ($isSemesterBased) {
+                        $query->where('semester', $request->semester);
+                    } else {
+                        $query->where('year', $request->year);
+                    }
+                })
                 ->where('name', $request->name)
-                ->where('id', '!=', $classSection->id)
+                ->where('id', '!=', $class->id)
                 ->first();
 
             if ($existingClass) {
                 return redirect()->back()
-                    ->with('error', 'A class with this name already exists for this course in the selected academic year and semester.')
+                    ->with('error', 'A class with this name already exists for this course in the selected academic year and ' . ($isSemesterBased ? 'semester' : 'year') . '.')
                     ->withInput();
             }
 
-            $classSection->update([
+            $class->update([
                 'name' => $request->name,
                 'course_id' => $request->course_id,
                 'academic_year_id' => $request->academic_year_id,
                 'instructor_id' => $request->instructor_id,
-                'semester' => $request->semester,
+                'semester' => $request->semester ?? null,
+                'year' => $request->year ?? null,
                 'room' => $request->room,
                 'capacity' => $request->capacity,
                 'start_date' => $request->start_date,
@@ -241,25 +318,24 @@ class ClassSectionController extends Controller
                 ->with('success', 'Class section updated successfully.');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Error updating class section: ' . $e->getMessage())
-                ->withInput();
+                ->with('error', 'Error updating class section: ' . $e->getMessage());
         }
     }
 
     /**
      * Remove the specified class section from storage.
      */
-    public function destroy(ClassSection $classSection)
+    public function destroy(ClassSection $class)
     {
         $this->authorize('manage-classes');
 
-        if (!$classSection->canBeDeleted()) {
+        if (!$class->canBeDeleted()) {
             return redirect()->route('classes.index')
                 ->with('error', 'Cannot delete class section. It has enrollments or exams.');
         }
 
         try {
-            $classSection->delete();
+            $class->delete();
 
             return redirect()->route('classes.index')
                 ->with('success', 'Class section deleted successfully.');
@@ -272,7 +348,7 @@ class ClassSectionController extends Controller
     /**
      * Assign instructor to class section
      */
-    public function assignInstructor(Request $request, ClassSection $classSection)
+    public function assignInstructor(Request $request, ClassSection $class)
     {
         $this->authorize('manage-classes');
 
@@ -281,7 +357,7 @@ class ClassSectionController extends Controller
         ]);
 
         try {
-            $classSection->update([
+            $class->update([
                 'instructor_id' => $request->instructor_id,
             ]);
 

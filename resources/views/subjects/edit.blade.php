@@ -75,9 +75,9 @@
                     <label for="code" class="block text-sm font-medium text-gray-700 mb-2">
                         Subject Code <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" 
-                           name="code" 
-                           id="code" 
+                    <input type="text"
+                           name="code"
+                           id="code"
                            value="{{ old('code', $subject->code) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('code') border-red-300 @enderror"
                            placeholder="e.g., ENG101-S01"
@@ -87,7 +87,10 @@
                     @error('code')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
-                    <p class="mt-1 text-sm text-gray-500">Unique subject code (max 20 characters)</p>
+                    <div class="mt-1 text-sm text-gray-500">
+                        <p><strong>Must be globally unique.</strong> Examples: ENG101-GR01, MTH201-AL01, BUS301-FN01</p>
+                        <p class="text-blue-600">💡 Change carefully - this affects all references to this subject</p>
+                    </div>
                 </div>
             </div>
 
@@ -138,18 +141,21 @@
                     <label for="order_sequence" class="block text-sm font-medium text-gray-700 mb-2">
                         Order Sequence <span class="text-red-500">*</span>
                     </label>
-                    <input type="number" 
-                           name="order_sequence" 
-                           id="order_sequence" 
+                    <input type="number"
+                           name="order_sequence"
+                           id="order_sequence"
                            value="{{ old('order_sequence', $subject->order_sequence) }}"
-                           min="1" 
+                           min="1"
                            max="100"
                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('order_sequence') border-red-300 @enderror"
                            required>
                     @error('order_sequence')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
-                    <p class="mt-1 text-sm text-gray-500">Order in class</p>
+                    <div class="mt-1 text-sm text-gray-500">
+                        <p><strong>Must be unique within the class.</strong> Current value: {{ $subject->order_sequence }}</p>
+                        <p class="text-amber-600">⚠️ Changing this affects the subject order in the class</p>
+                    </div>
                 </div>
 
                 <!-- Duration Hours -->
@@ -253,23 +259,131 @@
                     @enderror
                 </div>
 
-                <!-- Dates -->
-                <div class="space-y-4">
-                    <div>
-                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">
-                            Start Date
-                        </label>
-                        <input type="date" 
-                               name="start_date" 
-                               id="start_date" 
-                               value="{{ old('start_date', $subject->start_date?->format('Y-m-d')) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('start_date') border-red-300 @enderror">
-                        @error('start_date')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                <!-- Is Practical -->
+                <div class="flex items-center">
+                    <input type="checkbox"
+                           name="is_practical"
+                           id="is_practical"
+                           value="1"
+                           {{ old('is_practical', $subject->is_practical) ? 'checked' : '' }}
+                           class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                    <label for="is_practical" class="ml-2 block text-sm text-gray-900">
+                        Has Practical Component
+                    </label>
                 </div>
             </div>
+
+            <!-- Exam Marks Configuration -->
+            <div class="bg-gray-50 p-6 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    <i class="fas fa-calculator mr-2"></i>
+                    Exam Marks Configuration
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Theory Marks -->
+                    <div class="space-y-4">
+                        <h4 class="text-md font-medium text-gray-700">Theory Component</h4>
+
+                        <div>
+                            <label for="full_marks_theory" class="block text-sm font-medium text-gray-700 mb-2">
+                                Full Marks (Theory)
+                            </label>
+                            <input type="number"
+                                   name="full_marks_theory"
+                                   id="full_marks_theory"
+                                   value="{{ old('full_marks_theory', $subject->full_marks_theory) }}"
+                                   min="0"
+                                   max="1000"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('full_marks_theory') border-red-300 @enderror"
+                                   placeholder="e.g., 80">
+                            @error('full_marks_theory')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="pass_marks_theory" class="block text-sm font-medium text-gray-700 mb-2">
+                                Pass Marks (Theory)
+                            </label>
+                            <input type="number"
+                                   name="pass_marks_theory"
+                                   id="pass_marks_theory"
+                                   value="{{ old('pass_marks_theory', $subject->pass_marks_theory) }}"
+                                   min="0"
+                                   max="1000"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('pass_marks_theory') border-red-300 @enderror"
+                                   placeholder="e.g., 32">
+                            @error('pass_marks_theory')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Practical Marks -->
+                    <div class="space-y-4">
+                        <h4 class="text-md font-medium text-gray-700">Practical Component</h4>
+
+                        <div>
+                            <label for="full_marks_practical" class="block text-sm font-medium text-gray-700 mb-2">
+                                Full Marks (Practical)
+                            </label>
+                            <input type="number"
+                                   name="full_marks_practical"
+                                   id="full_marks_practical"
+                                   value="{{ old('full_marks_practical', $subject->full_marks_practical) }}"
+                                   min="0"
+                                   max="1000"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('full_marks_practical') border-red-300 @enderror"
+                                   placeholder="e.g., 20">
+                            @error('full_marks_practical')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="pass_marks_practical" class="block text-sm font-medium text-gray-700 mb-2">
+                                Pass Marks (Practical)
+                            </label>
+                            <input type="number"
+                                   name="pass_marks_practical"
+                                   id="pass_marks_practical"
+                                   value="{{ old('pass_marks_practical', $subject->pass_marks_practical) }}"
+                                   min="0"
+                                   max="1000"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('pass_marks_practical') border-red-300 @enderror"
+                                   placeholder="e.g., 8">
+                            @error('pass_marks_practical')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-blue-50 rounded-md">
+                    <p class="text-sm text-blue-700">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        <strong>Note:</strong> Leave marks fields empty if the subject doesn't have that component.
+                        For example, if it's a theory-only subject, leave practical marks empty.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Dates -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">
+                        Start Date
+                    </label>
+                    <input type="date"
+                           name="start_date"
+                           id="start_date"
+                           value="{{ old('start_date', $subject->start_date?->format('Y-m-d')) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('start_date') border-red-300 @enderror">
+                    @error('start_date')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
 
             <!-- End Date -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

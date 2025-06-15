@@ -141,7 +141,7 @@
                                                         {{ $student->user->name ?? 'Unknown Student' }}
                                                     </a>
                                                 </h4>
-                                                <p class="text-sm text-gray-500">{{ $student->matric_number }}</p>
+                                                <p class="text-sm text-gray-500">{{ $student->admission_number }}</p>
                                                 <p class="text-xs text-gray-400">
                                                     Department: {{ $student->department->name ?? 'No Department' }}
                                                 </p>

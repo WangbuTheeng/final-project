@@ -68,7 +68,7 @@ class EnrollmentService
                         $enrollments[] = $enrollment;
 
                     } catch (\Exception $e) {
-                        $errors[] = "Error enrolling student {$student->matric_number} in course {$course->code}: " . $e->getMessage();
+                        $errors[] = "Error enrolling student {$student->admission_number} in course {$course->code}: " . $e->getMessage();
                     }
                 }
             }

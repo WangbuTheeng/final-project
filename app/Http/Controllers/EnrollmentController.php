@@ -8,9 +8,11 @@ use App\Models\ClassSection;
 use App\Models\AcademicYear;
 use App\Models\Course;
 use App\Models\Department;
+use App\Models\Faculty;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log; // Import Log facade
 
 class EnrollmentController extends Controller
 {
@@ -27,24 +29,68 @@ class EnrollmentController extends Controller
         $this->authorize('manage-enrollments');
 
         $currentAcademicYear = AcademicYear::current();
-        $academicYears = AcademicYear::orderBy('name', 'desc')->get();
+        // Show only active academic years
+        $academicYears = AcademicYear::active()->orderBy('name', 'desc')->get();
         $departments = Department::active()->get();
+        $faculties = Faculty::active()->get();
 
         // Get filters
-        $selectedAcademicYear = $request->get('academic_year_id', $currentAcademicYear->id);
-        $selectedSemester = $request->get('semester', 'first');
+        $selectedAcademicYear = $request->get('academic_year_id', $currentAcademicYear ? $currentAcademicYear->id : null);
         $selectedDepartment = $request->get('department_id');
+        $selectedFaculty = $request->get('faculty_id');
+        $selectedCourse = $request->get('course_id');
+        $selectedClass = $request->get('class_id');
         $selectedStatus = $request->get('status');
 
-        // Build query
-        $enrollments = Enrollment::with(['student.user', 'student.department', 'class.course', 'academicYear'])
-            ->where('academic_year_id', $selectedAcademicYear)
-            ->where('semester', $selectedSemester);
+        // Get available courses based on selected filters
+        $availableCourses = collect();
+        if ($selectedAcademicYear && $selectedFaculty) {
+            $courseQuery = Course::with('faculty')
+                ->where('is_active', true)
+                ->where('faculty_id', $selectedFaculty)
+                ->whereHas('classes', function ($query) use ($selectedAcademicYear) {
+                    $query->where('academic_year_id', $selectedAcademicYear)
+                          ->where('status', 'active');
+                });
+
+            $availableCourses = $courseQuery->orderBy('code')->get();
+        }
+
+        // Get available classes based on selected filters
+        $availableClasses = collect();
+        if ($selectedCourse && $selectedAcademicYear) {
+            $availableClasses = ClassSection::with(['course', 'instructor'])
+                ->where('course_id', $selectedCourse)
+                ->where('academic_year_id', $selectedAcademicYear)
+                ->where('status', 'active')
+                ->orderBy('name')
+                ->get();
+        }
+
+        // Build enrollment query
+        $enrollments = Enrollment::with(['student.user', 'student.department', 'student.faculty', 'class.course.faculty', 'academicYear'])
+            ->where('academic_year_id', $selectedAcademicYear);
 
         if ($selectedDepartment) {
             $enrollments->whereHas('student', function ($query) use ($selectedDepartment) {
                 $query->where('department_id', $selectedDepartment);
             });
+        }
+
+        if ($selectedFaculty) {
+            $enrollments->whereHas('class.course', function ($query) use ($selectedFaculty) {
+                $query->where('faculty_id', $selectedFaculty);
+            });
+        }
+
+        if ($selectedCourse) {
+            $enrollments->whereHas('class', function ($query) use ($selectedCourse) {
+                $query->where('course_id', $selectedCourse);
+            });
+        }
+
+        if ($selectedClass) {
+            $enrollments->where('class_id', $selectedClass);
         }
 
         if ($selectedStatus) {
@@ -54,16 +100,21 @@ class EnrollmentController extends Controller
         $enrollments = $enrollments->paginate(20);
 
         // Get statistics
-        $stats = $this->getEnrollmentStats($selectedAcademicYear, $selectedSemester, $selectedDepartment);
+        $stats = $this->getEnrollmentStats($selectedAcademicYear, $selectedDepartment, $selectedFaculty, $selectedCourse, $selectedClass);
 
         return view('enrollments.index', compact(
             'enrollments',
             'academicYears',
             'departments',
+            'faculties',
+            'availableCourses',
+            'availableClasses',
             'currentAcademicYear',
             'selectedAcademicYear',
-            'selectedSemester',
             'selectedDepartment',
+            'selectedFaculty',
+            'selectedCourse',
+            'selectedClass',
             'selectedStatus',
             'stats'
         ));
@@ -77,48 +128,67 @@ class EnrollmentController extends Controller
         $this->authorize('manage-enrollments');
 
         $currentAcademicYear = AcademicYear::current();
-        $academicYears = AcademicYear::active()->get();
-        $departments = Department::active()->get();
+        $academicYears = AcademicYear::where('is_active', true)->get();
+        $faculties = Faculty::active()->get();
 
-        $selectedAcademicYear = $request->get('academic_year_id', $currentAcademicYear->id);
-        $selectedSemester = $request->get('semester', 'first');
-        $selectedDepartment = $request->get('department_id');
-        $selectedLevel = $request->get('level');
+        $selectedAcademicYear = $request->get('academic_year_id', $currentAcademicYear ? $currentAcademicYear->id : null);
+        $selectedFaculty = $request->get('faculty_id');
+        $selectedCourse = $request->get('course_id');
+        $selectedClass = $request->get('class_id');
 
-        // Get students based on filters
+        // Get students based on filters - we'll get all students for now
+        // and filter by department in the frontend based on selected course
         $students = collect();
-        if ($selectedDepartment && $selectedLevel) {
-            $students = Student::with('user')
-                ->active()
-                ->where('department_id', $selectedDepartment)
-                ->where('current_level', $selectedLevel)
+        if ($selectedClass) {
+            $class = ClassSection::with('course.department')->find($selectedClass);
+            if ($class && $class->course && $class->course->department) {
+                $students = Student::with('user')
+                    ->active()
+                    ->where('department_id', $class->course->department_id)
+                    ->whereDoesntHave('enrollments', function ($query) use ($selectedAcademicYear, $selectedClass) {
+                        $query->where('academic_year_id', $selectedAcademicYear)
+                              ->where('class_id', $selectedClass)
+                              ->where('status', 'enrolled');
+                    })
+                    ->get();
+            }
+        }
+
+        // Get available courses for selected faculty
+        $availableCourses = collect();
+        if ($selectedFaculty && $selectedAcademicYear) {
+            $availableCourses = Course::with('department')
+                ->where('faculty_id', $selectedFaculty)
+                ->where('is_active', true)
+                ->whereHas('classes', function ($query) use ($selectedAcademicYear) {
+                    $query->where('academic_year_id', $selectedAcademicYear)
+                          ->where('status', 'active');
+                })
+                ->orderBy('code')
                 ->get();
         }
 
-        // Get available classes for enrollment
+        // Get available classes for selected course
         $availableClasses = collect();
-        if ($selectedDepartment && $selectedLevel) {
-            $availableClasses = ClassSection::with(['course', 'instructor.user'])
-                ->whereHas('course', function ($query) use ($selectedDepartment, $selectedLevel) {
-                    $query->where('department_id', $selectedDepartment)
-                          ->where('level', $selectedLevel)
-                          ->where('is_active', true);
-                })
+        if ($selectedCourse && $selectedAcademicYear) {
+            $availableClasses = ClassSection::with(['course', 'instructor'])
+                ->where('course_id', $selectedCourse)
                 ->where('academic_year_id', $selectedAcademicYear)
-                ->where('semester', $selectedSemester)
                 ->where('status', 'active')
+                ->orderBy('name')
                 ->get();
         }
 
         return view('enrollments.create', compact(
             'academicYears',
-            'departments',
+            'faculties',
             'students',
+            'availableCourses',
             'availableClasses',
             'selectedAcademicYear',
-            'selectedSemester',
-            'selectedDepartment',
-            'selectedLevel'
+            'selectedFaculty',
+            'selectedCourse',
+            'selectedClass'
         ));
     }
 
@@ -133,7 +203,6 @@ class EnrollmentController extends Controller
             'student_id' => 'required|exists:students,id',
             'class_id' => 'required|exists:classes,id',
             'academic_year_id' => 'required|exists:academic_years,id',
-            'semester' => 'required|in:first,second',
             'enrollment_date' => 'required|date'
         ]);
 
@@ -141,16 +210,23 @@ class EnrollmentController extends Controller
             DB::beginTransaction();
 
             $student = Student::findOrFail($request->student_id);
-            $class = ClassSection::findOrFail($request->class_id);
+            // Eager load the 'course' relationship for the ClassSection
+            $class = ClassSection::with('course')->findOrFail($request->class_id);
 
             // Check if student can enroll in this course
-            if (!$student->canEnrollInCourse($class->course, $request->academic_year_id, $request->semester)) {
-                return back()->with('error', 'Student cannot enroll in this course. Check prerequisites and existing enrollments.');
+            list($canEnroll, $reasons) = $student->canEnrollInCourse($class, $request->academic_year_id, $class->semester);
+
+            if (!$canEnroll) {
+                $errorMessage = 'Student cannot enroll in this course.';
+                if (!empty($reasons)) {
+                    $errorMessage .= ' Reasons: ' . implode(' ', $reasons);
+                }
+                return redirect()->route('enrollments.create', ['error_message' => $errorMessage]);
             }
 
             // Check class capacity
             if ($class->current_enrollment >= $class->capacity) {
-                return back()->with('error', 'Class is at full capacity.');
+                return redirect()->route('enrollments.create', ['error_message' => 'Class is at full capacity. Please select another class or contact administration.']);
             }
 
             // Create enrollment
@@ -158,18 +234,21 @@ class EnrollmentController extends Controller
                 'student_id' => $request->student_id,
                 'class_id' => $request->class_id,
                 'academic_year_id' => $request->academic_year_id,
-                'semester' => $request->semester,
+                'semester' => $class->semester,
                 'enrollment_date' => $request->enrollment_date,
                 'status' => 'enrolled'
             ]);
 
             DB::commit();
 
+            Log::debug('Enrollment created successfully, redirecting to index.'); // Debug log
+
             return redirect()->route('enrollments.index')
                 ->with('success', 'Student enrolled successfully.');
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error enrolling student: ' . $e->getMessage()); // Log the error
             return back()->with('error', 'Error enrolling student: ' . $e->getMessage());
         }
     }
@@ -194,7 +273,7 @@ class EnrollmentController extends Controller
         $this->authorize('manage-enrollments');
 
         $currentAcademicYear = AcademicYear::current();
-        $academicYears = AcademicYear::active()->get();
+        $academicYears = AcademicYear::where('is_active', true)->get();
         $departments = Department::active()->get();
 
         return view('enrollments.bulk-create', compact('academicYears', 'departments', 'currentAcademicYear'));
@@ -209,7 +288,6 @@ class EnrollmentController extends Controller
 
         $request->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
-            'semester' => 'required|in:first,second',
             'department_id' => 'required|exists:departments,id',
             'level' => 'required|in:100,200,300,400,500',
             'course_ids' => 'required|array',
@@ -240,7 +318,6 @@ class EnrollmentController extends Controller
                     // Find available class for this course
                     $class = ClassSection::where('course_id', $courseId)
                         ->where('academic_year_id', $request->academic_year_id)
-                        ->where('semester', $request->semester)
                         ->where('status', 'active')
                         ->first();
 
@@ -250,8 +327,8 @@ class EnrollmentController extends Controller
                     }
 
                     // Check if student can enroll
-                    if (!$student->canEnrollInCourse($course, $request->academic_year_id, $request->semester)) {
-                        $errors[] = "Student {$student->matric_number} cannot enroll in {$course->code}";
+                    if (!$student->canEnrollInCourse($course, $request->academic_year_id, $class->semester)) {
+                        $errors[] = "Student {$student->admission_number} cannot enroll in {$course->code}";
                         continue;
                     }
 
@@ -266,7 +343,7 @@ class EnrollmentController extends Controller
                         'student_id' => $student->id,
                         'class_id' => $class->id,
                         'academic_year_id' => $request->academic_year_id,
-                        'semester' => $request->semester,
+                        'semester' => $class->semester,
                         'enrollment_date' => $request->enrollment_date,
                         'status' => 'enrolled'
                     ]);
@@ -317,10 +394,9 @@ class EnrollmentController extends Controller
     /**
      * Get enrollment statistics
      */
-    private function getEnrollmentStats($academicYearId, $semester, $departmentId = null)
+    private function getEnrollmentStats($academicYearId, $departmentId = null, $facultyId = null, $courseId = null, $classId = null)
     {
-        $query = Enrollment::where('academic_year_id', $academicYearId)
-            ->where('semester', $semester);
+        $query = Enrollment::where('academic_year_id', $academicYearId);
 
         if ($departmentId) {
             $query->whereHas('student', function ($q) use ($departmentId) {
@@ -328,12 +404,28 @@ class EnrollmentController extends Controller
             });
         }
 
+        if ($facultyId) {
+            $query->whereHas('class.course', function ($q) use ($facultyId) {
+                $q->where('faculty_id', $facultyId);
+            });
+        }
+
+        if ($courseId) {
+            $query->whereHas('class', function ($q) use ($courseId) {
+                $q->where('course_id', $courseId);
+            });
+        }
+
+        if ($classId) {
+            $query->where('class_id', $classId);
+        }
+
         return [
             'total' => $query->count(),
-            'enrolled' => $query->where('status', 'enrolled')->count(),
-            'completed' => $query->where('status', 'completed')->count(),
-            'failed' => $query->where('status', 'failed')->count(),
-            'dropped' => $query->where('status', 'dropped')->count(),
+            'enrolled' => (clone $query)->where('status', 'enrolled')->count(),
+            'completed' => (clone $query)->where('status', 'completed')->count(),
+            'failed' => (clone $query)->where('status', 'failed')->count(),
+            'dropped' => (clone $query)->where('status', 'dropped')->count(),
         ];
     }
 }

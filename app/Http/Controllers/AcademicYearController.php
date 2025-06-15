@@ -28,7 +28,7 @@ class AcademicYearController extends Controller
         // Check if user has permission to manage settings
         $this->authorize('manage-settings');
 
-        $academicYears = AcademicYear::orderBy('start_year', 'desc')->paginate(15);
+        $academicYears = AcademicYear::orderBy('start_date', 'desc')->paginate(15);
         return view('academic-years.index', compact('academicYears'));
     }
 

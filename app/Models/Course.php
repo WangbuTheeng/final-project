@@ -16,18 +16,17 @@ class Course extends Model
         'faculty_id',
         'department_id',
         'credit_units',
-        'level',
-        'semester',
+        'organization_type',
+        'year',
+        'semester_period',
         'course_type',
-        'prerequisites',
         'is_active'
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'credit_units' => 'integer',
-        'level' => 'integer',
-        'prerequisites' => 'array'
+        'year' => 'integer'
     ];
 
     /**
@@ -55,6 +54,42 @@ class Course extends Model
     }
 
     /**
+     * Get the display text for the course period (year/semester)
+     */
+    public function getPeriodDisplayAttribute()
+    {
+        if ($this->organization_type === 'yearly') {
+            return $this->year . ($this->year == 1 ? 'st' : ($this->year == 2 ? 'nd' : ($this->year == 3 ? 'rd' : 'th'))) . ' Year';
+        } else {
+            return 'Semester ' . $this->semester_period;
+        }
+    }
+
+    /**
+     * Get available years for yearly organization (1-4)
+     */
+    public static function getYearlyOptions()
+    {
+        return [1, 2, 3, 4];
+    }
+
+    /**
+     * Get available semesters for semester organization (1-8)
+     */
+    public static function getSemesterOptions()
+    {
+        return [1, 2, 3, 4, 5, 6, 7, 8];
+    }
+
+    /**
+     * Scope to filter by organization type
+     */
+    public function scopeByOrganizationType($query, $type)
+    {
+        return $query->where('organization_type', $type);
+    }
+
+    /**
      * Get active class sections for this course
      */
     public function activeClasses()
@@ -62,25 +97,7 @@ class Course extends Model
         return $this->classes()->where('status', 'active');
     }
 
-    /**
-     * Get prerequisite courses
-     */
-    public function prerequisiteCourses()
-    {
-        if (empty($this->prerequisites)) {
-            return collect();
-        }
 
-        return static::whereIn('id', $this->prerequisites)->get();
-    }
-
-    /**
-     * Get courses that have this course as prerequisite
-     */
-    public function dependentCourses()
-    {
-        return static::whereJsonContains('prerequisites', $this->id)->get();
-    }
 
     /**
      * Scope to get active courses
@@ -106,20 +123,22 @@ class Course extends Model
         return $query->where('department_id', $departmentId);
     }
 
+
+
     /**
-     * Scope to filter by level
+     * Scope to filter by year
      */
-    public function scopeByLevel($query, $level)
+    public function scopeByYear($query, $year)
     {
-        return $query->where('level', $level);
+        return $query->where('year', $year);
     }
 
     /**
-     * Scope to filter by semester
+     * Scope to filter by semester period
      */
-    public function scopeBySemester($query, $semester)
+    public function scopeBySemesterPeriod($query, $semesterPeriod)
     {
-        return $query->where('semester', $semester);
+        return $query->where('semester_period', $semesterPeriod);
     }
 
     /**
@@ -135,8 +154,7 @@ class Course extends Model
      */
     public function canBeDeleted()
     {
-        return $this->classes()->count() === 0 &&
-               $this->dependentCourses()->count() === 0;
+        return $this->classes()->count() === 0;
     }
 
     /**
@@ -147,34 +165,17 @@ class Course extends Model
         return $this->code . ' - ' . $this->title;
     }
 
-    /**
-     * Get level name
-     */
-    public function getLevelNameAttribute()
-    {
-        $levels = [
-            100 => '100 Level',
-            200 => '200 Level',
-            300 => '300 Level',
-            400 => '400 Level',
-            500 => '500 Level'
-        ];
 
-        return $levels[$this->level] ?? $this->level . ' Level';
-    }
 
     /**
-     * Get semester name
+     * Get semester period name
      */
-    public function getSemesterNameAttribute()
+    public function getSemesterPeriodNameAttribute()
     {
-        $semesters = [
-            'first' => 'First Semester',
-            'second' => 'Second Semester',
-            'both' => 'Both Semesters'
-        ];
-
-        return $semesters[$this->semester] ?? $this->semester;
+        if ($this->organization_type === 'semester' && $this->semester_period) {
+            return 'Semester ' . $this->semester_period;
+        }
+        return null;
     }
 
     /**

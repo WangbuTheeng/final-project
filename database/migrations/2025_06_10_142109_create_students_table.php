@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('matric_number')->unique();
+            $table->string('admission_number')->unique();
             $table->foreignId('department_id')->constrained('departments')->onDelete('cascade');
             $table->foreignId('academic_year_id')->constrained('academic_years')->onDelete('cascade'); // Admission year
             $table->integer('current_level')->default(100); // 100, 200, 300, 400, 500
-            $table->enum('mode_of_entry', ['utme', 'direct_entry', 'transfer'])->default('utme');
+            $table->enum('mode_of_entry', ['entrance_exam', 'direct_entry', 'transfer'])->default('entrance_exam');
             $table->enum('study_mode', ['full_time', 'part_time', 'distance'])->default('full_time');
             $table->enum('status', ['active', 'graduated', 'suspended', 'withdrawn', 'deferred'])->default('active');
             $table->decimal('cgpa', 3, 2)->nullable(); // Cumulative GPA

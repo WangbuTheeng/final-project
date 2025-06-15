@@ -84,19 +84,31 @@
                     <label for="code" class="block text-sm font-medium text-gray-700 mb-2">
                         Subject Code <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" 
-                           name="code" 
-                           id="code" 
-                           value="{{ old('code') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('code') border-red-300 @enderror"
-                           placeholder="e.g., ENG101-S01"
-                           maxlength="20"
-                           style="text-transform: uppercase;"
-                           required>
+                    <div class="flex space-x-2">
+                        <input type="text"
+                               name="code"
+                               id="code"
+                               value="{{ old('code') }}"
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('code') border-red-300 @enderror"
+                               placeholder="e.g., ENG101-S01"
+                               maxlength="20"
+                               style="text-transform: uppercase;"
+                               required>
+                        <button type="button"
+                                id="generate-code-btn"
+                                class="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                disabled
+                                title="Select class and enter subject name first">
+                            <i class="fas fa-magic"></i>
+                        </button>
+                    </div>
                     @error('code')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
-                    <p class="mt-1 text-sm text-gray-500">Unique subject code (max 20 characters)</p>
+                    <div class="mt-1 text-sm text-gray-500">
+                        <p><strong>Must be globally unique.</strong> Examples: ENG101-GR01, MTH201-AL01, BUS301-FN01</p>
+                        <p class="text-blue-600">💡 Click the magic button to auto-generate based on class and subject name</p>
+                    </div>
                 </div>
             </div>
 
@@ -147,18 +159,21 @@
                     <label for="order_sequence" class="block text-sm font-medium text-gray-700 mb-2">
                         Order Sequence <span class="text-red-500">*</span>
                     </label>
-                    <input type="number" 
-                           name="order_sequence" 
-                           id="order_sequence" 
-                           value="{{ old('order_sequence', 1) }}"
-                           min="1" 
+                    <input type="number"
+                           name="order_sequence"
+                           id="order_sequence"
+                           value="{{ old('order_sequence', $nextOrderSequence ?? 1) }}"
+                           min="1"
                            max="100"
                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('order_sequence') border-red-300 @enderror"
                            required>
                     @error('order_sequence')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
-                    <p class="mt-1 text-sm text-gray-500">Order in class</p>
+                    <div class="mt-1 text-sm text-gray-500">
+                        <p><strong>Must be unique within the class.</strong> Current suggestion: <span id="suggested-order">{{ $nextOrderSequence ?? 1 }}</span></p>
+                        <p class="text-green-600">✅ Auto-updates when you select a class</p>
+                    </div>
                 </div>
 
                 <!-- Duration Hours -->
@@ -262,23 +277,131 @@
                     @enderror
                 </div>
 
-                <!-- Dates -->
-                <div class="space-y-4">
-                    <div>
-                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">
-                            Start Date
-                        </label>
-                        <input type="date" 
-                               name="start_date" 
-                               id="start_date" 
-                               value="{{ old('start_date') }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('start_date') border-red-300 @enderror">
-                        @error('start_date')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                <!-- Is Practical -->
+                <div class="flex items-center">
+                    <input type="checkbox"
+                           name="is_practical"
+                           id="is_practical"
+                           value="1"
+                           {{ old('is_practical') ? 'checked' : '' }}
+                           class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                    <label for="is_practical" class="ml-2 block text-sm text-gray-900">
+                        Has Practical Component
+                    </label>
                 </div>
             </div>
+
+            <!-- Exam Marks Configuration -->
+            <div class="bg-gray-50 p-6 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    <i class="fas fa-calculator mr-2"></i>
+                    Exam Marks Configuration
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Theory Marks -->
+                    <div class="space-y-4">
+                        <h4 class="text-md font-medium text-gray-700">Theory Component</h4>
+
+                        <div>
+                            <label for="full_marks_theory" class="block text-sm font-medium text-gray-700 mb-2">
+                                Full Marks (Theory)
+                            </label>
+                            <input type="number"
+                                   name="full_marks_theory"
+                                   id="full_marks_theory"
+                                   value="{{ old('full_marks_theory') }}"
+                                   min="0"
+                                   max="1000"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('full_marks_theory') border-red-300 @enderror"
+                                   placeholder="e.g., 80">
+                            @error('full_marks_theory')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="pass_marks_theory" class="block text-sm font-medium text-gray-700 mb-2">
+                                Pass Marks (Theory)
+                            </label>
+                            <input type="number"
+                                   name="pass_marks_theory"
+                                   id="pass_marks_theory"
+                                   value="{{ old('pass_marks_theory') }}"
+                                   min="0"
+                                   max="1000"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('pass_marks_theory') border-red-300 @enderror"
+                                   placeholder="e.g., 32">
+                            @error('pass_marks_theory')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Practical Marks -->
+                    <div class="space-y-4">
+                        <h4 class="text-md font-medium text-gray-700">Practical Component</h4>
+
+                        <div>
+                            <label for="full_marks_practical" class="block text-sm font-medium text-gray-700 mb-2">
+                                Full Marks (Practical)
+                            </label>
+                            <input type="number"
+                                   name="full_marks_practical"
+                                   id="full_marks_practical"
+                                   value="{{ old('full_marks_practical') }}"
+                                   min="0"
+                                   max="1000"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('full_marks_practical') border-red-300 @enderror"
+                                   placeholder="e.g., 20">
+                            @error('full_marks_practical')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="pass_marks_practical" class="block text-sm font-medium text-gray-700 mb-2">
+                                Pass Marks (Practical)
+                            </label>
+                            <input type="number"
+                                   name="pass_marks_practical"
+                                   id="pass_marks_practical"
+                                   value="{{ old('pass_marks_practical') }}"
+                                   min="0"
+                                   max="1000"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('pass_marks_practical') border-red-300 @enderror"
+                                   placeholder="e.g., 8">
+                            @error('pass_marks_practical')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-blue-50 rounded-md">
+                    <p class="text-sm text-blue-700">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        <strong>Note:</strong> Leave marks fields empty if the subject doesn't have that component.
+                        For example, if it's a theory-only subject, leave practical marks empty.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Dates -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">
+                        Start Date
+                    </label>
+                    <input type="date"
+                           name="start_date"
+                           id="start_date"
+                           value="{{ old('start_date') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('start_date') border-red-300 @enderror">
+                    @error('start_date')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
 
             <!-- End Date -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -377,33 +500,115 @@
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const classSelect = document.getElementById('class_id');
+    const nameInput = document.getElementById('name');
+    const codeInput = document.getElementById('code');
+    const orderSequenceInput = document.getElementById('order_sequence');
+    const generateCodeBtn = document.getElementById('generate-code-btn');
+    const suggestedOrderSpan = document.getElementById('suggested-order');
+
     // Auto-uppercase the code field
-    document.getElementById('code').addEventListener('input', function(e) {
+    codeInput.addEventListener('input', function(e) {
         e.target.value = e.target.value.toUpperCase();
     });
 
-    // Learning objectives management
-    function addObjective() {
-        const container = document.getElementById('learning-objectives-container');
-        const div = document.createElement('div');
-        div.className = 'flex items-center space-x-2 mb-2';
-        div.innerHTML = `
-            <input type="text" 
-                   name="learning_objectives[]" 
-                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                   placeholder="Learning objective...">
-            <button type="button" onclick="removeObjective(this)" class="text-red-600 hover:text-red-800">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        container.appendChild(div);
-    }
+    // Update order sequence when class changes
+    classSelect.addEventListener('change', function() {
+        const classId = this.value;
 
-    function removeObjective(button) {
-        const container = document.getElementById('learning-objectives-container');
-        if (container.children.length > 1) {
-            button.parentElement.remove();
+        if (classId) {
+            // Get next order sequence
+            fetch(`{{ route('subjects.next-order-sequence') }}?class_id=${classId}`)
+                .then(response => response.json())
+                .then(data => {
+                    orderSequenceInput.value = data.order_sequence;
+                    suggestedOrderSpan.textContent = data.order_sequence;
+                })
+                .catch(error => {
+                    console.error('Error fetching order sequence:', error);
+                });
+
+            // Enable generate code button if name is also filled
+            updateGenerateCodeButton();
+        } else {
+            orderSequenceInput.value = 1;
+            suggestedOrderSpan.textContent = 1;
+            generateCodeBtn.disabled = true;
+        }
+    });
+
+    // Enable generate code button when name changes
+    nameInput.addEventListener('input', function() {
+        updateGenerateCodeButton();
+    });
+
+    // Generate code button click
+    generateCodeBtn.addEventListener('click', function() {
+        const classId = classSelect.value;
+        const subjectName = nameInput.value;
+
+        if (classId && subjectName) {
+            generateCodeBtn.disabled = true;
+            generateCodeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            fetch(`{{ route('subjects.generate-code') }}?class_id=${classId}&subject_name=${encodeURIComponent(subjectName)}`)
+                .then(response => response.json())
+                .then(data => {
+                    codeInput.value = data.code;
+                    generateCodeBtn.disabled = false;
+                    generateCodeBtn.innerHTML = '<i class="fas fa-magic"></i>';
+                })
+                .catch(error => {
+                    console.error('Error generating code:', error);
+                    generateCodeBtn.disabled = false;
+                    generateCodeBtn.innerHTML = '<i class="fas fa-magic"></i>';
+                    alert('Error generating code. Please try again.');
+                });
+        }
+    });
+
+    function updateGenerateCodeButton() {
+        const hasClass = classSelect.value !== '';
+        const hasName = nameInput.value.trim() !== '';
+
+        generateCodeBtn.disabled = !(hasClass && hasName);
+
+        if (hasClass && hasName) {
+            generateCodeBtn.title = 'Click to generate subject code';
+        } else {
+            generateCodeBtn.title = 'Select class and enter subject name first';
         }
     }
+
+    // Initialize on page load
+    if (classSelect.value) {
+        classSelect.dispatchEvent(new Event('change'));
+    }
+});
+
+// Learning objectives management
+function addObjective() {
+    const container = document.getElementById('learning-objectives-container');
+    const div = document.createElement('div');
+    div.className = 'flex items-center space-x-2 mb-2';
+    div.innerHTML = `
+        <input type="text"
+               name="learning_objectives[]"
+               class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+               placeholder="Learning objective...">
+        <button type="button" onclick="removeObjective(this)" class="text-red-600 hover:text-red-800">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    container.appendChild(div);
+}
+
+function removeObjective(button) {
+    const container = document.getElementById('learning-objectives-container');
+    if (container.children.length > 1) {
+        button.parentElement.remove();
+    }
+}
 </script>
 @endsection

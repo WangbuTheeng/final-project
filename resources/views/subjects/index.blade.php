@@ -222,6 +222,17 @@
                                             <i class="fas fa-{{ $subject->is_mandatory ? 'star' : 'star-half-alt' }} text-gray-400 mr-2"></i>
                                             <span>{{ $subject->is_mandatory ? 'Mandatory' : 'Optional' }}</span>
                                         </div>
+                                        @if($subject->total_full_marks > 0)
+                                            <div class="flex items-center">
+                                                <i class="fas fa-calculator text-gray-400 mr-2"></i>
+                                                <span class="text-xs">
+                                                    Total: {{ $subject->total_full_marks }} marks
+                                                    @if($subject->is_practical)
+                                                        <span class="text-green-600 ml-1">(Practical)</span>
+                                                    @endif
+                                                </span>
+                                            </div>
+                                        @endif
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">

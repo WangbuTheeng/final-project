@@ -23,19 +23,22 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-permissions', 'create-permissions', 'edit-permissions', 'delete-permissions',
             'assign-roles-to-users', 'assign-permissions-to-roles',
             // Academic Management
-            'view-courses', 'create-courses', 'edit-courses', 'delete-courses',
-            'view-students', 'create-students', 'edit-students', 'delete-students',
+            'view-courses', 'create-courses', 'edit-courses', 'delete-courses', 'manage-courses',
+            'view-students', 'create-students', 'edit-students', 'delete-students', 'manage-students',
+            'manage-classes',
             // Enrollment Management
             'view-enrollments', 'manage-enrollments', 'create-enrollments', 'drop-enrollments',
             // Examination Management
-            'view-exams', 'create-exams', 'edit-exams', 'delete-exams', 'grade-exams',
+            'view-exams', 'create-exams', 'edit-exams', 'delete-exams', 'manage-exams',
+            // Grade Management
+            'view-grades', 'create-grades', 'edit-grades', 'delete-grades', 'manage-grades',
             // Financial Management
             'view-finances', 'manage-fees', 'create-invoices', 'process-payments',
             // Teaching Management
             'view-classes', 'create-classes', 'edit-classes', 'assign-homework',
             'grade-assignments', 'view-student-progress',
             // Settings/Dashboard
-            'access-admin-dashboard', 'access-teacher-dashboard', 'access-examiner-dashboard', 
+            'access-admin-dashboard', 'access-teacher-dashboard', 'access-examiner-dashboard',
             'access-accountant-dashboard', 'manage-settings',
         ];
 
@@ -64,19 +67,21 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-roles', 'create-roles', 'edit-roles', 'delete-roles',
             'view-permissions', 'create-permissions', 'edit-permissions', 'delete-permissions',
             'assign-roles-to-users', 'assign-permissions-to-roles',
-            'view-courses', 'create-courses', 'edit-courses', 'delete-courses',
-            'view-students', 'create-students', 'edit-students', 'delete-students',
+            'view-courses', 'create-courses', 'edit-courses', 'delete-courses', 'manage-courses',
+            'view-students', 'create-students', 'edit-students', 'delete-students', 'manage-students',
             'view-enrollments', 'manage-enrollments', 'create-enrollments', 'drop-enrollments',
-            'view-exams', 'create-exams', 'edit-exams', 'delete-exams',
+            'view-exams', 'create-exams', 'edit-exams', 'delete-exams', 'manage-exams',
+            'view-grades', 'create-grades', 'edit-grades', 'delete-grades', 'manage-grades',
             'view-finances', 'manage-fees',
-            'view-classes', 'create-classes', 'edit-classes',
+            'view-classes', 'create-classes', 'edit-classes', 'manage-classes',
             'access-admin-dashboard', 'manage-settings',
         ];
         $adminRole->givePermissionTo($adminPermissions);
 
         // Examiner role permissions
         $examinerRole->givePermissionTo([
-            'view-exams', 'create-exams', 'edit-exams', 'delete-exams', 'grade-exams',
+            'view-exams', 'create-exams', 'edit-exams', 'delete-exams', 'manage-exams',
+            'view-grades', 'create-grades', 'edit-grades', 'delete-grades', 'manage-grades',
             'view-students', 'view-courses',
             'access-examiner-dashboard',
         ]);
@@ -94,6 +99,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'grade-assignments', 'view-student-progress',
             'view-students', 'view-courses',
             'view-enrollments', 'manage-enrollments',
+            'view-exams', 'create-exams', 'edit-exams', 'manage-exams',
+            'view-grades', 'create-grades', 'edit-grades', 'manage-grades',
             'access-teacher-dashboard',
         ]);
 

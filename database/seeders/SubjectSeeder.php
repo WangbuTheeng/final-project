@@ -213,6 +213,14 @@ class SubjectSeeder extends Seeder
     private function createSubjectsForClass($class, $subjects, $instructor)
     {
         foreach ($subjects as $subjectData) {
+            // Determine if subject is practical based on name
+            $isPractical = str_contains(strtolower($subjectData['name']), 'practical') ||
+                          str_contains(strtolower($subjectData['name']), 'lab') ||
+                          str_contains(strtolower($subjectData['name']), 'workshop');
+
+            // Set exam marks based on subject type
+            $examMarks = $this->generateExamMarks($subjectData['subject_type'], $isPractical);
+
             Subject::firstOrCreate([
                 'code' => $subjectData['code']
             ], array_merge($subjectData, [
@@ -221,6 +229,11 @@ class SubjectSeeder extends Seeder
                 'credit_weight' => rand(10, 30),
                 'is_mandatory' => true,
                 'is_active' => true,
+                'is_practical' => $isPractical,
+                'full_marks_theory' => $examMarks['full_marks_theory'],
+                'pass_marks_theory' => $examMarks['pass_marks_theory'],
+                'full_marks_practical' => $examMarks['full_marks_practical'],
+                'pass_marks_practical' => $examMarks['pass_marks_practical'],
                 'resources' => [
                     'textbook' => 'Course Textbook Chapter ' . $subjectData['order_sequence'],
                     'online_resources' => 'Online materials and videos',
@@ -228,5 +241,42 @@ class SubjectSeeder extends Seeder
                 ]
             ]));
         }
+    }
+
+    private function generateExamMarks($subjectType, $isPractical)
+    {
+        $marks = [
+            'full_marks_theory' => null,
+            'pass_marks_theory' => null,
+            'full_marks_practical' => null,
+            'pass_marks_practical' => null,
+        ];
+
+        switch ($subjectType) {
+            case 'theory':
+                $marks['full_marks_theory'] = rand(80, 100);
+                $marks['pass_marks_theory'] = (int)($marks['full_marks_theory'] * 0.4); // 40% pass marks
+                break;
+
+            case 'practical':
+                $marks['full_marks_practical'] = rand(50, 100);
+                $marks['pass_marks_practical'] = (int)($marks['full_marks_practical'] * 0.4); // 40% pass marks
+                break;
+
+            case 'mixed':
+                $marks['full_marks_theory'] = rand(60, 80);
+                $marks['pass_marks_theory'] = (int)($marks['full_marks_theory'] * 0.4);
+                $marks['full_marks_practical'] = rand(20, 40);
+                $marks['pass_marks_practical'] = (int)($marks['full_marks_practical'] * 0.4);
+                break;
+        }
+
+        // If subject is marked as practical but type is theory, add practical component
+        if ($isPractical && $subjectType === 'theory') {
+            $marks['full_marks_practical'] = rand(20, 30);
+            $marks['pass_marks_practical'] = (int)($marks['full_marks_practical'] * 0.4);
+        }
+
+        return $marks;
     }
 }

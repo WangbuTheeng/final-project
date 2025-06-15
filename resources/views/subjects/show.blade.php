@@ -205,6 +205,63 @@
                         </div>
                     </div>
 
+                    <!-- Exam Marks Configuration -->
+                    @if($subject->hasTheoryComponent() || $subject->hasPracticalComponent())
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Exam Marks Configuration</label>
+                            <div class="mt-2 bg-gray-50 rounded-lg p-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    @if($subject->hasTheoryComponent())
+                                        <div class="bg-white rounded-lg p-3 border border-gray-200">
+                                            <h4 class="text-sm font-medium text-gray-900 mb-2 flex items-center">
+                                                <i class="fas fa-book text-blue-500 mr-2"></i>
+                                                Theory Component
+                                            </h4>
+                                            <div class="space-y-1">
+                                                <p class="text-sm text-gray-600">
+                                                    Full Marks: <span class="font-medium text-gray-900">{{ $subject->full_marks_theory }}</span>
+                                                </p>
+                                                <p class="text-sm text-gray-600">
+                                                    Pass Marks: <span class="font-medium text-gray-900">{{ $subject->pass_marks_theory }}</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if($subject->hasPracticalComponent())
+                                        <div class="bg-white rounded-lg p-3 border border-gray-200">
+                                            <h4 class="text-sm font-medium text-gray-900 mb-2 flex items-center">
+                                                <i class="fas fa-flask text-green-500 mr-2"></i>
+                                                Practical Component
+                                            </h4>
+                                            <div class="space-y-1">
+                                                <p class="text-sm text-gray-600">
+                                                    Full Marks: <span class="font-medium text-gray-900">{{ $subject->full_marks_practical ?? 'Not specified' }}</span>
+                                                </p>
+                                                <p class="text-sm text-gray-600">
+                                                    Pass Marks: <span class="font-medium text-gray-900">{{ $subject->pass_marks_practical ?? 'Not specified' }}</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                @if($subject->total_full_marks > 0)
+                                    <div class="mt-3 pt-3 border-t border-gray-200">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm font-medium text-gray-900">Total Marks:</span>
+                                            <span class="text-lg font-bold text-primary-600">{{ $subject->total_full_marks }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm font-medium text-gray-900">Total Pass Marks:</span>
+                                            <span class="text-lg font-bold text-green-600">{{ $subject->total_pass_marks }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Timestamps -->
                     <div>
                         <label class="block text-sm font-medium text-gray-500">Created</label>

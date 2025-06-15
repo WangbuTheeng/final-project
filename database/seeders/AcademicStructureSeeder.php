@@ -114,8 +114,8 @@ class AcademicStructureSeeder extends Seeder
                 'faculty_id' => $engineering->id,
                 'department_id' => $csDept->id, // Optional department
                 'credit_units' => 3,
-                'level' => 100,
-                'semester' => 'first',
+                'organization_type' => 'yearly', // Changed to yearly
+                'year' => 1, // Added year
                 'course_type' => 'core',
                 'is_active' => true
             ],
@@ -126,8 +126,8 @@ class AcademicStructureSeeder extends Seeder
                 'faculty_id' => $engineering->id,
                 'department_id' => $csDept->id,
                 'credit_units' => 4,
-                'level' => 200,
-                'semester' => 'second',
+                'organization_type' => 'yearly', // Changed to yearly
+                'year' => 2, // Added year
                 'course_type' => 'core',
                 'is_active' => true
             ],
@@ -138,8 +138,8 @@ class AcademicStructureSeeder extends Seeder
                 'faculty_id' => $engineering->id,
                 'department_id' => null, // No department - directly under faculty
                 'credit_units' => 3,
-                'level' => 100,
-                'semester' => 'first',
+                'organization_type' => 'yearly', // Changed to yearly
+                'year' => 1, // Added year
                 'course_type' => 'core',
                 'is_active' => true
             ],
@@ -152,8 +152,8 @@ class AcademicStructureSeeder extends Seeder
                 'faculty_id' => $sciences->id,
                 'department_id' => $mathDept->id,
                 'credit_units' => 4,
-                'level' => 100,
-                'semester' => 'first',
+                'organization_type' => 'semester', // Changed to semester
+                'semester_period' => 1, // Added semester_period
                 'course_type' => 'core',
                 'is_active' => true
             ],
@@ -164,8 +164,8 @@ class AcademicStructureSeeder extends Seeder
                 'faculty_id' => $sciences->id,
                 'department_id' => null, // No department
                 'credit_units' => 3,
-                'level' => 100,
-                'semester' => 'second',
+                'organization_type' => 'semester', // Changed to semester
+                'semester_period' => 2, // Added semester_period
                 'course_type' => 'core',
                 'is_active' => true
             ],
@@ -178,8 +178,8 @@ class AcademicStructureSeeder extends Seeder
                 'faculty_id' => $arts->id,
                 'department_id' => null,
                 'credit_units' => 3,
-                'level' => 100,
-                'semester' => 'first',
+                'organization_type' => 'yearly', // Changed to yearly
+                'year' => 1, // Added year
                 'course_type' => 'general',
                 'is_active' => true
             ],
@@ -190,8 +190,8 @@ class AcademicStructureSeeder extends Seeder
                 'faculty_id' => $arts->id,
                 'department_id' => null,
                 'credit_units' => 2,
-                'level' => 200,
-                'semester' => 'both',
+                'organization_type' => 'semester', // Changed to semester
+                'semester_period' => 3, // Added semester_period
                 'course_type' => 'elective',
                 'is_active' => true
             ]
@@ -215,11 +215,18 @@ class AcademicStructureSeeder extends Seeder
         $coursesToCreateClasses = Course::take(4)->get();
 
         foreach ($coursesToCreateClasses as $course) {
+            // Determine semester for ClassSection based on Course organization_type
+            $classSemester = 'first'; // Default
+            if ($course->organization_type === 'semester') {
+                // For semester-based courses, map semester_period to 'first' or 'second'
+                $classSemester = ($course->semester_period >= 1 && $course->semester_period <= 4) ? 'first' : 'second';
+            }
+
             ClassSection::firstOrCreate([
                 'name' => $course->code . '-A',
                 'course_id' => $course->id,
                 'academic_year_id' => $academicYear->id,
-                'semester' => $course->semester === 'both' ? 'first' : $course->semester
+                'semester' => $classSemester // Use the determined semester
             ], [
                 'instructor_id' => $instructor?->id,
                 'room' => 'Room ' . rand(101, 999),

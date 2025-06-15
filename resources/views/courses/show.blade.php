@@ -119,11 +119,13 @@
                             </p>
                         </div>
 
+
+
                         <div>
-                            <label class="block text-sm font-medium text-gray-500">Level</label>
+                            <label class="block text-sm font-medium text-gray-500">Year</label>
                             <p class="mt-1 text-sm text-gray-900 flex items-center">
-                                <i class="fas fa-layer-group text-gray-400 mr-2"></i>
-                                {{ $course->level }} Level
+                                <i class="fas fa-graduation-cap text-gray-400 mr-2"></i>
+                                {{ $course->year }}{{ $course->year == 1 ? 'st' : ($course->year == 2 ? 'nd' : ($course->year == 3 ? 'rd' : 'th')) }} Year
                             </p>
                         </div>
 
@@ -144,27 +146,7 @@
                         </div>
                     </div>
 
-                    <!-- Prerequisites -->
-                    @if($course->prerequisiteCourses->count() > 0)
-                        <div>
-                            <label class="block text-sm font-medium text-gray-500">Prerequisites</label>
-                            <div class="mt-1 space-y-2">
-                                @foreach($course->prerequisiteCourses as $prerequisite)
-                                    <div class="flex items-center">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                            {{ $prerequisite->code }}
-                                        </span>
-                                        <span class="ml-2 text-sm text-gray-900">{{ $prerequisite->title }}</span>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @else
-                        <div>
-                            <label class="block text-sm font-medium text-gray-500">Prerequisites</label>
-                            <p class="mt-1 text-sm text-gray-400 italic">No prerequisites</p>
-                        </div>
-                    @endif
+
 
                     <!-- Timestamps -->
                     <div>

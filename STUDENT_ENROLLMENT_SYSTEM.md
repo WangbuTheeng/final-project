@@ -34,11 +34,11 @@ This document outlines the comprehensive Student Enrollment System implementatio
 ```sql
 - id (Primary Key)
 - user_id (Foreign Key to users table)
-- matric_number (Unique student identifier)
+- admission_number (Unique student identifier)
 - department_id (Foreign Key to departments)
 - academic_year_id (Admission year)
 - current_level (100, 200, 300, 400, 500)
-- mode_of_entry (utme, direct_entry, transfer)
+- mode_of_entry (entrance_exam, direct_entry, transfer)
 - study_mode (full_time, part_time, distance)
 - status (active, graduated, suspended, withdrawn, deferred)
 - cgpa (Cumulative Grade Point Average)
@@ -269,7 +269,7 @@ $user = User::create([...]);
 // Create student record
 $student = Student::create([
     'user_id' => $user->id,
-    'matric_number' => 'CSC/2023/001',
+    'admission_number' => 'CSC/2023/001',
     'department_id' => 1,
     'current_level' => 100,
     // ... other fields

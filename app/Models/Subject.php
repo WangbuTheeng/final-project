@@ -25,15 +25,25 @@ class Subject extends Model
         'difficulty_level',
         'subject_type',
         'is_mandatory',
-        'is_active'
+        'is_active',
+        'full_marks_theory',
+        'pass_marks_theory',
+        'full_marks_practical',
+        'pass_marks_practical',
+        'is_practical'
     ];
 
     protected $casts = [
         'is_mandatory' => 'boolean',
         'is_active' => 'boolean',
+        'is_practical' => 'boolean',
         'order_sequence' => 'integer',
         'duration_hours' => 'integer',
         'credit_weight' => 'integer',
+        'full_marks_theory' => 'integer',
+        'pass_marks_theory' => 'integer',
+        'full_marks_practical' => 'integer',
+        'pass_marks_practical' => 'integer',
         'start_date' => 'date',
         'end_date' => 'date',
         'learning_objectives' => 'array',
@@ -192,5 +202,77 @@ class Subject extends Model
     public function getDisplayNameAttribute()
     {
         return $this->order_sequence . '. ' . $this->name;
+    }
+
+    /**
+     * Scope to filter practical subjects
+     */
+    public function scopePractical($query)
+    {
+        return $query->where('is_practical', true);
+    }
+
+    /**
+     * Scope to filter theory subjects
+     */
+    public function scopeTheory($query)
+    {
+        return $query->where('is_practical', false);
+    }
+
+    /**
+     * Get total full marks (theory + practical)
+     */
+    public function getTotalFullMarksAttribute()
+    {
+        return ($this->full_marks_theory ?? 0) + ($this->full_marks_practical ?? 0);
+    }
+
+    /**
+     * Get total pass marks (theory + practical)
+     */
+    public function getTotalPassMarksAttribute()
+    {
+        return ($this->pass_marks_theory ?? 0) + ($this->pass_marks_practical ?? 0);
+    }
+
+    /**
+     * Check if subject has theory component
+     */
+    public function hasTheoryComponent()
+    {
+        return $this->full_marks_theory > 0;
+    }
+
+    /**
+     * Check if subject has practical component
+     */
+    public function hasPracticalComponent()
+    {
+        return $this->full_marks_practical > 0 || $this->is_practical;
+    }
+
+    /**
+     * Get marks breakdown for display
+     */
+    public function getMarksBreakdownAttribute()
+    {
+        $breakdown = [];
+
+        if ($this->hasTheoryComponent()) {
+            $breakdown['theory'] = [
+                'full_marks' => $this->full_marks_theory,
+                'pass_marks' => $this->pass_marks_theory
+            ];
+        }
+
+        if ($this->hasPracticalComponent()) {
+            $breakdown['practical'] = [
+                'full_marks' => $this->full_marks_practical,
+                'pass_marks' => $this->pass_marks_practical
+            ];
+        }
+
+        return $breakdown;
     }
 }

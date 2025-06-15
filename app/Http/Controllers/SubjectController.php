@@ -7,6 +7,7 @@ use App\Models\ClassSection;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class SubjectController extends Controller
 {
@@ -78,7 +79,7 @@ class SubjectController extends Controller
         $this->authorize('manage-courses');
 
         $classes = ClassSection::with(['course.faculty', 'instructor'])->active()->orderBy('name')->get();
-        
+
         // Get instructors (teachers and admins)
         $instructors = User::whereHas('roles', function($query) {
             $query->whereIn('name', ['Teacher', 'Admin', 'Super Admin']);
@@ -88,10 +89,105 @@ class SubjectController extends Controller
         $subjectTypes = ['theory', 'practical', 'mixed'];
 
         // Pre-select class if provided
-        $selectedClass = $request->filled('class_id') ? 
+        $selectedClass = $request->filled('class_id') ?
             ClassSection::find($request->class_id) : null;
 
-        return view('subjects.create', compact('classes', 'instructors', 'difficultyLevels', 'subjectTypes', 'selectedClass'));
+        // Get next available order sequence for selected class
+        $nextOrderSequence = 1;
+        if ($selectedClass) {
+            $nextOrderSequence = $this->getNextOrderSequence($selectedClass->id);
+        }
+
+        return view('subjects.create', compact('classes', 'instructors', 'difficultyLevels', 'subjectTypes', 'selectedClass', 'nextOrderSequence'));
+    }
+
+    /**
+     * Get the next available order sequence for a class
+     */
+    private function getNextOrderSequence($classId)
+    {
+        $maxOrder = Subject::where('class_id', $classId)->max('order_sequence');
+        return $maxOrder ? $maxOrder + 1 : 1;
+    }
+
+    /**
+     * Generate suggested subject code based on class and subject name
+     */
+    private function generateSubjectCode($classId, $subjectName)
+    {
+        $class = ClassSection::with('course.faculty')->find($classId);
+        if (!$class) {
+            return '';
+        }
+
+        // Get course code or create one from course title
+        $courseCode = $class->course->code ?? $this->generateCourseCode($class->course->title);
+
+        // Get subject abbreviation from name
+        $subjectAbbr = $this->generateSubjectAbbreviation($subjectName);
+
+        // Get next sequence number for this course
+        $sequenceNumber = $this->getNextSubjectSequence($courseCode);
+
+        return strtoupper($courseCode . '-' . $subjectAbbr . sprintf('%02d', $sequenceNumber));
+    }
+
+    /**
+     * Generate course code from course title
+     */
+    private function generateCourseCode($courseTitle)
+    {
+        $words = explode(' ', $courseTitle);
+        $code = '';
+
+        foreach ($words as $word) {
+            if (strlen($word) > 2) {
+                $code .= substr($word, 0, 3);
+            }
+        }
+
+        return substr(strtoupper($code), 0, 6);
+    }
+
+    /**
+     * Generate subject abbreviation from subject name
+     */
+    private function generateSubjectAbbreviation($subjectName)
+    {
+        $words = explode(' ', $subjectName);
+        $abbr = '';
+
+        foreach ($words as $word) {
+            if (strlen($word) > 2) {
+                $abbr .= substr($word, 0, 1);
+            }
+        }
+
+        return substr(strtoupper($abbr), 0, 3);
+    }
+
+    /**
+     * Get next sequence number for subject code
+     */
+    private function getNextSubjectSequence($courseCode)
+    {
+        $lastSubject = Subject::where('code', 'LIKE', $courseCode . '-%')
+            ->orderBy('code', 'desc')
+            ->first();
+
+        if (!$lastSubject) {
+            return 1;
+        }
+
+        // Extract sequence number from code
+        $parts = explode('-', $lastSubject->code);
+        if (count($parts) >= 2) {
+            $lastPart = end($parts);
+            $sequenceNumber = (int) substr($lastPart, -2);
+            return $sequenceNumber + 1;
+        }
+
+        return 1;
     }
 
     /**
@@ -107,7 +203,14 @@ class SubjectController extends Controller
             'description' => ['nullable', 'string'],
             'class_id' => ['required', 'exists:classes,id'],
             'instructor_id' => ['nullable', 'exists:users,id'],
-            'order_sequence' => ['required', 'integer', 'min:1'],
+            'order_sequence' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('subjects')->where(function ($query) use ($request) {
+                    return $query->where('class_id', $request->class_id);
+                })
+            ],
             'duration_hours' => ['nullable', 'integer', 'min:1', 'max:1000'],
             'credit_weight' => ['nullable', 'integer', 'min:1', 'max:100'],
             'start_date' => ['nullable', 'date'],
@@ -120,6 +223,11 @@ class SubjectController extends Controller
             'subject_type' => ['required', 'in:theory,practical,mixed'],
             'is_mandatory' => ['boolean'],
             'is_active' => ['boolean'],
+            'full_marks_theory' => ['nullable', 'integer', 'min:0', 'max:1000'],
+            'pass_marks_theory' => ['nullable', 'integer', 'min:0', 'max:1000', 'lte:full_marks_theory'],
+            'full_marks_practical' => ['nullable', 'integer', 'min:0', 'max:1000'],
+            'pass_marks_practical' => ['nullable', 'integer', 'min:0', 'max:1000', 'lte:full_marks_practical'],
+            'is_practical' => ['boolean'],
         ]);
 
         try {
@@ -142,6 +250,11 @@ class SubjectController extends Controller
                 'subject_type' => $request->subject_type,
                 'is_mandatory' => $request->has('is_mandatory') ? $request->is_mandatory : true,
                 'is_active' => $request->has('is_active') ? $request->is_active : true,
+                'full_marks_theory' => $request->full_marks_theory,
+                'pass_marks_theory' => $request->pass_marks_theory,
+                'full_marks_practical' => $request->full_marks_practical,
+                'pass_marks_practical' => $request->pass_marks_practical,
+                'is_practical' => $request->has('is_practical') ? $request->is_practical : false,
             ]);
 
             DB::commit();
@@ -207,7 +320,14 @@ class SubjectController extends Controller
             'description' => ['nullable', 'string'],
             'class_id' => ['required', 'exists:classes,id'],
             'instructor_id' => ['nullable', 'exists:users,id'],
-            'order_sequence' => ['required', 'integer', 'min:1'],
+            'order_sequence' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('subjects')->where(function ($query) use ($request) {
+                    return $query->where('class_id', $request->class_id);
+                })->ignore($subject->id)
+            ],
             'duration_hours' => ['nullable', 'integer', 'min:1', 'max:1000'],
             'credit_weight' => ['nullable', 'integer', 'min:1', 'max:100'],
             'start_date' => ['nullable', 'date'],
@@ -220,6 +340,11 @@ class SubjectController extends Controller
             'subject_type' => ['required', 'in:theory,practical,mixed'],
             'is_mandatory' => ['boolean'],
             'is_active' => ['boolean'],
+            'full_marks_theory' => ['nullable', 'integer', 'min:0', 'max:1000'],
+            'pass_marks_theory' => ['nullable', 'integer', 'min:0', 'max:1000', 'lte:full_marks_theory'],
+            'full_marks_practical' => ['nullable', 'integer', 'min:0', 'max:1000'],
+            'pass_marks_practical' => ['nullable', 'integer', 'min:0', 'max:1000', 'lte:full_marks_practical'],
+            'is_practical' => ['boolean'],
         ]);
 
         try {
@@ -242,6 +367,11 @@ class SubjectController extends Controller
                 'subject_type' => $request->subject_type,
                 'is_mandatory' => $request->has('is_mandatory') ? $request->is_mandatory : $subject->is_mandatory,
                 'is_active' => $request->has('is_active') ? $request->is_active : $subject->is_active,
+                'full_marks_theory' => $request->full_marks_theory,
+                'pass_marks_theory' => $request->pass_marks_theory,
+                'full_marks_practical' => $request->full_marks_practical,
+                'pass_marks_practical' => $request->pass_marks_practical,
+                'is_practical' => $request->has('is_practical') ? $request->is_practical : $subject->is_practical,
             ]);
 
             DB::commit();
@@ -283,5 +413,44 @@ class SubjectController extends Controller
     {
         $subjects = $class->activeSubjects()->get();
         return response()->json($subjects);
+    }
+
+    /**
+     * Get next order sequence for a class (AJAX endpoint)
+     */
+    public function getNextOrderSequenceAjax(Request $request)
+    {
+        $classId = $request->input('class_id');
+        if (!$classId) {
+            return response()->json(['order_sequence' => 1]);
+        }
+
+        $nextOrder = $this->getNextOrderSequence($classId);
+        return response()->json(['order_sequence' => $nextOrder]);
+    }
+
+    /**
+     * Generate subject code suggestion (AJAX endpoint)
+     */
+    public function generateSubjectCodeSuggestion(Request $request)
+    {
+        $classId = $request->input('class_id');
+        $subjectName = $request->input('subject_name');
+
+        if (!$classId || !$subjectName) {
+            return response()->json(['code' => '']);
+        }
+
+        $suggestedCode = $this->generateSubjectCode($classId, $subjectName);
+
+        // Check if code already exists and modify if needed
+        $originalCode = $suggestedCode;
+        $counter = 1;
+        while (Subject::where('code', $suggestedCode)->exists()) {
+            $suggestedCode = $originalCode . '-' . sprintf('%02d', $counter);
+            $counter++;
+        }
+
+        return response()->json(['code' => $suggestedCode]);
     }
 }

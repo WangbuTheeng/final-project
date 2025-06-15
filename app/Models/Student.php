@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log; // Import Log facade
 
 class Student extends Model
 {
@@ -11,8 +12,9 @@ class Student extends Model
 
     protected $fillable = [
         'user_id',
-        'matric_number',
+        'admission_number',
         'department_id',
+        'faculty_id',
         'academic_year_id',
         'current_level',
         'mode_of_entry',
@@ -53,6 +55,14 @@ class Student extends Model
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    /**
+     * Get the faculty this student belongs to
+     */
+    public function faculty()
+    {
+        return $this->belongsTo(Faculty::class);
     }
 
     /**
@@ -125,6 +135,14 @@ class Student extends Model
     }
 
     /**
+     * Scope to get students by faculty
+     */
+    public function scopeByFaculty($query, $facultyId)
+    {
+        return $query->where('faculty_id', $facultyId);
+    }
+
+    /**
      * Scope to get students by level
      */
     public function scopeByLevel($query, $level)
@@ -167,43 +185,53 @@ class Student extends Model
     /**
      * Check if student can enroll in a course
      */
-    public function canEnrollInCourse($course, $academicYearId, $semester)
+    public function canEnrollInCourse(ClassSection $class, $academicYearId, $semester) // Changed $course to ClassSection $class
     {
-        // Check if already enrolled in this course for the semester
+        $reasons = [];
+
+        // Check if already enrolled in this specific class for the semester (including soft-deleted)
         $existingEnrollment = $this->enrollments()
-            ->whereHas('class', function ($query) use ($course) {
-                $query->where('course_id', $course->id);
-            })
+            ->withTrashed() // Include soft-deleted records
+            ->where('class_id', $class->id) // Check against the specific class ID
             ->where('academic_year_id', $academicYearId)
             ->where('semester', $semester)
-            ->where('status', 'enrolled')
             ->exists();
 
         if ($existingEnrollment) {
-            return false;
+            $reasons[] = 'Student is already enrolled in this specific class for the selected semester.';
         }
 
-        // Check if course level matches student level
-        if ($course->level != $this->current_level) {
-            return false;
+        // Check if course level matches student level (only if course has level defined)
+        // Use $class->course->level instead of $course->level
+        if (isset($class->course->level) && $class->course->level !== null && $class->course->level != $this->current_level) {
+            $reasons[] = 'Course level (' . $class->course->level . ') does not match student\'s current level (' . $this->current_level . ').';
         }
 
-        // Check prerequisites
-        if (!empty($course->prerequisites)) {
+        // Check prerequisites (only if course has prerequisites defined)
+        // Use $class->course->prerequisites instead of $course->prerequisites
+        if (isset($class->course->prerequisites) && !empty($class->course->prerequisites)) {
             $completedCourses = $this->completedEnrollments()
                 ->with('class.course')
                 ->get()
                 ->pluck('class.course.id')
                 ->toArray();
 
-            foreach ($course->prerequisites as $prerequisiteId) {
+            $missingPrerequisites = [];
+            foreach ($class->course->prerequisites as $prerequisiteId) {
                 if (!in_array($prerequisiteId, $completedCourses)) {
-                    return false;
+                    $prerequisiteCourse = Course::find($prerequisiteId);
+                    if ($prerequisiteCourse) {
+                        $missingPrerequisites[] = $prerequisiteCourse->code . ' - ' . $prerequisiteCourse->title;
+                    }
                 }
+            }
+
+            if (!empty($missingPrerequisites)) {
+                $reasons[] = 'Missing prerequisites: ' . implode(', ', $missingPrerequisites) . '.';
             }
         }
 
-        return true;
+        return [empty($reasons), $reasons]; // Return [true/false, reasons_array]
     }
 
     /**
@@ -244,7 +272,10 @@ class Student extends Model
             ->get();
 
         if ($completedEnrollments->isEmpty()) {
-            $this->update(['cgpa' => 0.00]);
+            $this->update([
+                'cgpa' => 0.00,
+                'total_credits_earned' => 0
+            ]);
             return;
         }
 
@@ -301,7 +332,9 @@ class Student extends Model
      */
     public function getAcademicStandingAttribute()
     {
-        if ($this->cgpa >= 4.5) {
+        if ($this->cgpa == 0.00 && $this->total_credits_earned == 0) {
+            return 'No Record';
+        } elseif ($this->cgpa >= 4.5) {
             return 'First Class';
         } elseif ($this->cgpa >= 3.5) {
             return 'Second Class Upper';
@@ -314,5 +347,73 @@ class Student extends Model
         } else {
             return 'Fail';
         }
+    }
+
+    /**
+     * Generate a unique admission number
+     */
+    public static function generateAdmissionNumber($academicYearId, $departmentId = null, $facultyId = null)
+    {
+        $academicYear = \App\Models\AcademicYear::find($academicYearId);
+
+        if (!$academicYear) {
+            throw new \Exception('Invalid academic year');
+        }
+
+        // Get the year from academic year (e.g., 2024/2025 -> 24)
+        $yearCode = substr($academicYear->start_date->format('Y'), -2);
+
+        // Get code based on department or faculty
+        if ($departmentId) {
+            $department = \App\Models\Department::find($departmentId);
+            if (!$department) {
+                throw new \Exception('Invalid department');
+            }
+            $code = strtoupper(substr($department->code ?? $department->name, 0, 3));
+            $filterField = 'department_id';
+            $filterId = $departmentId;
+        } elseif ($facultyId) {
+            $faculty = \App\Models\Faculty::find($facultyId);
+            if (!$faculty) {
+                throw new \Exception('Invalid faculty');
+            }
+            $code = strtoupper(substr($faculty->code ?? $faculty->name, 0, 3));
+            $filterField = 'faculty_id';
+            $filterId = $facultyId;
+        } else {
+            throw new \Exception('Either department or faculty must be provided');
+        }
+
+        // Get the next sequence number for this year and department/faculty
+        $query = static::where('academic_year_id', $academicYearId)
+            ->where('admission_number', 'like', $yearCode . $code . '%')
+            ->orderBy('admission_number', 'desc');
+
+        if ($departmentId) {
+            $query->where('department_id', $departmentId);
+        } else {
+            $query->where('faculty_id', $facultyId)->whereNull('department_id');
+        }
+
+        $lastStudent = $query->first();
+
+        if ($lastStudent) {
+            // Extract the sequence number from the last admission number
+            $lastSequence = (int) substr($lastStudent->admission_number, -4);
+            $nextSequence = $lastSequence + 1;
+        } else {
+            $nextSequence = 1;
+        }
+
+        // Format: YYDDDNNNN (e.g., 24CSC0001)
+        $admissionNumber = $yearCode . $code . str_pad($nextSequence, 4, '0', STR_PAD_LEFT);
+
+        // Ensure uniqueness
+        while (static::where('admission_number', $admissionNumber)->exists()) {
+            $nextSequence++;
+            $admissionNumber = $yearCode . $code . str_pad($nextSequence, 4, '0', STR_PAD_LEFT);
+        }
+
+        return $admissionNumber;
     }
 }

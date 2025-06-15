@@ -47,58 +47,88 @@
     <!-- Filters -->
     <div class="bg-white shadow-sm rounded-lg border border-gray-200">
         <div class="px-6 py-4">
-            <form method="GET" action="{{ route('courses.index') }}" class="grid grid-cols-1 md:grid-cols-6 gap-4">
-                <!-- Search -->
-                <div class="md:col-span-2">
-                    <input type="text" 
-                           name="search" 
-                           value="{{ request('search') }}"
-                           placeholder="Search courses..."
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+            <form method="GET" action="{{ route('courses.index') }}" class="space-y-4">
+                <!-- First Row -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Search -->
+                    <div class="md:col-span-2">
+                        <input type="text"
+                               name="search"
+                               value="{{ request('search') }}"
+                               placeholder="Search courses..."
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                    </div>
+
+                    <!-- Faculty Filter -->
+                    <div>
+                        <select name="faculty_id" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            <option value="">All Faculties</option>
+                            @foreach($faculties as $faculty)
+                                <option value="{{ $faculty->id }}" {{ request('faculty_id') == $faculty->id ? 'selected' : '' }}>
+                                    {{ $faculty->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Organization Type Filter -->
+                    <div>
+                        <select name="organization_type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            <option value="">All Organization Types</option>
+                            @foreach($organizationTypes as $type)
+                                <option value="{{ $type }}" {{ request('organization_type') == $type ? 'selected' : '' }}>
+                                    {{ ucfirst($type) }} Based
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
-                <!-- Faculty Filter -->
-                <div>
-                    <select name="faculty_id" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        <option value="">All Faculties</option>
-                        @foreach($faculties as $faculty)
-                            <option value="{{ $faculty->id }}" {{ request('faculty_id') == $faculty->id ? 'selected' : '' }}>
-                                {{ $faculty->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                <!-- Second Row -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Year Filter (for yearly organization) -->
+                    <div>
+                        <select name="year" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            <option value="">All Years</option>
+                            @foreach($yearlyOptions as $year)
+                                <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>
+                                    {{ $year }}{{ $year == 1 ? 'st' : ($year == 2 ? 'nd' : ($year == 3 ? 'rd' : 'th')) }} Year
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                <!-- Level Filter -->
-                <div>
-                    <select name="level" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        <option value="">All Levels</option>
-                        @foreach($levels as $level)
-                            <option value="{{ $level }}" {{ request('level') == $level ? 'selected' : '' }}>
-                                {{ $level }} Level
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                    <!-- Semester Period Filter (for semester organization) -->
+                    <div>
+                        <select name="semester_period" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            <option value="">All Semester Periods</option>
+                            @foreach($semesterOptions as $sem)
+                                <option value="{{ $sem }}" {{ request('semester_period') == $sem ? 'selected' : '' }}>
+                                    Semester {{ $sem }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                <!-- Semester Filter -->
-                <div>
-                    <select name="semester" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        <option value="">All Semesters</option>
-                        @foreach($semesters as $semester)
-                            <option value="{{ $semester }}" {{ request('semester') == $semester ? 'selected' : '' }}>
-                                {{ ucfirst($semester) }} Semester
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                    <!-- Course Type Filter -->
+                    <div>
+                        <select name="course_type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            <option value="">All Course Types</option>
+                            @foreach($courseTypes as $type)
+                                <option value="{{ $type }}" {{ request('course_type') == $type ? 'selected' : '' }}>
+                                    {{ ucfirst($type) }} Course
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                <!-- Filter Button -->
-                <div>
-                    <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                        <i class="fas fa-filter mr-2"></i>
-                        Filter
-                    </button>
+                    <!-- Filter Button -->
+                    <div>
+                        <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <i class="fas fa-filter mr-2"></i>
+                            Filter
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -187,13 +217,30 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <div class="space-y-1">
                                         <div class="flex items-center">
-                                            <i class="fas fa-layer-group text-gray-400 mr-2"></i>
-                                            <span>{{ $course->level }} Level</span>
+                                            <i class="fas fa-cog text-gray-400 mr-2"></i>
+                                            <span class="capitalize">{{ $course->organization_type ?? 'yearly' }} Based</span>
                                         </div>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-calendar text-gray-400 mr-2"></i>
-                                            <span>{{ ucfirst($course->semester) }}</span>
-                                        </div>
+                                        @if(($course->organization_type ?? 'yearly') === 'yearly')
+                                            @if($course->year)
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-graduation-cap text-gray-400 mr-2"></i>
+                                                    <span>{{ $course->year }}{{ $course->year == 1 ? 'st' : ($course->year == 2 ? 'nd' : ($course->year == 3 ? 'rd' : 'th')) }} Year</span>
+                                                </div>
+                                            @endif
+                                            @if($course->semester)
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-calendar text-gray-400 mr-2"></i>
+                                                    <span>{{ ucfirst($course->semester) }} Semester</span>
+                                                </div>
+                                            @endif
+                                        @else
+                                            @if($course->semester_period)
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-calendar text-gray-400 mr-2"></i>
+                                                    <span>Semester {{ $course->semester_period }}</span>
+                                                </div>
+                                            @endif
+                                        @endif
                                         <div class="flex items-center">
                                             <i class="fas fa-star text-gray-400 mr-2"></i>
                                             <span>{{ $course->credit_units }} units</span>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Department;
+use App\Models\Faculty;
+use App\Models\Course;
 use App\Models\AcademicYear;
 use App\Models\Enrollment;
 use Illuminate\Http\Request;
@@ -27,22 +29,30 @@ class StudentController extends Controller
         $this->authorize('view-students');
 
         $departments = Department::active()->get();
+        $faculties = Faculty::active()->get();
+        $courses = Course::active()->get();
         $academicYears = AcademicYear::orderBy('name', 'desc')->get();
 
         // Get filters
         $selectedDepartment = $request->get('department_id');
-        $selectedLevel = $request->get('level');
+        $selectedFaculty = $request->get('faculty_id');
+        $selectedCourse = $request->get('course_id');
         $selectedStatus = $request->get('status');
         $selectedAcademicYear = $request->get('academic_year_id');
         $search = $request->get('search');
 
         // Build query
-        $students = Student::with(['user', 'department', 'academicYear'])
+        $students = Student::with(['user', 'department.faculty', 'faculty', 'academicYear'])
             ->when($selectedDepartment, function ($query) use ($selectedDepartment) {
                 return $query->where('department_id', $selectedDepartment);
             })
-            ->when($selectedLevel, function ($query) use ($selectedLevel) {
-                return $query->where('current_level', $selectedLevel);
+            ->when($selectedFaculty, function ($query) use ($selectedFaculty) {
+                return $query->where('faculty_id', $selectedFaculty);
+            })
+            ->when($selectedCourse, function ($query) use ($selectedCourse) {
+                return $query->whereHas('enrollments.class.course', function ($q) use ($selectedCourse) {
+                    $q->where('course_id', $selectedCourse);
+                });
             })
             ->when($selectedStatus, function ($query) use ($selectedStatus) {
                 return $query->where('status', $selectedStatus);
@@ -52,7 +62,7 @@ class StudentController extends Controller
             })
             ->when($search, function ($query) use ($search) {
                 return $query->where(function ($q) use ($search) {
-                    $q->where('matric_number', 'like', "%{$search}%")
+                    $q->where('admission_number', 'like', "%{$search}%")
                       ->orWhereHas('user', function ($userQuery) use ($search) {
                           $userQuery->where('first_name', 'like', "%{$search}%")
                                    ->orWhere('last_name', 'like', "%{$search}%")
@@ -64,14 +74,17 @@ class StudentController extends Controller
             ->paginate(20);
 
         // Get statistics
-        $stats = $this->getStudentStats($selectedDepartment, $selectedLevel, $selectedStatus);
+        $stats = $this->getStudentStats($selectedDepartment, $selectedFaculty, $selectedStatus);
 
         return view('students.index', compact(
             'students',
             'departments',
+            'faculties',
+            'courses',
             'academicYears',
             'selectedDepartment',
-            'selectedLevel',
+            'selectedFaculty',
+            'selectedCourse',
             'selectedStatus',
             'selectedAcademicYear',
             'search',
@@ -86,10 +99,11 @@ class StudentController extends Controller
     {
         $this->authorize('create-students');
 
-        $departments = Department::active()->get();
-        $academicYears = AcademicYear::active()->get();
+        $faculties = Faculty::with('departments')->where('is_active', true)->get();
+        $departments = Department::with('faculty')->active()->get();
+        $academicYears = AcademicYear::where('is_active', true)->get();
 
-        return view('students.create', compact('departments', 'academicYears'));
+        return view('students.create', compact('faculties', 'departments', 'academicYears'));
     }
 
     /**
@@ -106,15 +120,15 @@ class StudentController extends Controller
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
             'date_of_birth' => 'required|date|before:today',
-            'gender' => 'required|in:male,female',
+            'gender' => 'required|in:male,female,other',
             'address' => 'nullable|string',
-            
+
             // Student fields
-            'matric_number' => 'required|string|unique:students,matric_number',
-            'department_id' => 'required|exists:departments,id',
+            'faculty_id' => 'required|exists:faculties,id',
+            'department_id' => 'nullable|exists:departments,id',
             'academic_year_id' => 'required|exists:academic_years,id',
             'current_level' => 'required|in:100,200,300,400,500',
-            'mode_of_entry' => 'required|in:utme,direct_entry,transfer',
+            'mode_of_entry' => 'required|in:entrance_exam,direct_entry,transfer',
             'study_mode' => 'required|in:full_time,part_time,distance',
             
             // Guardian information
@@ -130,6 +144,7 @@ class StudentController extends Controller
 
             // Create user account
             $user = User::create([
+                'name' => $request->first_name . ' ' . $request->last_name,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
@@ -154,15 +169,26 @@ class StudentController extends Controller
                 ];
             }
 
+            // Generate admission number
+            $admissionNumber = Student::generateAdmissionNumber($request->academic_year_id, $request->department_id, $request->faculty_id);
+
             // Calculate expected graduation date
-            $department = Department::find($request->department_id);
             $academicYear = AcademicYear::find($request->academic_year_id);
-            $expectedGraduationDate = $academicYear->end_date->addYears($department->duration_years);
+            $expectedGraduationDate = null;
+
+            if ($request->department_id) {
+                $department = Department::find($request->department_id);
+                $expectedGraduationDate = $academicYear->end_date->addYears($department->duration_years);
+            } else {
+                // Default to 4 years if no department specified
+                $expectedGraduationDate = $academicYear->end_date->addYears(4);
+            }
 
             // Create student record
             $student = Student::create([
                 'user_id' => $user->id,
-                'matric_number' => $request->matric_number,
+                'admission_number' => $admissionNumber,
+                'faculty_id' => $request->faculty_id,
                 'department_id' => $request->department_id,
                 'academic_year_id' => $request->academic_year_id,
                 'current_level' => $request->current_level,
@@ -192,7 +218,7 @@ class StudentController extends Controller
     {
         $this->authorize('view-students');
 
-        $student->load(['user', 'department.faculty', 'academicYear']);
+        $student->load(['user', 'department.faculty', 'faculty', 'academicYear']);
 
         // Get current academic year enrollments
         $currentAcademicYear = AcademicYear::current();
@@ -219,10 +245,11 @@ class StudentController extends Controller
         $this->authorize('edit-students');
 
         $student->load('user');
-        $departments = Department::active()->get();
-        $academicYears = AcademicYear::active()->get();
+        $faculties = Faculty::with('departments')->where('is_active', true)->get();
+        $departments = Department::with('faculty')->active()->get();
+        $academicYears = AcademicYear::where('is_active', true)->get();
 
-        return view('students.edit', compact('student', 'departments', 'academicYears'));
+        return view('students.edit', compact('student', 'faculties', 'departments', 'academicYears'));
     }
 
     /**
@@ -239,14 +266,14 @@ class StudentController extends Controller
             'email' => ['required', 'email', Rule::unique('users')->ignore($student->user_id)],
             'phone' => 'nullable|string|max:20',
             'date_of_birth' => 'required|date|before:today',
-            'gender' => 'required|in:male,female',
+            'gender' => 'required|in:male,female,other',
             'address' => 'nullable|string',
             
             // Student fields
-            'matric_number' => ['required', 'string', Rule::unique('students')->ignore($student->id)],
-            'department_id' => 'required|exists:departments,id',
+            'faculty_id' => 'required|exists:faculties,id',
+            'department_id' => 'nullable|exists:departments,id',
             'current_level' => 'required|in:100,200,300,400,500',
-            'mode_of_entry' => 'required|in:utme,direct_entry,transfer',
+            'mode_of_entry' => 'required|in:entrance_exam,direct_entry,transfer',
             'study_mode' => 'required|in:full_time,part_time,distance',
             'status' => 'required|in:active,graduated,suspended,withdrawn,deferred',
             
@@ -263,6 +290,7 @@ class StudentController extends Controller
 
             // Update user account
             $student->user->update([
+                'name' => $request->first_name . ' ' . $request->last_name,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
@@ -286,7 +314,7 @@ class StudentController extends Controller
 
             // Update student record
             $student->update([
-                'matric_number' => $request->matric_number,
+                'faculty_id' => $request->faculty_id,
                 'department_id' => $request->department_id,
                 'current_level' => $request->current_level,
                 'mode_of_entry' => $request->mode_of_entry,
@@ -340,7 +368,7 @@ class StudentController extends Controller
     /**
      * Get student statistics
      */
-    private function getStudentStats($departmentId = null, $level = null, $status = null)
+    private function getStudentStats($departmentId = null, $facultyId = null, $status = null)
     {
         $query = Student::query();
 
@@ -348,8 +376,8 @@ class StudentController extends Controller
             $query->where('department_id', $departmentId);
         }
 
-        if ($level) {
-            $query->where('current_level', $level);
+        if ($facultyId) {
+            $query->where('faculty_id', $facultyId);
         }
 
         if ($status) {
@@ -364,4 +392,5 @@ class StudentController extends Controller
             'withdrawn' => $query->where('status', 'withdrawn')->count(),
         ];
     }
+
 }

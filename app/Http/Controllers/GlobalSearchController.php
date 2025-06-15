@@ -129,7 +129,7 @@ class GlobalSearchController extends Controller
                 ->whereHas('user', function ($q) use ($query) {
                     $q->search($query);
                 })
-                ->orWhere('matric_number', 'LIKE', "%{$query}%")
+                ->orWhere('admission_number', 'LIKE', "%{$query}%")
                 ->orderBy('id', 'asc')
                 ->paginate(10);
             $results['students'] = $students;
@@ -166,7 +166,7 @@ class GlobalSearchController extends Controller
                 ->whereHas('user', function ($q) use ($query) {
                     $q->search($query);
                 })
-                ->orWhere('matric_number', 'LIKE', "%{$query}%")
+                ->orWhere('admission_number', 'LIKE', "%{$query}%")
                 ->orderBy('id', 'asc')
                 ->limit($limit)
                 ->get()
@@ -174,7 +174,7 @@ class GlobalSearchController extends Controller
                     return [
                         'id' => $student->id,
                         'title' => $student->user->name ?? 'Unknown',
-                        'subtitle' => $student->matric_number,
+                        'subtitle' => $student->admission_number,
                         'description' => $student->department->name ?? 'No Department',
                         'url' => route('students.show', $student),
                         'avatar' => strtoupper(substr($student->user->name ?? 'ST', 0, 2)),

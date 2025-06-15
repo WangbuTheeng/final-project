@@ -17,6 +17,7 @@ class ClassSection extends Model
         'academic_year_id',
         'instructor_id',
         'semester',
+        'year',
         'room',
         'schedule',
         'capacity',
@@ -143,7 +144,7 @@ class ClassSection extends Model
      */
     public function getAvailableSlotsAttribute()
     {
-        return max(0, $this->capacity - $this->enrolled_count);
+        return max(0, $this->capacity - $this->enrolled_count); // Changed to enrolled_count
     }
 
     /**
@@ -155,7 +156,7 @@ class ClassSection extends Model
             return 0;
         }
 
-        return round(($this->enrolled_count / $this->capacity) * 100, 2);
+        return round(($this->enrolled_count / $this->capacity) * 100, 2); // Changed to enrolled_count
     }
 
     /**
@@ -163,17 +164,13 @@ class ClassSection extends Model
      */
     public function updateEnrolledCount()
     {
-        $this->enrolled_count = $this->activeEnrollments()->count();
+        $this->enrolled_count = $this->activeEnrollments()->count(); // Changed to enrolled_count
         $this->save();
     }
 
-    /**
-     * Get current enrollment (alias for enrolled_count)
-     */
-    public function getCurrentEnrollmentAttribute()
-    {
-        return $this->enrolled_count;
-    }
+    // Removed the redundant getEnrolledCountAttribute as 'enrolled_count' is a direct column
+    // The accessor was aliasing 'current_enrollment' which was not a column.
+    // Now 'enrolled_count' is the direct column and should be accessed directly.
 
     /**
      * Check if class can be deleted
@@ -197,12 +194,7 @@ class ClassSection extends Model
      */
     public function getSemesterNameAttribute()
     {
-        $semesters = [
-            'first' => 'First Semester',
-            'second' => 'Second Semester'
-        ];
-
-        return $semesters[$this->semester] ?? $this->semester;
+        return 'Semester ' . $this->semester;
     }
 
     /**

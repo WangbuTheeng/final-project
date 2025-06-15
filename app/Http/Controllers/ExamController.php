@@ -4,7 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Exam;
 use App\Models\Course;
+use App\Models\ClassSection;
+use App\Models\Subject;
+use App\Models\AcademicYear;
+use App\Models\Grade;
+use App\Models\Student;
+use App\Models\Enrollment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ExamController extends Controller
 {
@@ -23,13 +31,55 @@ class ExamController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Check if user has permission to view exams
-        $this->authorize('view-exams');
+        $this->authorize('manage-exams');
 
-        $exams = Exam::with('course')->orderBy('created_at', 'desc')->paginate(15);
-        return view('exams.index', compact('exams'));
+        $query = Exam::with(['class.course', 'subject', 'academicYear', 'creator']);
+
+        // Apply filters
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhereHas('class.course', function($courseQuery) use ($search) {
+                      $courseQuery->where('title', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('subject', function($subjectQuery) use ($search) {
+                      $subjectQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($request->filled('exam_type')) {
+            $query->where('exam_type', $request->exam_type);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('academic_year_id')) {
+            $query->where('academic_year_id', $request->academic_year_id);
+        }
+
+        $exams = $query->orderBy('exam_date', 'desc')->paginate(15);
+
+        // Get filter options
+        $academicYears = AcademicYear::active()->orderBy('name')->get();
+        $examTypes = array_keys(Exam::getExamTypes());
+        $statuses = ['scheduled', 'ongoing', 'completed', 'cancelled'];
+
+        // Statistics
+        $totalExams = Exam::count();
+        $upcomingExams = Exam::upcoming()->count();
+        $ongoingExams = Exam::ongoing()->count();
+        $completedExams = Exam::completed()->count();
+
+        return view('exams.index', compact(
+            'exams', 'academicYears', 'examTypes', 'statuses',
+            'totalExams', 'upcomingExams', 'ongoingExams', 'completedExams'
+        ));
     }
 
     /**
@@ -37,13 +87,25 @@ class ExamController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        // Check if user has permission to create exams
-        $this->authorize('create-exams');
-        
-        $courses = Course::all();
-        return view('exams.create', compact('courses'));
+        $this->authorize('manage-exams');
+
+        $academicYears = AcademicYear::active()->orderBy('name')->get();
+        $classes = ClassSection::with(['course.faculty', 'academicYear'])
+            ->active()
+            ->orderBy('name')
+            ->get();
+
+        $examTypes = Exam::getExamTypes();
+
+        // Pre-select class if provided
+        $selectedClass = $request->filled('class_id') ?
+            ClassSection::find($request->class_id) : null;
+
+        return view('exams.create', compact(
+            'academicYears', 'classes', 'examTypes', 'selectedClass'
+        ));
     }
 
     /**
@@ -54,39 +116,110 @@ class ExamController extends Controller
      */
     public function store(Request $request)
     {
-        // Check if user has permission to create exams
-        $this->authorize('create-exams');
-        
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'course_id' => ['required', 'exists:courses,id'],
-            'total_marks' => ['required', 'numeric', 'min:0'],
+        $this->authorize('manage-exams');
+
+        // Get the selected class to determine if it's semester or year-based
+        $class = ClassSection::with('course')->find($request->class_id);
+        $isSemesterBased = ($class && $class->course->organization_type === 'semester');
+
+        $rules = [
+            'title' => ['required', 'string', 'max:255'],
+            'class_id' => ['required', 'exists:classes,id'],
+            'subject_id' => ['nullable', 'exists:subjects,id'],
+            'academic_year_id' => ['required', 'exists:academic_years,id'],
+            'exam_type' => ['required', 'in:internal,board,practical,midterm,annual,quiz,test,final,assignment'],
+            'exam_date' => ['required', 'date', 'after:now'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'duration_minutes' => ['required', 'integer', 'min:15', 'max:480'],
+            'total_marks' => ['required', 'numeric', 'min:1', 'max:1000'],
             'theory_marks' => ['nullable', 'numeric', 'min:0'],
             'practical_marks' => ['nullable', 'numeric', 'min:0'],
-            'passing_marks' => ['required', 'numeric', 'min:0', 'lte:total_marks'],
-        ]);
+            'pass_mark' => ['required', 'numeric', 'min:0'],
+            'venue' => ['nullable', 'string', 'max:255'],
+            'instructions' => ['nullable', 'string'],
+            'subjects' => ['nullable', 'array'], // For multi-subject exams
+            'subjects.*' => ['exists:subjects,id'],
+        ];
 
-        // Ensure theory + practical marks = total marks if both are provided
+        // Add semester or year validation based on course type
+        if ($isSemesterBased) {
+            $rules['semester'] = ['required', 'integer', 'in:1,2,3,4,5,6,7,8'];
+        } else {
+            $rules['year'] = ['required', 'integer', 'in:1,2,3,4'];
+        }
+
+        $request->validate($rules);
+
+        // Validate that theory + practical marks = total marks if both are provided
         if ($request->filled('theory_marks') && $request->filled('practical_marks')) {
             $totalCalculated = $request->theory_marks + $request->practical_marks;
-            if ($totalCalculated != $request->total_marks) {
+            if (abs($totalCalculated - $request->total_marks) > 0.01) {
                 return redirect()->back()
                     ->with('error', 'Theory marks + practical marks must equal total marks')
                     ->withInput();
             }
         }
 
-        Exam::create([
-            'name' => $request->name,
-            'course_id' => $request->course_id,
-            'total_marks' => $request->total_marks,
-            'theory_marks' => $request->theory_marks,
-            'practical_marks' => $request->practical_marks,
-            'passing_marks' => $request->passing_marks,
-        ]);
+        // Validate pass mark is not greater than total marks
+        if ($request->pass_mark > $request->total_marks) {
+            return redirect()->back()
+                ->with('error', 'Pass mark cannot be greater than total marks')
+                ->withInput();
+        }
 
-        return redirect()->route('exams.index')
-            ->with('success', 'Exam created successfully.');
+        try {
+            $exam = null;
+
+            DB::transaction(function () use ($request, $isSemesterBased, &$exam) {
+                $exam = Exam::create([
+                    'title' => $request->title,
+                    'class_id' => $request->class_id,
+                    'subject_id' => $request->subject_id,
+                    'academic_year_id' => $request->academic_year_id,
+                    'exam_type' => $request->exam_type,
+                    'semester' => $isSemesterBased ? $request->semester : null,
+                    'year' => $isSemesterBased ? null : $request->year,
+                    'exam_date' => $request->exam_date,
+                    'start_date' => $request->start_date,
+                    'end_date' => $request->end_date,
+                    'duration_minutes' => $request->duration_minutes,
+                    'total_marks' => $request->total_marks,
+                    'theory_marks' => $request->theory_marks,
+                    'practical_marks' => $request->practical_marks,
+                    'pass_mark' => $request->pass_mark,
+                    'venue' => $request->venue,
+                    'instructions' => $request->instructions,
+                    'status' => 'scheduled',
+                    'created_by' => Auth::id(),
+                ]);
+
+                // If subjects are provided, attach them to the exam
+                if ($request->filled('subjects')) {
+                    foreach ($request->subjects as $subjectId) {
+                        $subject = Subject::find($subjectId);
+                        if ($subject) {
+                            $exam->examSubjects()->create([
+                                'subject_id' => $subjectId,
+                                'theory_marks' => $subject->full_marks_theory,
+                                'practical_marks' => $subject->full_marks_practical,
+                                'pass_marks_theory' => $subject->pass_marks_theory,
+                                'pass_marks_practical' => $subject->pass_marks_practical,
+                                'is_active' => true,
+                            ]);
+                        }
+                    }
+                }
+            });
+
+            return redirect()->route('exams.index')
+                ->with('success', 'Exam created successfully.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error creating exam: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -170,15 +303,190 @@ class ExamController extends Controller
      */
     public function destroy(Exam $exam)
     {
-        // Check if user has permission to delete exams
-        $this->authorize('delete-exams');
-        
-        // Check if there are any grades associated with this exam
-        // This should be implemented based on your specific relationships
-        
-        $exam->delete();
-        
-        return redirect()->route('exams.index')
-            ->with('success', 'Exam deleted successfully.');
+        $this->authorize('manage-exams');
+
+        // Check if exam has grades
+        if ($exam->grades()->count() > 0) {
+            return redirect()->back()
+                ->with('error', 'Cannot delete exam that has grades recorded.');
+        }
+
+        try {
+            $exam->delete();
+            return redirect()->route('exams.index')
+                ->with('success', 'Exam deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error deleting exam: ' . $e->getMessage());
+        }
     }
-} 
+
+    /**
+     * Show grade entry form for an exam
+     */
+    public function grades(Exam $exam)
+    {
+        $this->authorize('manage-exams');
+
+        $exam->load(['class.course', 'subject', 'academicYear']);
+
+        // Get enrolled students for this exam
+        $enrollments = Enrollment::with(['student.user'])
+            ->where('class_id', $exam->class_id)
+            ->where('academic_year_id', $exam->academic_year_id)
+            ->where('status', 'enrolled');
+
+        // Filter by semester or year based on course type
+        if ($exam->semester) {
+            $enrollments->where('semester', $exam->semester);
+        } elseif ($exam->year) {
+            $enrollments->where('year', $exam->year);
+        }
+
+        $enrollments = $enrollments->orderBy('student_id')->get();
+
+        // Get existing grades for this exam
+        $existingGrades = Grade::where('exam_id', $exam->id)
+            ->get()
+            ->keyBy('student_id');
+
+        return view('exams.grades', compact('exam', 'enrollments', 'existingGrades'));
+    }
+
+    /**
+     * Store grades for an exam
+     */
+    public function storeGrades(Request $request, Exam $exam)
+    {
+        $this->authorize('manage-exams');
+
+        $request->validate([
+            'grades' => ['required', 'array'],
+            'grades.*.student_id' => ['required', 'exists:students,id'],
+            'grades.*.theory_score' => ['nullable', 'numeric', 'min:0'],
+            'grades.*.practical_score' => ['nullable', 'numeric', 'min:0'],
+            'grades.*.remarks' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        try {
+            DB::transaction(function () use ($request, $exam) {
+                foreach ($request->grades as $gradeData) {
+                    $studentId = $gradeData['student_id'];
+                    $theoryScore = $gradeData['theory_score'] ?? 0;
+                    $practicalScore = $gradeData['practical_score'] ?? 0;
+
+                    // Calculate total score
+                    $totalScore = $theoryScore + $practicalScore;
+
+                    // Skip if no scores entered
+                    if ($totalScore <= 0) {
+                        continue;
+                    }
+
+                    // Validate scores don't exceed maximum
+                    if ($exam->hasTheory() && $theoryScore > $exam->theory_marks) {
+                        throw new \Exception("Theory score for student {$studentId} exceeds maximum marks");
+                    }
+
+                    if ($exam->hasPractical() && $practicalScore > $exam->practical_marks) {
+                        throw new \Exception("Practical score for student {$studentId} exceeds maximum marks");
+                    }
+
+                    if ($totalScore > $exam->total_marks) {
+                        throw new \Exception("Total score for student {$studentId} exceeds maximum marks");
+                    }
+
+                    // Get enrollment
+                    $enrollment = Enrollment::where('student_id', $studentId)
+                        ->where('class_id', $exam->class_id)
+                        ->where('academic_year_id', $exam->academic_year_id)
+                        ->first();
+
+                    if (!$enrollment) {
+                        continue;
+                    }
+
+                    // Create or update grade
+                    Grade::updateOrCreate(
+                        [
+                            'student_id' => $studentId,
+                            'exam_id' => $exam->id,
+                            'enrollment_id' => $enrollment->id,
+                        ],
+                        [
+                            'subject_id' => $exam->subject_id,
+                            'academic_year_id' => $exam->academic_year_id,
+                            'semester' => $exam->semester,
+                            'year' => $exam->year,
+                            'grade_type' => 'exam',
+                            'theory_score' => $exam->hasTheory() ? $theoryScore : null,
+                            'practical_score' => $exam->hasPractical() ? $practicalScore : null,
+                            'score' => $totalScore,
+                            'max_score' => $exam->total_marks,
+                            'remarks' => $gradeData['remarks'] ?? null,
+                            'graded_by' => Auth::id(),
+                            'graded_at' => now(),
+                        ]
+                    );
+                }
+            });
+
+            return redirect()->route('exams.grades', $exam)
+                ->with('success', 'Grades saved successfully.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error saving grades: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Get subjects for a class (AJAX)
+     */
+    public function getSubjects(Request $request)
+    {
+        $classId = $request->input('class_id');
+
+        if (!$classId) {
+            return response()->json([]);
+        }
+
+        $subjects = Subject::where('class_id', $classId)
+            ->where('is_active', true)
+            ->orderBy('order_sequence')
+            ->get(['id', 'name', 'code', 'full_marks_theory', 'pass_marks_theory', 'full_marks_practical', 'pass_marks_practical', 'is_practical']);
+
+        return response()->json($subjects);
+    }
+
+    /**
+     * Get subject marks for auto-loading (AJAX)
+     */
+    public function getSubjectMarks(Request $request)
+    {
+        $subjectId = $request->input('subject_id');
+
+        if (!$subjectId) {
+            return response()->json([]);
+        }
+
+        $subject = Subject::find($subjectId);
+
+        if (!$subject) {
+            return response()->json([]);
+        }
+
+        return response()->json([
+            'theory_marks' => $subject->full_marks_theory,
+            'practical_marks' => $subject->full_marks_practical,
+            'total_marks' => $subject->total_full_marks,
+            'pass_marks_theory' => $subject->pass_marks_theory,
+            'pass_marks_practical' => $subject->pass_marks_practical,
+            'total_pass_marks' => $subject->total_pass_marks,
+            'is_practical' => $subject->is_practical,
+            'has_theory' => $subject->hasTheoryComponent(),
+            'has_practical' => $subject->hasPracticalComponent(),
+        ]);
+    }
+}

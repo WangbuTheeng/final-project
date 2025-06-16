@@ -121,6 +121,22 @@
                     </div>
                 </div>
 
+                <!-- Course (for course-level exams) -->
+                <div>
+                    <label for="course_id" class="block text-sm font-medium text-gray-700 mb-2">
+                        Course <span class="text-gray-400">(Optional)</span>
+                    </label>
+                    <select name="course_id"
+                            id="course_id"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('course_id') border-red-300 @enderror">
+                        <option value="">Select course</option>
+                    </select>
+                    @error('course_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                    <p class="mt-1 text-sm text-gray-500">For course-level comprehensive exams</p>
+                </div>
+
                 <!-- Academic Year -->
                 <div>
                     <label for="academic_year_id" class="block text-sm font-medium text-gray-700 mb-2">
@@ -271,15 +287,102 @@
                 </div>
             </div>
 
+            <!-- Exam Configuration -->
+            <div class="mt-8">
+                <h4 class="text-lg font-medium text-gray-900 mb-4">Exam Configuration</h4>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Multi-Subject Exam -->
+                    <div class="flex items-center">
+                        <input type="checkbox"
+                               name="is_multi_subject"
+                               id="is_multi_subject"
+                               value="1"
+                               {{ old('is_multi_subject') ? 'checked' : '' }}
+                               class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                        <label for="is_multi_subject" class="ml-2 block text-sm text-gray-900">
+                            Multi-Subject Exam
+                        </label>
+                    </div>
+
+                    <!-- Auto-Load Subjects -->
+                    <div class="flex items-center">
+                        <input type="checkbox"
+                               name="auto_load_subjects"
+                               id="auto_load_subjects"
+                               value="1"
+                               {{ old('auto_load_subjects') ? 'checked' : '' }}
+                               class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                        <label for="auto_load_subjects" class="ml-2 block text-sm text-gray-900">
+                            Auto-Load All Course Subjects
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-blue-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">Exam Configuration Options</h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li><strong>Multi-Subject Exam:</strong> Check this for exams covering multiple subjects</li>
+                                    <li><strong>Auto-Load All Course Subjects:</strong> Automatically include all subjects from the selected class/course</li>
+                                    <li><strong>Single Subject:</strong> Leave both unchecked and select a specific subject for single-subject exams</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Marks Section -->
             <div class="mt-8">
-                <h4 class="text-lg font-medium text-gray-900 mb-4">Marks Distribution</h4>
-                
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-lg font-medium text-gray-900">Marks Distribution</h4>
+                    <button type="button"
+                            id="load-class-marks-btn"
+                            class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            disabled>
+                        <i class="fas fa-calculator mr-2"></i>
+                        Auto-Calculate from All Subjects
+                    </button>
+                </div>
+
+                <!-- Class Marks Summary (Hidden by default) -->
+                <div id="class-marks-summary" class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md" style="display: none;">
+                    <h5 class="text-sm font-medium text-blue-900 mb-2">Class Subjects Summary</h5>
+                    <div id="subjects-list" class="text-sm text-blue-800"></div>
+                    <div class="mt-2 pt-2 border-t border-blue-200">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div>
+                                <span class="font-medium">Total Subjects:</span>
+                                <span id="total-subjects">0</span>
+                            </div>
+                            <div>
+                                <span class="font-medium">Total Marks:</span>
+                                <span id="calculated-total-marks">0</span>
+                            </div>
+                            <div>
+                                <span class="font-medium">Theory Marks:</span>
+                                <span id="calculated-theory-marks">0</span>
+                            </div>
+                            <div>
+                                <span class="font-medium">Practical Marks:</span>
+                                <span id="calculated-practical-marks">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Total Marks -->
                     <div>
                         <label for="total_marks" class="block text-sm font-medium text-gray-700 mb-2">
                             Total Marks <span class="text-red-500">*</span>
+                            <span class="text-xs text-gray-500 font-normal">(Use auto-calculate for class-wide exams)</span>
                         </label>
                         <input type="number" 
                                name="total_marks" 
@@ -420,6 +523,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const practicalMarksInput = document.getElementById('practical_marks');
     const passMarkInput = document.getElementById('pass_mark');
     const loadMarksBtn = document.getElementById('load-marks-btn');
+    const loadClassMarksBtn = document.getElementById('load-class-marks-btn');
+    const classMarksSummary = document.getElementById('class-marks-summary');
 
     // Handle class selection
     classSelect.addEventListener('change', function() {
@@ -447,6 +552,12 @@ document.addEventListener('DOMContentLoaded', function() {
             semesterSelect.removeAttribute('required');
             yearSelect.removeAttribute('required');
         }
+
+        // Enable/disable auto-calculate button
+        loadClassMarksBtn.disabled = !classId;
+
+        // Hide class marks summary when class changes
+        classMarksSummary.style.display = 'none';
 
         // Load subjects for the selected class
         if (classId) {
@@ -521,6 +632,80 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.innerHTML = '<i class="fas fa-download mr-1"></i>Load Marks from Subject';
             });
     });
+
+    // Handle auto-calculate from all subjects button
+    loadClassMarksBtn.addEventListener('click', function() {
+        const classId = classSelect.value;
+        if (!classId) return;
+
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Calculating...';
+
+        fetch(`{{ route('exams.class-marks') }}?class_id=${classId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.subject_count === 0) {
+                    alert('No subjects found for this class. Please add subjects first.');
+                    return;
+                }
+
+                // Update marks inputs
+                totalMarksInput.value = data.total_marks;
+                theoryMarksInput.value = data.total_theory_marks;
+                practicalMarksInput.value = data.total_practical_marks;
+
+                // Calculate suggested pass mark (40% of total)
+                const suggestedPassMark = Math.round(data.total_marks * 0.4);
+                passMarkInput.value = suggestedPassMark;
+
+                // Show summary
+                displayClassMarksSummary(data);
+
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-calculator mr-2"></i>Auto-Calculate from All Subjects';
+            })
+            .catch(error => {
+                console.error('Error loading class marks:', error);
+                alert('Error calculating marks. Please try again.');
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-calculator mr-2"></i>Auto-Calculate from All Subjects';
+            });
+    });
+
+    // Function to display class marks summary
+    function displayClassMarksSummary(data) {
+        const subjectsList = document.getElementById('subjects-list');
+        const totalSubjects = document.getElementById('total-subjects');
+        const calculatedTotalMarks = document.getElementById('calculated-total-marks');
+        const calculatedTheoryMarks = document.getElementById('calculated-theory-marks');
+        const calculatedPracticalMarks = document.getElementById('calculated-practical-marks');
+
+        // Update summary numbers
+        totalSubjects.textContent = data.subject_count;
+        calculatedTotalMarks.textContent = data.total_marks;
+        calculatedTheoryMarks.textContent = data.total_theory_marks;
+        calculatedPracticalMarks.textContent = data.total_practical_marks;
+
+        // Create subjects list
+        let subjectsHtml = '<div class="grid grid-cols-1 md:grid-cols-2 gap-2">';
+        data.subjects.forEach(subject => {
+            subjectsHtml += `
+                <div class="flex justify-between items-center py-1 px-2 bg-white rounded border">
+                    <span class="font-medium">${subject.name} (${subject.code})</span>
+                    <span class="text-sm">
+                        ${subject.theory_marks > 0 ? `T:${subject.theory_marks}` : ''}
+                        ${subject.theory_marks > 0 && subject.practical_marks > 0 ? ' + ' : ''}
+                        ${subject.practical_marks > 0 ? `P:${subject.practical_marks}` : ''}
+                        = ${subject.total_marks}
+                    </span>
+                </div>
+            `;
+        });
+        subjectsHtml += '</div>';
+
+        subjectsList.innerHTML = subjectsHtml;
+        classMarksSummary.style.display = 'block';
+    }
 
     // Validate marks distribution
     function validateMarks() {

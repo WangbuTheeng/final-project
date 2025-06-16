@@ -13,7 +13,7 @@ class Exam extends Model
     protected $fillable = [
         'title',
         'class_id',
-        'subject_id',
+        'course_id', // Added for course-level exams
         'academic_year_id',
         'exam_type',
         'semester',
@@ -22,13 +22,15 @@ class Exam extends Model
         'start_date',
         'end_date',
         'duration_minutes',
-        'total_marks',
-        'theory_marks',
-        'practical_marks',
+        'total_marks', // Auto-calculated from all subjects
+        'theory_marks', // Auto-calculated from all subjects
+        'practical_marks', // Auto-calculated from all subjects
         'pass_mark',
         'venue',
         'instructions',
         'status',
+        'is_multi_subject', // Flag for multi-subject exams
+        'auto_load_subjects', // Flag to auto-load all course subjects
         'created_by'
     ];
 
@@ -40,7 +42,9 @@ class Exam extends Model
         'theory_marks' => 'decimal:2',
         'practical_marks' => 'decimal:2',
         'pass_mark' => 'decimal:2',
-        'duration_minutes' => 'integer'
+        'duration_minutes' => 'integer',
+        'is_multi_subject' => 'boolean',
+        'auto_load_subjects' => 'boolean'
     ];
 
     protected $dates = [
@@ -108,10 +112,13 @@ class Exam extends Model
     }
 
     /**
-     * Get the course through the class relationship
+     * Get the course directly or through the class relationship
      */
     public function course()
     {
+        if ($this->course_id) {
+            return $this->belongsTo(Course::class);
+        }
         return $this->hasOneThrough(Course::class, ClassSection::class, 'id', 'id', 'class_id', 'course_id');
     }
 
@@ -359,7 +366,7 @@ class Exam extends Model
     }
 
     /**
-     * Auto-load marks from subject
+     * Auto-load marks from subject (for single subject exams)
      */
     public function loadMarksFromSubject()
     {
@@ -374,5 +381,68 @@ class Exam extends Model
             $this->total_marks = $subject->total_full_marks;
             $this->pass_mark = $subject->total_pass_marks;
         }
+    }
+
+    /**
+     * Auto-load all subjects for course-based exams
+     */
+    public function autoLoadCourseSubjects()
+    {
+        if (!$this->auto_load_subjects || !$this->class_id) {
+            return;
+        }
+
+        $subjects = Subject::where('class_id', $this->class_id)
+            ->where('is_active', true)
+            ->get();
+
+        $totalTheoryMarks = 0;
+        $totalPracticalMarks = 0;
+
+        foreach ($subjects as $subject) {
+            // Attach subject to exam with default marks
+            $this->subjects()->syncWithoutDetaching([
+                $subject->id => [
+                    'theory_marks' => $subject->full_marks_theory ?? 0,
+                    'practical_marks' => $subject->full_marks_practical ?? 0,
+                    'pass_marks_theory' => $subject->pass_marks_theory ?? 0,
+                    'pass_marks_practical' => $subject->pass_marks_practical ?? 0,
+                    'is_active' => true
+                ]
+            ]);
+
+            $totalTheoryMarks += $subject->full_marks_theory ?? 0;
+            $totalPracticalMarks += $subject->full_marks_practical ?? 0;
+        }
+
+        // Update exam total marks
+        $this->theory_marks = $totalTheoryMarks;
+        $this->practical_marks = $totalPracticalMarks;
+        $this->total_marks = $totalTheoryMarks + $totalPracticalMarks;
+        $this->is_multi_subject = true;
+        $this->save();
+    }
+
+    /**
+     * Calculate total marks from attached subjects
+     */
+    public function calculateTotalMarksFromSubjects()
+    {
+        $totalTheory = $this->subjects()->sum('exam_subjects.theory_marks');
+        $totalPractical = $this->subjects()->sum('exam_subjects.practical_marks');
+
+        $this->theory_marks = $totalTheory;
+        $this->practical_marks = $totalPractical;
+        $this->total_marks = $totalTheory + $totalPractical;
+
+        return $this->total_marks;
+    }
+
+    /**
+     * Get marks for this exam
+     */
+    public function marks()
+    {
+        return $this->hasMany(Mark::class);
     }
 }

@@ -168,6 +168,92 @@ class ClassSection extends Model
         $this->save();
     }
 
+    /**
+     * Get total marks from all subjects in this class
+     */
+    public function getTotalSubjectMarks()
+    {
+        return $this->subjects()
+            ->active()
+            ->get()
+            ->sum(function ($subject) {
+                return $subject->total_full_marks;
+            });
+    }
+
+    /**
+     * Get total theory marks from all subjects in this class
+     */
+    public function getTotalTheoryMarks()
+    {
+        return $this->subjects()
+            ->active()
+            ->sum('full_marks_theory');
+    }
+
+    /**
+     * Get total practical marks from all subjects in this class
+     */
+    public function getTotalPracticalMarks()
+    {
+        return $this->subjects()
+            ->active()
+            ->sum('full_marks_practical');
+    }
+
+    /**
+     * Get total pass marks from all subjects in this class
+     */
+    public function getTotalPassMarks()
+    {
+        return $this->subjects()
+            ->active()
+            ->get()
+            ->sum(function ($subject) {
+                return $subject->total_pass_marks;
+            });
+    }
+
+    /**
+     * Get marks breakdown for all subjects in this class
+     */
+    public function getSubjectMarksBreakdown()
+    {
+        $subjects = $this->subjects()->active()->get();
+
+        $breakdown = [
+            'total_marks' => 0,
+            'total_theory_marks' => 0,
+            'total_practical_marks' => 0,
+            'total_pass_marks' => 0,
+            'subjects' => [],
+            'subject_count' => $subjects->count()
+        ];
+
+        foreach ($subjects as $subject) {
+            $subjectData = [
+                'id' => $subject->id,
+                'name' => $subject->name,
+                'code' => $subject->code,
+                'theory_marks' => $subject->full_marks_theory ?? 0,
+                'practical_marks' => $subject->full_marks_practical ?? 0,
+                'total_marks' => $subject->total_full_marks,
+                'pass_marks' => $subject->total_pass_marks,
+                'is_practical' => $subject->is_practical,
+                'has_theory' => $subject->hasTheoryComponent(),
+                'has_practical' => $subject->hasPracticalComponent(),
+            ];
+
+            $breakdown['subjects'][] = $subjectData;
+            $breakdown['total_marks'] += $subjectData['total_marks'];
+            $breakdown['total_theory_marks'] += $subjectData['theory_marks'];
+            $breakdown['total_practical_marks'] += $subjectData['practical_marks'];
+            $breakdown['total_pass_marks'] += $subjectData['pass_marks'];
+        }
+
+        return $breakdown;
+    }
+
     // Removed the redundant getEnrolledCountAttribute as 'enrolled_count' is a direct column
     // The accessor was aliasing 'current_enrollment' which was not a column.
     // Now 'enrolled_count' is the direct column and should be accessed directly.

@@ -125,6 +125,7 @@ class ExamController extends Controller
         $rules = [
             'title' => ['required', 'string', 'max:255'],
             'class_id' => ['required', 'exists:classes,id'],
+            'course_id' => ['nullable', 'exists:courses,id'],
             'subject_id' => ['nullable', 'exists:subjects,id'],
             'academic_year_id' => ['required', 'exists:academic_years,id'],
             'exam_type' => ['required', 'in:internal,board,practical,midterm,annual,quiz,test,final,assignment'],
@@ -132,12 +133,14 @@ class ExamController extends Controller
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'duration_minutes' => ['required', 'integer', 'min:15', 'max:480'],
-            'total_marks' => ['required', 'numeric', 'min:1', 'max:1000'],
+            'total_marks' => ['nullable', 'numeric', 'min:1', 'max:1000'], // Made nullable for auto-calculation
             'theory_marks' => ['nullable', 'numeric', 'min:0'],
             'practical_marks' => ['nullable', 'numeric', 'min:0'],
             'pass_mark' => ['required', 'numeric', 'min:0'],
             'venue' => ['nullable', 'string', 'max:255'],
             'instructions' => ['nullable', 'string'],
+            'is_multi_subject' => ['nullable', 'boolean'],
+            'auto_load_subjects' => ['nullable', 'boolean'],
             'subjects' => ['nullable', 'array'], // For multi-subject exams
             'subjects.*' => ['exists:subjects,id'],
         ];
@@ -175,6 +178,7 @@ class ExamController extends Controller
                 $exam = Exam::create([
                     'title' => $request->title,
                     'class_id' => $request->class_id,
+                    'course_id' => $request->course_id,
                     'subject_id' => $request->subject_id,
                     'academic_year_id' => $request->academic_year_id,
                     'exam_type' => $request->exam_type,
@@ -191,8 +195,45 @@ class ExamController extends Controller
                     'venue' => $request->venue,
                     'instructions' => $request->instructions,
                     'status' => 'scheduled',
+                    'is_multi_subject' => $request->boolean('is_multi_subject'),
+                    'auto_load_subjects' => $request->boolean('auto_load_subjects'),
                     'created_by' => Auth::id(),
                 ]);
+
+                // Auto-load all subjects for course if requested
+                if ($request->boolean('auto_load_subjects')) {
+                    $exam->autoLoadCourseSubjects();
+                }
+                // If this is a class-wide exam (no specific subject), attach all subjects from the class
+                elseif (!$request->filled('subject_id')) {
+                    $classSubjects = Subject::where('class_id', $request->class_id)
+                        ->active()
+                        ->get();
+
+                    $totalTheoryMarks = 0;
+                    $totalPracticalMarks = 0;
+
+                    foreach ($classSubjects as $subject) {
+                        $exam->examSubjects()->create([
+                            'subject_id' => $subject->id,
+                            'theory_marks' => $subject->full_marks_theory ?? 0,
+                            'practical_marks' => $subject->full_marks_practical ?? 0,
+                            'pass_marks_theory' => $subject->pass_marks_theory ?? 0,
+                            'pass_marks_practical' => $subject->pass_marks_practical ?? 0,
+                            'is_active' => true,
+                        ]);
+
+                        $totalTheoryMarks += $subject->full_marks_theory ?? 0;
+                        $totalPracticalMarks += $subject->full_marks_practical ?? 0;
+                    }
+
+                    // Update exam total marks
+                    $exam->theory_marks = $totalTheoryMarks;
+                    $exam->practical_marks = $totalPracticalMarks;
+                    $exam->total_marks = $totalTheoryMarks + $totalPracticalMarks;
+                    $exam->is_multi_subject = true;
+                    $exam->save();
+                }
 
                 // If subjects are provided, attach them to the exam
                 if ($request->filled('subjects')) {
@@ -231,10 +272,21 @@ class ExamController extends Controller
     public function show(Exam $exam)
     {
         // Check if user has permission to view exams
-        $this->authorize('view-exams');
-        
-        $exam->load('course');
-        return view('exams.show', compact('exam'));
+        $this->authorize('manage-exams');
+
+        $exam->load(['class.course.faculty', 'subject', 'academicYear', 'creator', 'grades.student.user']);
+
+        // Get exam statistics
+        $stats = [
+            'total_enrolled' => $exam->getEnrolledStudentsCount(),
+            'total_graded' => $exam->getGradedStudentsCount(),
+            'average_score' => $exam->getAverageScore(),
+            'pass_rate' => $exam->getPassRate(),
+            'highest_score' => $exam->grades()->max('score') ?? 0,
+            'lowest_score' => $exam->grades()->min('score') ?? 0,
+        ];
+
+        return view('exams.show', compact('exam', 'stats'));
     }
 
     /**
@@ -245,11 +297,21 @@ class ExamController extends Controller
      */
     public function edit(Exam $exam)
     {
-        // Check if user has permission to edit exams
-        $this->authorize('edit-exams');
-        
-        $courses = Course::all();
-        return view('exams.edit', compact('exam', 'courses'));
+        $this->authorize('manage-exams');
+
+        $exam->load(['class.course', 'subject', 'academicYear']);
+
+        $academicYears = AcademicYear::active()->orderBy('name')->get();
+        $classes = ClassSection::with(['course.faculty', 'academicYear'])
+            ->active()
+            ->orderBy('name')
+            ->get();
+
+        $examTypes = Exam::getExamTypes();
+
+        return view('exams.edit', compact(
+            'exam', 'academicYears', 'classes', 'examTypes'
+        ));
     }
 
     /**
@@ -261,38 +323,89 @@ class ExamController extends Controller
      */
     public function update(Request $request, Exam $exam)
     {
-        // Check if user has permission to edit exams
-        $this->authorize('edit-exams');
-        
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'course_id' => ['required', 'exists:courses,id'],
-            'total_marks' => ['required', 'numeric', 'min:0'],
+        $this->authorize('manage-exams');
+
+        // Get the selected class to determine organization type
+        $selectedClass = ClassSection::find($request->class_id);
+        $isSemesterBased = $selectedClass && $selectedClass->course->organization_type === 'semester';
+
+        $rules = [
+            'title' => ['required', 'string', 'max:255'],
+            'class_id' => ['required', 'exists:classes,id'],
+            'subject_id' => ['nullable', 'exists:subjects,id'],
+            'academic_year_id' => ['required', 'exists:academic_years,id'],
+            'exam_type' => ['required', 'in:internal,board,practical,midterm,annual,quiz,test,final,assignment'],
+            'exam_date' => ['required', 'date'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'duration_minutes' => ['required', 'integer', 'min:15', 'max:480'],
+            'total_marks' => ['required', 'numeric', 'min:1', 'max:1000'],
             'theory_marks' => ['nullable', 'numeric', 'min:0'],
             'practical_marks' => ['nullable', 'numeric', 'min:0'],
-            'passing_marks' => ['required', 'numeric', 'min:0', 'lte:total_marks'],
-        ]);
+            'pass_mark' => ['required', 'numeric', 'min:0'],
+            'venue' => ['nullable', 'string', 'max:255'],
+            'instructions' => ['nullable', 'string'],
+            'status' => ['required', 'in:scheduled,ongoing,completed,cancelled'],
+        ];
 
-        // Ensure theory + practical marks = total marks if both are provided
+        // Add conditional validation for semester/year
+        if ($isSemesterBased) {
+            $rules['semester'] = ['required', 'integer', 'min:1', 'max:8'];
+        } else {
+            $rules['year'] = ['required', 'integer', 'min:1', 'max:4'];
+        }
+
+        $request->validate($rules);
+
+        // Validate marks distribution
         if ($request->filled('theory_marks') && $request->filled('practical_marks')) {
             $totalCalculated = $request->theory_marks + $request->practical_marks;
-            if ($totalCalculated != $request->total_marks) {
+            if (abs($totalCalculated - $request->total_marks) > 0.01) {
                 return redirect()->back()
                     ->with('error', 'Theory marks + practical marks must equal total marks')
                     ->withInput();
             }
         }
 
-        $exam->name = $request->name;
-        $exam->course_id = $request->course_id;
-        $exam->total_marks = $request->total_marks;
-        $exam->theory_marks = $request->theory_marks;
-        $exam->practical_marks = $request->practical_marks;
-        $exam->passing_marks = $request->passing_marks;
-        $exam->save();
+        // Validate pass mark doesn't exceed total marks
+        if ($request->pass_mark > $request->total_marks) {
+            return redirect()->back()
+                ->with('error', 'Pass mark cannot exceed total marks')
+                ->withInput();
+        }
 
-        return redirect()->route('exams.index')
-            ->with('success', 'Exam updated successfully.');
+        try {
+            DB::transaction(function () use ($request, $exam, $isSemesterBased) {
+                $exam->update([
+                    'title' => $request->title,
+                    'class_id' => $request->class_id,
+                    'subject_id' => $request->subject_id,
+                    'academic_year_id' => $request->academic_year_id,
+                    'exam_type' => $request->exam_type,
+                    'semester' => $isSemesterBased ? $request->semester : null,
+                    'year' => $isSemesterBased ? null : $request->year,
+                    'exam_date' => $request->exam_date,
+                    'start_date' => $request->start_date,
+                    'end_date' => $request->end_date,
+                    'duration_minutes' => $request->duration_minutes,
+                    'total_marks' => $request->total_marks,
+                    'theory_marks' => $request->theory_marks,
+                    'practical_marks' => $request->practical_marks,
+                    'pass_mark' => $request->pass_mark,
+                    'venue' => $request->venue,
+                    'instructions' => $request->instructions,
+                    'status' => $request->status,
+                ]);
+            });
+
+            return redirect()->route('exams.show', $exam)
+                ->with('success', 'Exam updated successfully.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error updating exam: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -488,5 +601,27 @@ class ExamController extends Controller
             'has_theory' => $subject->hasTheoryComponent(),
             'has_practical' => $subject->hasPracticalComponent(),
         ]);
+    }
+
+    /**
+     * Get class marks breakdown for auto-loading (AJAX)
+     */
+    public function getClassMarks(Request $request)
+    {
+        $classId = $request->input('class_id');
+
+        if (!$classId) {
+            return response()->json([]);
+        }
+
+        $class = ClassSection::find($classId);
+
+        if (!$class) {
+            return response()->json([]);
+        }
+
+        $breakdown = $class->getSubjectMarksBreakdown();
+
+        return response()->json($breakdown);
     }
 }

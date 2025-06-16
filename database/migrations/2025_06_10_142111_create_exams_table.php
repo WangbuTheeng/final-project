@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('venue')->nullable();
             $table->text('instructions')->nullable();
             $table->enum('status', ['scheduled', 'ongoing', 'completed', 'cancelled'])->default('scheduled');
+            $table->foreignId('grading_system_id')->nullable()->constrained('grading_systems')->onDelete('set null');
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->timestamps();
 

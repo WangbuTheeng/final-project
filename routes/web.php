@@ -16,9 +16,14 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\BulkMarksController;
 use App\Http\Controllers\GradeController;
+use App\Http\Controllers\MarkController;
+use App\Http\Controllers\MarksheetController;
+use App\Http\Controllers\ResultController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\GlobalSearchController;
+use App\Http\Controllers\CollegeSettingController;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -30,6 +35,43 @@ Route::get('/', function () {
 // Test route for testing Tailwind and Alpine.js
 Route::get('/test', function() {
     return view('test');
+});
+
+// Test route for college settings
+Route::get('/test-college-settings', function() {
+    $settings = \App\Models\CollegeSetting::getSettings();
+    return response()->json($settings);
+});
+
+// Test route to create/update college settings
+Route::get('/test-update-college-settings', function() {
+    $settings = \App\Models\CollegeSetting::getSettings();
+
+    $updated = $settings->update([
+        'college_name' => 'Bajra International College',
+        'college_address' => 'Kathmandu, Nepal',
+        'college_website' => 'www.bajracollege.edu.np',
+        'college_phone' => '+977-1-4444444',
+        'college_email' => 'info@bajracollege.edu.np',
+        'marksheet_settings' => [
+            'show_logo' => true,
+            'show_signatures' => true,
+            'show_issue_date' => true,
+            'show_grading_scale' => false,
+            'show_qr_code' => false,
+            'watermark_text' => 'OFFICIAL'
+        ]
+    ]);
+
+    return response()->json([
+        'updated' => $updated,
+        'settings' => $settings->fresh()
+    ]);
+});
+
+// Test form for college settings
+Route::get('/test-form-college-settings', function() {
+    return view('test-college-settings');
 });
 
 Auth::routes();
@@ -73,6 +115,13 @@ Route::middleware(['auth'])->group(function () {
             ->name('academic-years.set-current');
         Route::put('academic-years/{academicYear}/set-active', [AcademicYearController::class, 'setActive'])
             ->name('academic-years.set-active');
+    });
+
+    // College Settings Routes
+    Route::middleware(['permission:manage-settings'])->group(function () {
+        Route::get('college-settings', [CollegeSettingController::class, 'index'])->name('college-settings.index');
+        Route::put('college-settings', [CollegeSettingController::class, 'update'])->name('college-settings.update');
+        Route::post('college-settings/delete-file', [CollegeSettingController::class, 'deleteFile'])->name('college-settings.delete-file');
     });
 
     // Faculty Routes
@@ -168,6 +217,18 @@ Route::middleware(['auth'])->group(function () {
             ->name('exams.subjects.by-class');
         Route::get('exams/subject-marks', [ExamController::class, 'getSubjectMarks'])
             ->name('exams.subject-marks');
+        Route::get('exams/class-marks', [ExamController::class, 'getClassMarks'])
+            ->name('exams.class-marks');
+    });
+
+    // Bulk Marks Entry Routes
+    Route::middleware(['permission:manage-exams'])->group(function () {
+        Route::get('bulk-marks', [BulkMarksController::class, 'index'])
+            ->name('bulk-marks.index');
+        Route::get('bulk-marks/create', [BulkMarksController::class, 'create'])
+            ->name('bulk-marks.create');
+        Route::post('bulk-marks', [BulkMarksController::class, 'store'])
+            ->name('bulk-marks.store');
     });
 
     // Grade Routes (temporarily without permission middleware for testing)
@@ -184,6 +245,38 @@ Route::middleware(['auth'])->group(function () {
         ->name('grades.student-report');
     Route::get('grades/subjects/by-class', [GradeController::class, 'getSubjects'])
         ->name('grades.subjects.by-class');
+
+    // Marks Entry Routes
+    Route::middleware(['permission:manage-exams'])->group(function () {
+        Route::get('marks', [MarkController::class, 'index'])->name('marks.index');
+        Route::post('marks/search', [MarkController::class, 'search'])->name('marks.search');
+        // Redirect GET requests to marks/search back to marks index
+        Route::get('marks/search', function() {
+            return redirect()->route('marks.index')->with('info', 'Please use the search form to find exams for marks entry.');
+        });
+        Route::post('marks/bulk-store', [MarkController::class, 'storeBulk'])->name('marks.store-bulk');
+        Route::get('marks/classes-by-course', [MarkController::class, 'getClassesByCourse'])->name('marks.classes-by-course');
+        Route::get('marks/exams-by-class', [MarkController::class, 'getExamsByClass'])->name('marks.exams-by-class');
+    });
+
+    // Marksheet Generation Routes
+    Route::middleware(['permission:manage-exams'])->group(function () {
+        Route::get('marksheets', [MarksheetController::class, 'index'])->name('marksheets.index');
+        Route::get('marksheets/exam/{exam}/student/{student}', [MarksheetController::class, 'generate'])->name('marksheets.generate');
+        Route::get('marksheets/exam/{exam}/student/{student}/pdf', [MarksheetController::class, 'generatePdf'])->name('marksheets.generate-pdf');
+        Route::get('marksheets/exam/{exam}/bulk', [MarksheetController::class, 'generateBulk'])->name('marksheets.bulk');
+        Route::get('marksheets/students-by-exam', [MarksheetController::class, 'getStudentsByExam'])->name('marksheets.students-by-exam');
+    });
+
+    // Result Management Routes
+    Route::middleware(['permission:manage-exams'])->group(function () {
+        Route::get('results', [ResultController::class, 'index'])->name('results.index');
+        Route::get('results/exam/{exam}/generate', [ResultController::class, 'generate'])->name('results.generate');
+        Route::get('results/exam/{exam}/pdf', [ResultController::class, 'generatePdf'])->name('results.generate-pdf');
+        Route::get('results/exam/{exam}/student/{student}/marksheet', [ResultController::class, 'studentMarksheet'])->name('results.student-marksheet');
+        Route::get('results/exam/{exam}/student/{student}/marksheet/pdf', [ResultController::class, 'studentMarksheetPdf'])->name('results.student-marksheet-pdf');
+        Route::post('results/exam/{exam}/bulk-generate', [ResultController::class, 'bulkGenerate'])->name('results.bulk-generate');
+    });
     
     // Finance Routes
     Route::middleware(['permission:view-finances'])->prefix('finance')->name('finance.')->group(function () {

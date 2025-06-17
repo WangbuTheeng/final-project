@@ -12,7 +12,7 @@ use App\Models\AcademicYear;
 use App\Models\CollegeSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Barryvdh\DomPDF\Facade\Pdf;
+use PDF;
 
 class ResultController extends Controller
 {
@@ -129,7 +129,7 @@ class ResultController extends Controller
             return redirect()->back()->with('error', 'No results found for this exam.');
         }
 
-        $pdf = Pdf::loadView('results.pdf', $data);
+        $pdf = \PDF::loadView('results.pdf', $data);
         $pdf->setPaper('A4', 'landscape'); // Landscape for better table display
 
         $filename = sprintf(
@@ -199,7 +199,7 @@ class ResultController extends Controller
             return redirect()->back()->with('error', 'No marks found for this student.');
         }
 
-        $pdf = Pdf::loadView('results.student-marksheet-pdf', $data);
+        $pdf = \PDF::loadView('results.student-marksheet-pdf', $data);
         $pdf->setPaper('A4', 'portrait');
 
         $filename = sprintf(
@@ -358,7 +358,7 @@ class ResultController extends Controller
             return redirect()->back()->with('error', 'No marks found for selected students.');
         }
 
-        $pdf = Pdf::loadView('results.bulk-marksheets-pdf', compact('results', 'exam'));
+        $pdf = \PDF::loadView('results.bulk-marksheets-pdf', compact('results', 'exam'));
         $pdf->setPaper('A4', 'portrait');
 
         $filename = sprintf(

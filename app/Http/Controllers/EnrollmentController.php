@@ -274,9 +274,9 @@ class EnrollmentController extends Controller
 
         $currentAcademicYear = AcademicYear::current();
         $academicYears = AcademicYear::where('is_active', true)->get();
-        $departments = Department::active()->get();
+        $faculties = Faculty::active()->get();
 
-        return view('enrollments.bulk-create', compact('academicYears', 'departments', 'currentAcademicYear'));
+        return view('enrollments.bulk-create', compact('academicYears', 'faculties', 'currentAcademicYear'));
     }
 
     /**
@@ -288,54 +288,56 @@ class EnrollmentController extends Controller
 
         $request->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
-            'department_id' => 'required|exists:departments,id',
-            'level' => 'required|in:100,200,300,400,500',
-            'course_ids' => 'required|array',
-            'course_ids.*' => 'exists:courses,id',
+            'faculty_id' => 'required|exists:faculties,id',
+            'class_ids' => 'required|array',
+            'class_ids.*' => 'exists:classes,id',
             'enrollment_date' => 'required|date'
         ]);
 
         try {
             DB::beginTransaction();
 
-            // Get students for the department and level
-            $students = Student::active()
-                ->where('department_id', $request->department_id)
-                ->where('current_level', $request->level)
-                ->get();
-
-            if ($students->isEmpty()) {
-                return back()->with('error', 'No active students found for the selected department and level.');
-            }
-
             $enrollmentCount = 0;
             $errors = [];
+            $enrolledStudents = [];
 
-            foreach ($students as $student) {
-                foreach ($request->course_ids as $courseId) {
-                    $course = Course::find($courseId);
-                    
-                    // Find available class for this course
-                    $class = ClassSection::where('course_id', $courseId)
-                        ->where('academic_year_id', $request->academic_year_id)
-                        ->where('status', 'active')
-                        ->first();
+            foreach ($request->class_ids as $classId) {
+                $class = ClassSection::with(['course', 'enrollments.student'])->findOrFail($classId);
 
-                    if (!$class) {
-                        $errors[] = "No active class found for course {$course->code}";
-                        continue;
-                    }
+                // Get students already enrolled in this class to avoid duplicates
+                $alreadyEnrolledStudentIds = $class->enrollments()
+                    ->where('academic_year_id', $request->academic_year_id)
+                    ->where('status', 'enrolled')
+                    ->pluck('student_id')
+                    ->toArray();
 
-                    // Check if student can enroll
-                    if (!$student->canEnrollInCourse($course, $request->academic_year_id, $class->semester)) {
-                        $errors[] = "Student {$student->admission_number} cannot enroll in {$course->code}";
-                        continue;
-                    }
+                // Get all active students from the faculty (through departments or directly)
+                $students = Student::active()
+                    ->where('faculty_id', $request->faculty_id)
+                    ->whereNotIn('id', $alreadyEnrolledStudentIds)
+                    ->get();
 
+                if ($students->isEmpty()) {
+                    $errors[] = "No eligible students found for class {$class->name} ({$class->course->code})";
+                    continue;
+                }
+
+                foreach ($students as $student) {
                     // Check class capacity
-                    if ($class->current_enrollment >= $class->capacity) {
-                        $errors[] = "Class for {$course->code} is at full capacity";
-                        continue;
+                    if ($class->enrolled_count >= $class->capacity) {
+                        $errors[] = "Class {$class->name} ({$class->course->code}) is at full capacity";
+                        break;
+                    }
+
+                    // Check if student can enroll (basic validation)
+                    $existingEnrollment = Enrollment::where('student_id', $student->id)
+                        ->where('class_id', $classId)
+                        ->where('academic_year_id', $request->academic_year_id)
+                        ->where('status', 'enrolled')
+                        ->exists();
+
+                    if ($existingEnrollment) {
+                        continue; // Skip if already enrolled
                     }
 
                     // Create enrollment
@@ -343,22 +345,23 @@ class EnrollmentController extends Controller
                         'student_id' => $student->id,
                         'class_id' => $class->id,
                         'academic_year_id' => $request->academic_year_id,
-                        'semester' => $class->semester,
+                        'semester' => $class->semester ?? 1,
                         'enrollment_date' => $request->enrollment_date,
                         'status' => 'enrolled'
                     ]);
 
                     $enrollmentCount++;
+                    $enrolledStudents[] = $student->admission_number;
                 }
             }
 
             DB::commit();
 
-            $message = "Successfully enrolled {$enrollmentCount} student-course combinations.";
+            $message = "Successfully enrolled {$enrollmentCount} students in " . count($request->class_ids) . " class(es).";
             if (!empty($errors)) {
-                $message .= " Errors: " . implode(', ', array_slice($errors, 0, 5));
-                if (count($errors) > 5) {
-                    $message .= " and " . (count($errors) - 5) . " more.";
+                $message .= " Issues: " . implode(', ', array_slice($errors, 0, 3));
+                if (count($errors) > 3) {
+                    $message .= " and " . (count($errors) - 3) . " more.";
                 }
             }
 

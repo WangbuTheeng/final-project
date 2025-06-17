@@ -91,12 +91,21 @@ class Grade extends Model
     }
 
     /**
-     * Calculate letter grade based on score
+     * Calculate letter grade based on score using exam's grading system
      */
     public function calculateLetterGrade()
     {
         $percentage = ($this->score / $this->max_score) * 100;
 
+        // Use exam's grading system if available
+        if ($this->exam) {
+            $gradeScale = $this->exam->getGradeByPercentage($percentage);
+            if ($gradeScale) {
+                return $gradeScale->grade_letter;
+            }
+        }
+
+        // Fallback to default grading logic
         if ($percentage >= 80) {
             return 'A';
         } elseif ($percentage >= 70) {
@@ -113,10 +122,21 @@ class Grade extends Model
     }
 
     /**
-     * Calculate grade point based on letter grade
+     * Calculate grade point based on letter grade using exam's grading system
      */
     public function calculateGradePoint()
     {
+        $percentage = ($this->score / $this->max_score) * 100;
+
+        // Use exam's grading system if available
+        if ($this->exam) {
+            $gradeScale = $this->exam->getGradeByPercentage($percentage);
+            if ($gradeScale) {
+                return $gradeScale->grade_point;
+            }
+        }
+
+        // Fallback to default grade points
         $gradePoints = [
             'A' => 5.0,
             'B' => 4.0,

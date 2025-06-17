@@ -8,7 +8,7 @@ use App\Models\Student;
 use App\Models\Mark;
 use App\Models\CollegeSetting;
 use App\Models\GradeScale;
-use Barryvdh\DomPDF\Facade\Pdf;
+use PDF;
 
 class MarksheetController extends Controller
 {
@@ -51,8 +51,8 @@ class MarksheetController extends Controller
         $totalMaximum = $marks->sum('total_marks');
         $overallPercentage = $totalMaximum > 0 ? ($totalObtained / $totalMaximum) * 100 : 0;
 
-        // Determine overall grade
-        $overallGrade = GradeScale::getGradeByPercentage($overallPercentage);
+        // Determine overall grade using exam's grading system
+        $overallGrade = $exam->getGradeByPercentage($overallPercentage);
 
         // Calculate GPA (credit-weighted)
         $totalCredits = 0;
@@ -84,6 +84,9 @@ class MarksheetController extends Controller
             $resultStatus = 'THIRD DIVISION';
         }
 
+        // Get the grading system for this exam
+        $gradingSystem = $exam->getEffectiveGradingSystem();
+
         $data = [
             'exam' => $exam,
             'student' => $student,
@@ -95,6 +98,7 @@ class MarksheetController extends Controller
             'gpa' => $gpa,
             'resultStatus' => $resultStatus,
             'collegeSettings' => $collegeSettings,
+            'gradingSystem' => $gradingSystem,
         ];
 
         return view('marksheets.template', $data);
@@ -121,7 +125,7 @@ class MarksheetController extends Controller
         $totalObtained = $marks->sum('obtained_marks');
         $totalMaximum = $marks->sum('total_marks');
         $overallPercentage = $totalMaximum > 0 ? ($totalObtained / $totalMaximum) * 100 : 0;
-        $overallGrade = GradeScale::getGradeByPercentage($overallPercentage);
+        $overallGrade = $exam->getGradeByPercentage($overallPercentage);
 
         // Calculate GPA
         $totalCredits = 0;
@@ -148,6 +152,9 @@ class MarksheetController extends Controller
             $resultStatus = 'THIRD DIVISION';
         }
 
+        // Get the grading system for this exam
+        $gradingSystem = $exam->getEffectiveGradingSystem();
+
         $data = [
             'exam' => $exam,
             'student' => $student,
@@ -159,9 +166,10 @@ class MarksheetController extends Controller
             'gpa' => $gpa,
             'resultStatus' => $resultStatus,
             'collegeSettings' => $collegeSettings,
+            'gradingSystem' => $gradingSystem,
         ];
 
-        $pdf = Pdf::loadView('marksheets.pdf', $data);
+        $pdf = \PDF::loadView('marksheets.pdf', $data);
         $pdf->setPaper('A4', 'portrait');
 
         $filename = sprintf(

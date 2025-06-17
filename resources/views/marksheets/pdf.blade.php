@@ -300,41 +300,38 @@
 
         <!-- Grading Scale -->
         @if($collegeSettings->marksheet_settings['show_grading_scale'] ?? false)
-            <div style="margin: 20px 0; padding: 15px; border: 1px solid #d1d5db; border-radius: 5px; background-color: #f9fafb;">
-                <h4 style="font-size: 12px; font-weight: bold; margin-bottom: 10px; text-align: center;">Grading Scale for {{ ucfirst($exam->exam_type) }} Examination</h4>
-                <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
-                    <thead>
-                        <tr style="background-color: #e5e7eb;">
-                            <th style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">Grade</th>
-                            <th style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">Percentage Range</th>
-                            <th style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">Grade Points</th>
-                            <th style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">Remarks</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                            $gradeScales = [
-                                ['grade' => 'A+', 'min' => 90, 'max' => 100, 'points' => 4.0, 'remarks' => 'Outstanding'],
-                                ['grade' => 'A', 'min' => 80, 'max' => 89, 'points' => 3.6, 'remarks' => 'Excellent'],
-                                ['grade' => 'B+', 'min' => 70, 'max' => 79, 'points' => 3.2, 'remarks' => 'Very Good'],
-                                ['grade' => 'B', 'min' => 60, 'max' => 69, 'points' => 2.8, 'remarks' => 'Good'],
-                                ['grade' => 'C+', 'min' => 50, 'max' => 59, 'points' => 2.4, 'remarks' => 'Satisfactory'],
-                                ['grade' => 'C', 'min' => 40, 'max' => 49, 'points' => 2.0, 'remarks' => 'Acceptable'],
-                                ['grade' => 'D', 'min' => 32, 'max' => 39, 'points' => 1.6, 'remarks' => 'Partially Acceptable'],
-                                ['grade' => 'F', 'min' => 0, 'max' => 31, 'points' => 0.0, 'remarks' => 'Fail'],
-                            ];
-                        @endphp
-                        @foreach($gradeScales as $scale)
-                            <tr>
-                                <td style="border: 1px solid #d1d5db; padding: 4px; text-align: center; font-weight: bold;">{{ $scale['grade'] }}</td>
-                                <td style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">{{ $scale['min'] }}% - {{ $scale['max'] }}%</td>
-                                <td style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">{{ $scale['points'] }}</td>
-                                <td style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">{{ $scale['remarks'] }}</td>
+            @php
+                $gradingSystem = $exam->getEffectiveGradingSystem();
+                $gradeScales = $gradingSystem ? $gradingSystem->gradeScales : collect();
+            @endphp
+
+            @if($gradeScales->count() > 0)
+                <div style="margin: 20px 0; padding: 15px; border: 1px solid #d1d5db; border-radius: 5px; background-color: #f9fafb;">
+                    <h4 style="font-size: 12px; font-weight: bold; margin-bottom: 10px; text-align: center;">
+                        Grading Scale: {{ $gradingSystem->name ?? 'Default System' }} ({{ ucfirst($exam->exam_type) }} Examination)
+                    </h4>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+                        <thead>
+                            <tr style="background-color: #e5e7eb;">
+                                <th style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">Grade</th>
+                                <th style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">Percentage Range</th>
+                                <th style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">Grade Points</th>
+                                <th style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">Remarks</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            @foreach($gradeScales as $scale)
+                                <tr>
+                                    <td style="border: 1px solid #d1d5db; padding: 4px; text-align: center; font-weight: bold;">{{ $scale->grade_letter }}</td>
+                                    <td style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">{{ number_format($scale->min_percent, 1) }}% - {{ number_format($scale->max_percent, 1) }}%</td>
+                                    <td style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">{{ number_format($scale->grade_point, 2) }}</td>
+                                    <td style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">{{ $scale->description ?: '-' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         @endif
 
         <!-- Signatures -->

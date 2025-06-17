@@ -106,10 +106,21 @@ class Mark extends Model
     }
 
     /**
-     * Determine grade based on percentage
+     * Determine grade based on percentage using exam's grading system
      */
     public function determineGrade()
     {
+        // Use exam's grading system if available
+        if ($this->exam) {
+            $gradeScale = $this->exam->getGradeByPercentage($this->percentage);
+            if ($gradeScale) {
+                $this->grade_letter = $gradeScale->grade_letter;
+                $this->grade_point = $gradeScale->grade_point;
+                return $gradeScale;
+            }
+        }
+
+        // Fallback to default grading system
         $gradeScale = GradeScale::where('min_percent', '<=', $this->percentage)
             ->where('max_percent', '>=', $this->percentage)
             ->where('status', 'active')

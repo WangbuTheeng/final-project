@@ -124,6 +124,15 @@ Route::middleware(['auth'])->group(function () {
         Route::post('college-settings/delete-file', [CollegeSettingController::class, 'deleteFile'])->name('college-settings.delete-file');
     });
 
+    // Grading System Routes
+    Route::middleware(['permission:manage-settings'])->group(function () {
+        Route::resource('grading-systems', App\Http\Controllers\GradingSystemController::class);
+        Route::patch('grading-systems/{gradingSystem}/set-default', [App\Http\Controllers\GradingSystemController::class, 'setDefault'])
+            ->name('grading-systems.set-default');
+        Route::patch('grading-systems/{gradingSystem}/toggle-status', [App\Http\Controllers\GradingSystemController::class, 'toggleStatus'])
+            ->name('grading-systems.toggle-status');
+    });
+
     // Faculty Routes
     Route::middleware(['permission:manage-settings'])->group(function () {
         Route::resource('faculties', FacultyController::class);
@@ -192,11 +201,16 @@ Route::middleware(['auth'])->group(function () {
 
     // Enrollment Management Routes
     Route::middleware(['permission:manage-enrollments'])->group(function () {
-        Route::resource('enrollments', EnrollmentController::class)->except(['edit', 'update']);
+        // Bulk enrollment routes must come before resource routes to avoid conflicts
         Route::get('enrollments/bulk-create', [EnrollmentController::class, 'bulkCreate'])
             ->name('enrollments.bulk-create');
         Route::post('enrollments/bulk-store', [EnrollmentController::class, 'bulkStore'])
             ->name('enrollments.bulk-store');
+
+        // Resource routes
+        Route::resource('enrollments', EnrollmentController::class)->except(['edit', 'update']);
+
+        // Additional enrollment routes
         Route::post('enrollments/{enrollment}/drop', [EnrollmentController::class, 'drop'])
             ->name('enrollments.drop');
 
@@ -303,3 +317,26 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/get-course-type', [ClassSectionController::class, 'getCourseType'])->name('getCourseType');
+
+// Debug route
+Route::get('/debug/api-test', function() {
+    return view('debug.api-test');
+})->middleware('auth');
+
+
+
+// AJAX API routes for enrollment (moved from api.php to avoid CSRF issues)
+Route::middleware(['auth'])->prefix('api')->group(function () {
+    Route::get('/courses', [App\Http\Controllers\Api\EnrollmentApiController::class, 'getCourses']);
+    Route::get('/students', [App\Http\Controllers\Api\EnrollmentApiController::class, 'getStudents']);
+    Route::get('/classes/by-courses', [App\Http\Controllers\Api\EnrollmentApiController::class, 'getClassesByCourses']);
+    Route::get('/classes/available', [App\Http\Controllers\Api\EnrollmentApiController::class, 'getAvailableClasses']);
+    Route::get('/enrollment/eligibility', [App\Http\Controllers\Api\EnrollmentApiController::class, 'checkEligibility']);
+    Route::get('/enrollment/stats', [App\Http\Controllers\Api\EnrollmentApiController::class, 'getEnrollmentStats']);
+    Route::get('/faculties', [App\Http\Controllers\Api\EnrollmentApiController::class, 'getFaculties']);
+    Route::get('/courses-by-faculty', [App\Http\Controllers\Api\EnrollmentApiController::class, 'getCoursesByFaculty']);
+
+    // Course and Class creation endpoints
+    Route::post('/courses', [App\Http\Controllers\Api\EnrollmentApiController::class, 'createCourse']);
+    Route::post('/classes', [App\Http\Controllers\Api\EnrollmentApiController::class, 'createClass']);
+});

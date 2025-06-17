@@ -10,6 +10,7 @@ class GradeScale extends Model
     use HasFactory;
 
     protected $fillable = [
+        'grading_system_id',
         'grade_letter',
         'grade_point',
         'min_percent',
@@ -25,6 +26,14 @@ class GradeScale extends Model
         'max_percent' => 'decimal:2',
         'order_sequence' => 'integer'
     ];
+
+    /**
+     * Get the grading system this grade scale belongs to
+     */
+    public function gradingSystem()
+    {
+        return $this->belongsTo(GradingSystem::class);
+    }
 
     /**
      * Scope for active grade scales
@@ -43,14 +52,19 @@ class GradeScale extends Model
     }
 
     /**
-     * Get grade by percentage
+     * Get grade by percentage for a specific grading system
      */
-    public static function getGradeByPercentage($percentage)
+    public static function getGradeByPercentage($percentage, $gradingSystemId = null)
     {
-        return static::active()
+        $query = static::active()
             ->where('min_percent', '<=', $percentage)
-            ->where('max_percent', '>=', $percentage)
-            ->first();
+            ->where('max_percent', '>=', $percentage);
+
+        if ($gradingSystemId) {
+            $query->where('grading_system_id', $gradingSystemId);
+        }
+
+        return $query->first();
     }
 
     /**

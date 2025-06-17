@@ -98,13 +98,14 @@ class ExamController extends Controller
             ->get();
 
         $examTypes = Exam::getExamTypes();
+        $gradingSystems = \App\Models\GradingSystem::getActiveOptions();
 
         // Pre-select class if provided
         $selectedClass = $request->filled('class_id') ?
             ClassSection::find($request->class_id) : null;
 
         return view('exams.create', compact(
-            'academicYears', 'classes', 'examTypes', 'selectedClass'
+            'academicYears', 'classes', 'examTypes', 'gradingSystems', 'selectedClass'
         ));
     }
 
@@ -192,6 +193,7 @@ class ExamController extends Controller
                     'theory_marks' => $request->theory_marks,
                     'practical_marks' => $request->practical_marks,
                     'pass_mark' => $request->pass_mark,
+                    'grading_system_id' => $request->grading_system_id,
                     'venue' => $request->venue,
                     'instructions' => $request->instructions,
                     'status' => 'scheduled',
@@ -343,6 +345,7 @@ class ExamController extends Controller
             'theory_marks' => ['nullable', 'numeric', 'min:0'],
             'practical_marks' => ['nullable', 'numeric', 'min:0'],
             'pass_mark' => ['required', 'numeric', 'min:0'],
+            'grading_system_id' => ['nullable', 'exists:grading_systems,id'],
             'venue' => ['nullable', 'string', 'max:255'],
             'instructions' => ['nullable', 'string'],
             'status' => ['required', 'in:scheduled,ongoing,completed,cancelled'],

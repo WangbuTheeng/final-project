@@ -31,6 +31,7 @@ class Exam extends Model
         'status',
         'is_multi_subject', // Flag for multi-subject exams
         'auto_load_subjects', // Flag to auto-load all course subjects
+        'grading_system_id', // Grading system for this exam
         'created_by'
     ];
 
@@ -75,6 +76,14 @@ class Exam extends Model
     public function academicYear()
     {
         return $this->belongsTo(AcademicYear::class);
+    }
+
+    /**
+     * Get the grading system for this exam
+     */
+    public function gradingSystem()
+    {
+        return $this->belongsTo(GradingSystem::class);
     }
 
     /**
@@ -363,6 +372,29 @@ class Exam extends Model
             'final' => 'Final Exam',
             'assignment' => 'Assignment'
         ];
+    }
+
+    /**
+     * Get the effective grading system (exam's grading system or default)
+     */
+    public function getEffectiveGradingSystem()
+    {
+        return $this->gradingSystem ?: GradingSystem::getDefault();
+    }
+
+    /**
+     * Get grade by percentage using exam's grading system
+     */
+    public function getGradeByPercentage($percentage)
+    {
+        $gradingSystem = $this->getEffectiveGradingSystem();
+
+        if ($gradingSystem) {
+            return $gradingSystem->getGradeByPercentage($percentage);
+        }
+
+        // Fallback to old method if no grading system
+        return GradeScale::getGradeByPercentage($percentage);
     }
 
     /**

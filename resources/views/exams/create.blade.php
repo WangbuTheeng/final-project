@@ -163,8 +163,8 @@
                     <label for="exam_type" class="block text-sm font-medium text-gray-700 mb-2">
                         Exam Type <span class="text-red-500">*</span>
                     </label>
-                    <select name="exam_type" 
-                            id="exam_type" 
+                    <select name="exam_type"
+                            id="exam_type"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('exam_type') border-red-300 @enderror"
                             required>
                         <option value="">Select exam type</option>
@@ -177,6 +177,27 @@
                     @error('exam_type')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
+                </div>
+
+                <!-- Grading System -->
+                <div>
+                    <label for="grading_system_id" class="block text-sm font-medium text-gray-700 mb-2">
+                        Grading System <span class="text-gray-400">(Optional)</span>
+                    </label>
+                    <select name="grading_system_id"
+                            id="grading_system_id"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('grading_system_id') border-red-300 @enderror">
+                        <option value="">Use default grading system</option>
+                        @foreach($gradingSystems as $gradingSystem)
+                            <option value="{{ $gradingSystem->id }}" {{ old('grading_system_id') == $gradingSystem->id ? 'selected' : '' }}>
+                                {{ $gradingSystem->formatted_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('grading_system_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                    <p class="mt-1 text-sm text-gray-500">Choose a specific grading system for this exam</p>
                 </div>
 
                 <!-- Semester (for semester-based courses) -->

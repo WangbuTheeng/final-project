@@ -43,12 +43,12 @@
         <!-- Academic Structure -->
         @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Teacher'))
         <li>
-            <div x-data="{ open: {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*') ? 'true' : 'false' }} }" class="space-y-1">
+            <div x-data="{ open: {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'true' : 'false' }} }" class="space-y-1">
                 <button
                     @click="open = !open"
-                    class="{{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}
+                    class="{{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}
                 >
-                    <i class="fas fa-university mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                    <i class="fas fa-university mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                     <span class="flex-1 text-left">Academic Structure</span>
                     <i class="fas transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                 </button>
@@ -60,7 +60,7 @@
                      x-transition:leave-start="transform opacity-100 translate-y-0"
                      x-transition:leave-end="transform opacity-0 -translate-y-2"
                      class="pl-12 space-y-1"
-                     {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*') ? '' : 'style="display: none;"' }}>
+                     {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? '' : 'style="display: none;"' }}>
                     <a href="{{ route('academic-years.index') }}" class="{{ request()->routeIs('academic-years.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('academic-years.*') ? 'style=background-color:#37a2bc;' : '' }}>
                         <i class="fas fa-calendar-alt mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('academic-years.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                         Academic Years
@@ -97,6 +97,11 @@
                     <a href="{{ route('college-settings.index') }}" class="{{ request()->routeIs('college-settings.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('college-settings.*') ? 'style=background-color:#37a2bc;' : '' }}>
                         <i class="fas fa-cog mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('college-settings.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                         College Settings
+                    </a>
+
+                    <a href="{{ route('grading-systems.index') }}" class="{{ request()->routeIs('grading-systems.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('grading-systems.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-graduation-cap mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('grading-systems.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Grading Systems
                     </a>
                     @endif
                 </div>

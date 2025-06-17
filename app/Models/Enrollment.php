@@ -265,6 +265,30 @@ class Enrollment extends Model
     }
 
     /**
+     * Check if student has participated in any exam for this enrollment
+     */
+    public function hasParticipatedInExam()
+    {
+        return $this->marks()->exists();
+    }
+
+    /**
+     * Get student's CGPA
+     */
+    public function getCgpa()
+    {
+        return $this->student->cgpa ?? 0.00;
+    }
+
+    /**
+     * Get marks relationship
+     */
+    public function marks()
+    {
+        return $this->hasMany(Mark::class);
+    }
+
+    /**
      * Get status badge color for UI
      */
     public function getStatusBadgeColorAttribute()

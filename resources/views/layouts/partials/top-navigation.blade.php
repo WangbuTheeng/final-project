@@ -1,12 +1,12 @@
 <!-- Top Navigation Bar -->
-<div class="sticky top-0 z-10 flex h-16 bg-white shadow-sm border-b border-gray-200">
+<div class="sticky top-0 z-30 flex h-16 bg-white/95 backdrop-blur-xl shadow-soft-lg border-b border-gray-200/50">
     <button
         type="button"
-        class="px-4 text-gray-500 hover:text-teal-600 hover:bg-gray-50 transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500 lg:hidden"
+        class="px-4 text-gray-500 hover:text-brand hover:bg-brand/5 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand/20 lg:hidden rounded-lg mx-2 my-2"
         @click="sidebarOpen = true"
     >
         <span class="sr-only">Open sidebar</span>
-        <i class="fas fa-bars"></i>
+        <i class="fas fa-bars text-lg"></i>
     </button>
 
     <div class="flex justify-between flex-1 px-6">
@@ -43,10 +43,7 @@
                        @keydown.arrow-down.prevent="navigateDown()"
                        @keydown.arrow-up.prevent="navigateUp()"
                        @focus="showSuggestions = true"
-                       class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 text-sm"
-                       style="--tw-ring-color: #37a2bc; --tw-border-opacity: 1; border-color: rgb(209 213 219);"
-                       onfocus="this.style.borderColor='#37a2bc'; this.style.boxShadow='0 0 0 1px #37a2bc';"
-                       onblur="setTimeout(() => { if (!this.closest('[x-data]').__x.$data.showSuggestions) { this.style.borderColor='rgb(209 213 219)'; this.style.boxShadow='none'; } }, 200);"
+                       class="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl leading-5 bg-white/80 backdrop-blur-sm placeholder-gray-400 focus:outline-none focus:placeholder-gray-300 focus:ring-2 focus:ring-brand/20 focus:border-brand/30 text-sm font-medium shadow-soft-sm transition-all duration-200"
                        placeholder="Search users, students, courses... (Ctrl+K)"
                        autocomplete="off">
 
@@ -143,19 +140,19 @@
         </div>
 
         <!-- Right side items -->
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-3">
             <!-- Notifications -->
             <div class="relative">
-                <button class="p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 rounded-lg" style="--tw-ring-color: #37a2bc;" onfocus="this.style.boxShadow='0 0 0 2px #37a2bc';" onblur="this.style.boxShadow='none';">
-                    <i class="fas fa-bell text-lg"></i>
-                    <span class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white" style="background-color: #37a2bc;"></span>
+                <button class="p-3 text-gray-400 hover:text-brand hover:bg-brand/5 focus:outline-none focus:ring-2 focus:ring-brand/20 rounded-xl transition-all duration-200 group">
+                    <i class="fas fa-bell text-lg group-hover:animate-bounce-gentle"></i>
+                    <span class="absolute top-2 right-2 block h-2.5 w-2.5 bg-gradient-to-r from-red-400 to-red-500 rounded-full ring-2 ring-white shadow-sm animate-pulse"></span>
                 </button>
             </div>
 
             <!-- Settings -->
             <div class="relative">
-                <button class="p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 rounded-lg" style="--tw-ring-color: #37a2bc;" onfocus="this.style.boxShadow='0 0 0 2px #37a2bc';" onblur="this.style.boxShadow='none';">
-                    <i class="fas fa-cog text-lg"></i>
+                <button class="p-3 text-gray-400 hover:text-brand hover:bg-brand/5 focus:outline-none focus:ring-2 focus:ring-brand/20 rounded-xl transition-all duration-200 group">
+                    <i class="fas fa-cog text-lg group-hover:rotate-90 transition-transform duration-300"></i>
                 </button>
             </div>
 
@@ -163,39 +160,67 @@
             <div class="relative" x-data="{ open: false }">
                 <button
                     type="button"
-                    class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2"
-                    style="--tw-ring-color: #37a2bc;"
-                    onfocus="this.style.boxShadow='0 0 0 2px #37a2bc';"
-                    onblur="this.style.boxShadow='none';"
+                    class="flex items-center space-x-3 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 bg-white/80 backdrop-blur-sm border border-gray-200/50 px-3 py-2 hover:bg-white hover:shadow-soft-md transition-all duration-200 group"
                     @click="open = !open"
                 >
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white" style="background-color: #37a2bc;">
-                        <span class="font-medium text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                    <div class="w-8 h-8 bg-gradient-to-br from-brand to-brand-dark rounded-lg flex items-center justify-center text-white shadow-soft-sm group-hover:scale-105 transition-transform duration-200">
+                        <span class="font-semibold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
                     </div>
+                    <div class="hidden sm:block text-left">
+                        <p class="text-sm font-medium text-gray-700 group-hover:text-gray-900">{{ Auth::user()->name }}</p>
+                        <p class="text-xs text-gray-500">
+                            @if(auth()->user()->hasRole('Super Admin'))
+                                Super Admin
+                            @elseif(auth()->user()->hasRole('Admin'))
+                                Admin
+                            @elseif(auth()->user()->hasRole('Teacher'))
+                                Teacher
+                            @elseif(auth()->user()->hasRole('Examiner'))
+                                Examiner
+                            @elseif(auth()->user()->hasRole('Accountant'))
+                                Accountant
+                            @else
+                                User
+                            @endif
+                        </p>
+                    </div>
+                    <i class="fas fa-chevron-down text-xs text-gray-400 group-hover:text-gray-600 transition-all duration-200" :class="{ 'rotate-180': open }"></i>
                 </button>
 
                 <div
                     x-show="open"
-                    x-transition:enter="transition ease-out duration-100"
-                    x-transition:enter-start="transform opacity-0 scale-95"
-                    x-transition:enter-end="transform opacity-100 scale-100"
-                    x-transition:leave="transition ease-in duration-75"
-                    x-transition:leave-start="transform opacity-100 scale-100"
-                    x-transition:leave-end="transform opacity-0 scale-95"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="transform opacity-0 scale-95 translate-y-1"
+                    x-transition:enter-end="transform opacity-100 scale-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="transform opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="transform opacity-0 scale-95 translate-y-1"
                     @click.away="open = false"
-                    class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+                    class="origin-top-right absolute right-0 mt-3 w-56 rounded-xl shadow-soft-xl bg-white/95 backdrop-blur-xl ring-1 ring-gray-200/50 border border-gray-200/50 focus:outline-none"
                     style="display: none;"
                 >
-                    <div class="py-1">
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            Profile
+                    <div class="py-2">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <p class="text-sm font-medium text-gray-900">{{ Auth::user()->name }}</p>
+                            <p class="text-xs text-gray-500">{{ Auth::user()->email }}</p>
+                        </div>
+                        <a href="#" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-brand/5 hover:text-brand transition-all duration-200 group">
+                            <i class="fas fa-user-circle mr-3 text-gray-400 group-hover:text-brand"></i>
+                            My Profile
                         </a>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <a href="#" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-brand/5 hover:text-brand transition-all duration-200 group">
+                            <i class="fas fa-cog mr-3 text-gray-400 group-hover:text-brand"></i>
                             Settings
                         </a>
+                        <a href="#" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-brand/5 hover:text-brand transition-all duration-200 group">
+                            <i class="fas fa-bell mr-3 text-gray-400 group-hover:text-brand"></i>
+                            Notifications
+                        </a>
+                        <div class="border-t border-gray-100 my-1"></div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <button type="submit" class="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 group">
+                                <i class="fas fa-sign-out-alt mr-3 text-red-400 group-hover:text-red-600"></i>
                                 Logout
                             </button>
                         </form>

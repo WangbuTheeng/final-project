@@ -177,16 +177,11 @@ class ReportsController extends Controller
             abort(403, 'Unauthorized access to teacher reports.');
         }
 
-        $faculties = Faculty::orderBy('name')->get();
         $departments = Teacher::distinct()->pluck('department')->filter()->sort();
 
-        $query = Teacher::with(['user', 'faculty', 'classes.course']);
+        $query = Teacher::query();
 
         // Apply filters
-        if ($request->filled('faculty_id')) {
-            $query->where('faculty_id', $request->faculty_id);
-        }
-
         if ($request->filled('department')) {
             $query->where('department', $request->department);
         }
@@ -202,11 +197,11 @@ class ReportsController extends Controller
             'total' => Teacher::count(),
             'active' => Teacher::where('status', 'active')->count(),
             'inactive' => Teacher::where('status', 'inactive')->count(),
-            'avg_classes' => Teacher::withCount('classes')->avg('classes_count') ?? 0,
+            'on_leave' => Teacher::where('status', 'on_leave')->count(),
         ];
 
         return view('reports.teachers', compact(
-            'teachers', 'faculties', 'departments', 'stats'
+            'teachers', 'departments', 'stats'
         ));
     }
 

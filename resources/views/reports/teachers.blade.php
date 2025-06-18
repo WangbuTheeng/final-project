@@ -60,12 +60,12 @@
 
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div class="flex items-center">
-            <div class="p-3 rounded-lg bg-purple-100">
-                <i class="fas fa-chalkboard text-xl text-purple-600"></i>
+            <div class="p-3 rounded-lg bg-yellow-100">
+                <i class="fas fa-user-clock text-xl text-yellow-600"></i>
             </div>
             <div class="ml-4">
-                <p class="text-sm font-medium text-gray-500">Avg Classes</p>
-                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['avg_classes'], 1) }}</p>
+                <p class="text-sm font-medium text-gray-500">On Leave</p>
+                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['on_leave']) }}</p>
             </div>
         </div>
     </div>
@@ -74,19 +74,7 @@
 <!-- Filters -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
     <h3 class="text-lg font-semibold text-gray-900 mb-4">Filter Teachers</h3>
-    <form method="GET" action="{{ route('reports.teachers') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div>
-            <label for="faculty_id" class="block text-sm font-medium text-gray-700 mb-2">Faculty</label>
-            <select name="faculty_id" id="faculty_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                <option value="">All Faculties</option>
-                @foreach($faculties as $faculty)
-                    <option value="{{ $faculty->id }}" {{ request('faculty_id') == $faculty->id ? 'selected' : '' }}>
-                        {{ $faculty->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
+    <form method="GET" action="{{ route('reports.teachers') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
             <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department</label>
             <select name="department" id="department" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
@@ -105,6 +93,8 @@
                 <option value="">All Statuses</option>
                 <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                 <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                <option value="on_leave" {{ request('status') == 'on_leave' ? 'selected' : '' }}>On Leave</option>
+                <option value="terminated" {{ request('status') == 'terminated' ? 'selected' : '' }}>Terminated</option>
             </select>
         </div>
 
@@ -128,9 +118,8 @@
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teacher</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Faculty</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Classes</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Join Date</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -142,11 +131,11 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium" style="background-color: #37a2bc;">
-                                    {{ substr($teacher->user->first_name, 0, 1) }}{{ substr($teacher->user->last_name, 0, 1) }}
+                                    {{ substr($teacher->teacher_name, 0, 2) }}
                                 </div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ $teacher->user->full_name }}</div>
-                                    <div class="text-sm text-gray-500">{{ $teacher->user->email }}</div>
+                                    <div class="text-sm font-medium text-gray-900">{{ $teacher->teacher_name }}</div>
+                                    <div class="text-sm text-gray-500">{{ $teacher->email }}</div>
                                 </div>
                             </div>
                         </td>
@@ -154,26 +143,10 @@
                             {{ $teacher->employee_id ?? 'N/A' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $teacher->faculty->name ?? 'N/A' }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {{ $teacher->department ?? 'N/A' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <div class="flex flex-wrap gap-1">
-                                @forelse($teacher->classes->take(3) as $class)
-                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                        {{ $class->course->title }} - {{ $class->name }}
-                                    </span>
-                                @empty
-                                    <span class="text-gray-500">No classes assigned</span>
-                                @endforelse
-                                @if($teacher->classes->count() > 3)
-                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                                        +{{ $teacher->classes->count() - 3 }} more
-                                    </span>
-                                @endif
-                            </div>
+                            {{ $teacher->position ?? 'N/A' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
@@ -202,7 +175,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
                             <i class="fas fa-chalkboard-teacher text-4xl text-gray-300 mb-4"></i>
                             <p class="text-lg font-medium">No teachers found</p>
                             <p class="text-sm">Try adjusting your filters or add some teachers to get started.</p>
@@ -222,20 +195,20 @@
 
 <!-- Teacher Analytics -->
 <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <!-- Faculty Distribution -->
+    <!-- Department Distribution -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Faculty Distribution</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Department Distribution</h3>
         <div class="space-y-3">
             @php
-                $facultyDistribution = $teachers->groupBy('faculty.name')->map->count()->sortByDesc(function($count) { return $count; });
+                $departmentDistribution = $teachers->groupBy('department')->map->count()->sortByDesc(function($count) { return $count; });
             @endphp
-            @foreach($facultyDistribution as $facultyName => $count)
+            @foreach($departmentDistribution as $departmentName => $count)
                 @php
                     $percentage = $teachers->count() > 0 ? ($count / $teachers->count()) * 100 : 0;
                 @endphp
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-700 w-24 truncate">{{ $facultyName ?? 'Unassigned' }}</span>
+                        <span class="text-sm font-medium text-gray-700 w-24 truncate">{{ $departmentName ?? 'Unassigned' }}</span>
                         <div class="w-32 bg-gray-200 rounded-full h-2">
                             <div class="h-2 rounded-full bg-blue-500" style="width: {{ $percentage }}%"></div>
                         </div>
@@ -248,28 +221,28 @@
         </div>
     </div>
 
-    <!-- Workload Analysis -->
+    <!-- Status Distribution -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Workload Analysis</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Status Distribution</h3>
         <div class="space-y-3">
             @php
-                $workloadRanges = [
-                    '0 classes' => $teachers->filter(function($t) { return $t->classes->count() === 0; })->count(),
-                    '1-2 classes' => $teachers->filter(function($t) { return $t->classes->count() >= 1 && $t->classes->count() <= 2; })->count(),
-                    '3-4 classes' => $teachers->filter(function($t) { return $t->classes->count() >= 3 && $t->classes->count() <= 4; })->count(),
-                    '5+ classes' => $teachers->filter(function($t) { return $t->classes->count() >= 5; })->count(),
+                $statusDistribution = [
+                    'Active' => $teachers->filter(function($t) { return $t->status === 'active'; })->count(),
+                    'Inactive' => $teachers->filter(function($t) { return $t->status === 'inactive'; })->count(),
+                    'On Leave' => $teachers->filter(function($t) { return $t->status === 'on_leave'; })->count(),
+                    'Terminated' => $teachers->filter(function($t) { return $t->status === 'terminated'; })->count(),
                 ];
             @endphp
-            @foreach($workloadRanges as $range => $count)
+            @foreach($statusDistribution as $status => $count)
                 @php
                     $percentage = $teachers->count() > 0 ? ($count / $teachers->count()) * 100 : 0;
-                    $color = $range === '0 classes' ? 'bg-red-500' : 
-                            ($range === '1-2 classes' ? 'bg-yellow-500' : 
-                             ($range === '3-4 classes' ? 'bg-green-500' : 'bg-blue-500'));
+                    $color = $status === 'Active' ? 'bg-green-500' :
+                            ($status === 'Inactive' ? 'bg-gray-500' :
+                             ($status === 'On Leave' ? 'bg-yellow-500' : 'bg-red-500'));
                 @endphp
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-700 w-20">{{ $range }}</span>
+                        <span class="text-sm font-medium text-gray-700 w-20">{{ $status }}</span>
                         <div class="w-32 bg-gray-200 rounded-full h-2">
                             <div class="h-2 rounded-full {{ $color }}" style="width: {{ $percentage }}%"></div>
                         </div>

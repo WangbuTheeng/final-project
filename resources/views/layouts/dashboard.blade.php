@@ -10,131 +10,271 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <!-- Alpine.js (from CDN) -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
+
     <!-- Tailwind CSS (from CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'display': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+                    },
                     colors: {
                         primary: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            200: '#a7f3d0',
-                            300: '#6ee7b7',
-                            400: '#34d399',
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
                             500: '#37a2bc',
-                            600: '#2d8299',
-                            700: '#256b7a',
-                            800: '#1e5661',
-                            900: '#1a4851',
-                            950: '#0f2a30',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                            950: '#082f49',
                         },
-                        'dashboard-bg': '#f3f4f6',
+                        secondary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: {
+                            50: '#fef7ff',
+                            100: '#fceeff',
+                            200: '#f8d4fe',
+                            300: '#f2b1fc',
+                            400: '#e879f9',
+                            500: '#d946ef',
+                            600: '#c026d3',
+                            700: '#a21caf',
+                            800: '#86198f',
+                            900: '#701a75',
+                        },
+                        success: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        warning: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                        },
+                        danger: {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            200: '#fecaca',
+                            300: '#fca5a5',
+                            400: '#f87171',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            800: '#991b1b',
+                            900: '#7f1d1d',
+                        },
+                        'dashboard-bg': '#f8fafc',
                         'brand': '#37a2bc',
                         'brand-light': '#4db3cc',
                         'brand-dark': '#2d8299',
                     },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+                        'mesh-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        'brand-gradient': 'linear-gradient(135deg, #37a2bc 0%, #4db3cc 50%, #2d8299 100%)',
+                        'sidebar-gradient': 'linear-gradient(180deg, #37a2bc 0%, #2d8299 100%)',
+                    },
                     boxShadow: {
-                        'soft-sm': '0 2px 4px 0 rgba(0, 0, 0, 0.05)',
-                        'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
-                        'soft-md': '0 6px 10px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
-                        'soft-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03)',
+                        'soft-xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        'soft-sm': '0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+                        'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04)',
+                        'soft-md': '0 6px 10px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04)',
+                        'soft-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04)',
+                        'soft-xl': '0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                        'soft-2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+                        'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+                        'glow': '0 0 20px rgba(55, 162, 188, 0.3)',
+                        'glow-lg': '0 0 30px rgba(55, 162, 188, 0.4)',
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.2s ease-in-out',
-                        'slide-in-right': 'slideInRight 0.3s ease-in-out',
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'fade-in-up': 'fadeInUp 0.4s ease-out',
+                        'fade-in-down': 'fadeInDown 0.4s ease-out',
+                        'slide-in-right': 'slideInRight 0.3s ease-out',
+                        'slide-in-left': 'slideInLeft 0.3s ease-out',
+                        'scale-in': 'scaleIn 0.2s ease-out',
+                        'bounce-gentle': 'bounceGentle 2s infinite',
+                        'pulse-soft': 'pulseSoft 2s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'shimmer': 'shimmer 2s linear infinite',
                     },
                     keyframes: {
                         fadeIn: {
                             '0%': { opacity: '0' },
                             '100%': { opacity: '1' },
                         },
-                        slideInRight: {
-                            '0%': { transform: 'translateX(100%)' },
-                            '100%': { transform: 'translateX(0)' },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
+                        fadeInDown: {
+                            '0%': { opacity: '0', transform: 'translateY(-20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideInRight: {
+                            '0%': { opacity: '0', transform: 'translateX(100%)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' },
+                        },
+                        slideInLeft: {
+                            '0%': { opacity: '0', transform: 'translateX(-100%)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' },
+                        },
+                        scaleIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.9)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        },
+                        bounceGentle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                        },
+                        pulseSoft: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.8' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200% 0' },
+                            '100%': { backgroundPosition: '200% 0' },
+                        },
+                    },
+                    backdropBlur: {
+                        'xs': '2px',
                     },
                 },
             },
         }
     </script>
 </head>
-<body class="font-sans antialiased" style="background-color: #f3f4f6;">
-    <div class="min-h-screen">
+<body class="font-sans antialiased bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
+    <div class="min-h-screen relative">
+        <!-- Background Pattern -->
+        <div class="fixed inset-0 z-0 opacity-30">
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-purple-50/50"></div>
+            <div class="absolute inset-0" style="background-image: radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);"></div>
+        </div>
+
         <!-- Mobile sidebar backdrop -->
-        <div x-data="{ sidebarOpen: false }">
-            <div 
-                x-show="sidebarOpen" 
-                x-transition:enter="transition-opacity ease-linear duration-300" 
-                x-transition:enter-start="opacity-0" 
-                x-transition:enter-end="opacity-100" 
-                x-transition:leave="transition-opacity ease-linear duration-300" 
-                x-transition:leave-start="opacity-100" 
-                x-transition:leave-end="opacity-0" 
-                class="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 backdrop-blur-sm lg:hidden"
+        <div x-data="{ sidebarOpen: false }" class="relative z-10">
+            <div
+                x-show="sidebarOpen"
+                x-transition:enter="transition-opacity ease-linear duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition-opacity ease-linear duration-300"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm lg:hidden"
                 @click="sidebarOpen = false"
                 style="display: none;"
             ></div>
 
             <!-- Mobile sidebar -->
-            <div 
-                x-show="sidebarOpen" 
-                x-transition:enter="transition ease-in-out duration-300 transform" 
-                x-transition:enter-start="-translate-x-full" 
-                x-transition:enter-end="translate-x-0" 
-                x-transition:leave="transition ease-in-out duration-300 transform" 
-                x-transition:leave-start="translate-x-0" 
-                x-transition:leave-end="-translate-x-full" 
-                class="fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-soft-lg lg:hidden animate-slide-in-right"
+            <div
+                x-show="sidebarOpen"
+                x-transition:enter="transition ease-in-out duration-300 transform"
+                x-transition:enter-start="-translate-x-full"
+                x-transition:enter-end="translate-x-0"
+                x-transition:leave="transition ease-in-out duration-300 transform"
+                x-transition:leave-start="translate-x-0"
+                x-transition:leave-end="-translate-x-full"
+                class="fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl shadow-soft-2xl border-r border-gray-200/50 lg:hidden animate-slide-in-right"
                 style="display: none;"
             >
-                <div class="flex items-center justify-end h-16 px-4 border-b border-gray-100">
-                    <button @click="sidebarOpen = false" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-full transition-colors duration-150 ease-in-out">
+                <div class="flex items-center justify-end h-16 px-4 border-b border-gray-200/50 bg-gradient-to-r from-white/80 to-gray-50/80">
+                    <button @click="sidebarOpen = false" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-white/80 rounded-xl transition-all duration-200 ease-in-out hover:scale-105">
                         <span class="sr-only">Close sidebar</span>
-                        <i class="fas fa-times"></i>
+                        <i class="fas fa-times text-lg"></i>
                     </button>
                 </div>
                 <!-- Mobile sidebar content -->
-                <div class="overflow-y-auto h-[calc(100vh-4rem)] px-1">
+                <div class="overflow-y-auto overflow-x-hidden h-[calc(100vh-4rem)] px-1 bg-gradient-to-b from-white/90 to-gray-50/90">
                     @include('layouts.partials.sidebar-menu')
                 </div>
             </div>
 
             <!-- Static sidebar for desktop -->
-            <div class="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col">
-                <div class="flex flex-col flex-1 min-h-0 bg-white shadow-soft-lg h-full">
-                    <div class="flex flex-col flex-1 overflow-y-auto">
+            <div class="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col z-30">
+                <div class="flex flex-col flex-1 min-h-0 bg-white/95 backdrop-blur-xl shadow-soft-2xl border-r border-gray-200/50 h-full">
+                    <div class="flex flex-col flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-white/90 to-gray-50/90">
                         @include('layouts.partials.sidebar-menu')
                     </div>
                 </div>
             </div>
 
             <!-- Main content -->
-            <div class="lg:pl-72">
+            <div class="lg:pl-72 relative z-20">
                 <!-- Top navigation -->
                 @include('layouts.partials.top-navigation')
 
                 <!-- Main content area -->
-                <main class="p-4 lg:p-8 animate-fade-in" style="background-color: #f3f4f6;">
+                <main class="p-4 lg:p-8 animate-fade-in-up min-h-screen">
                     <!-- Success Messages -->
                     @if(session('success'))
-                    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="mb-6 px-4 py-3 rounded-md bg-green-50 text-green-800 border-l-4 border-green-500 shadow-soft-sm">
+                    <div x-data="{ show: true }"
+                         x-show="show"
+                         x-init="setTimeout(() => show = false, 5000)"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform scale-95"
+                         x-transition:enter-end="opacity-100 transform scale-100"
+                         x-transition:leave="transition ease-in duration-200"
+                         x-transition:leave-start="opacity-100 transform scale-100"
+                         x-transition:leave-end="opacity-0 transform scale-95"
+                         class="mb-6 px-6 py-4 rounded-xl bg-gradient-to-r from-success-50 to-emerald-50 text-success-800 border border-success-200 shadow-soft-lg backdrop-blur-sm">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
-                                <span>{{ session('success') }}</span>
+                                <div class="flex-shrink-0 w-8 h-8 bg-success-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-check text-success-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-success-900">Success!</p>
+                                    <p class="text-sm text-success-700">{{ session('success') }}</p>
+                                </div>
                             </div>
-                            <button @click="show = false" class="text-green-600 hover:text-green-800 ml-4">
-                                <i class="fas fa-times"></i>
+                            <button @click="show = false" class="text-success-600 hover:text-success-800 hover:bg-success-100 p-2 rounded-lg transition-all duration-200">
+                                <i class="fas fa-times text-sm"></i>
                             </button>
                         </div>
                     </div>
@@ -142,14 +282,28 @@
 
                     <!-- Status Messages -->
                     @if(session('status'))
-                    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="mb-6 px-4 py-3 rounded-md bg-green-50 text-green-800 border-l-4 border-green-500 shadow-soft-sm">
+                    <div x-data="{ show: true }"
+                         x-show="show"
+                         x-init="setTimeout(() => show = false, 5000)"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform scale-95"
+                         x-transition:enter-end="opacity-100 transform scale-100"
+                         x-transition:leave="transition ease-in duration-200"
+                         x-transition:leave-start="opacity-100 transform scale-100"
+                         x-transition:leave-end="opacity-0 transform scale-95"
+                         class="mb-6 px-6 py-4 rounded-xl bg-gradient-to-r from-primary-50 to-blue-50 text-primary-800 border border-primary-200 shadow-soft-lg backdrop-blur-sm">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
-                                <span>{{ session('status') }}</span>
+                                <div class="flex-shrink-0 w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-info text-primary-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-primary-900">Information</p>
+                                    <p class="text-sm text-primary-700">{{ session('status') }}</p>
+                                </div>
                             </div>
-                            <button @click="show = false" class="text-green-600 hover:text-green-800 ml-4">
-                                <i class="fas fa-times"></i>
+                            <button @click="show = false" class="text-primary-600 hover:text-primary-800 hover:bg-primary-100 p-2 rounded-lg transition-all duration-200">
+                                <i class="fas fa-times text-sm"></i>
                             </button>
                         </div>
                     </div>
@@ -157,14 +311,27 @@
 
                     <!-- Error Messages -->
                     @if(session('error'))
-                    <div x-data="{ show: true }" x-show="show" class="mb-6 px-4 py-3 rounded-md bg-red-50 text-red-800 border-l-4 border-red-500 shadow-soft-sm">
+                    <div x-data="{ show: true }"
+                         x-show="show"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform scale-95"
+                         x-transition:enter-end="opacity-100 transform scale-100"
+                         x-transition:leave="transition ease-in duration-200"
+                         x-transition:leave-start="opacity-100 transform scale-100"
+                         x-transition:leave-end="opacity-0 transform scale-95"
+                         class="mb-6 px-6 py-4 rounded-xl bg-gradient-to-r from-danger-50 to-red-50 text-danger-800 border border-danger-200 shadow-soft-lg backdrop-blur-sm">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                                <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
-                                <span>{{ session('error') }}</span>
+                                <div class="flex-shrink-0 w-8 h-8 bg-danger-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-exclamation-triangle text-danger-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-danger-900">Error!</p>
+                                    <p class="text-sm text-danger-700">{{ session('error') }}</p>
+                                </div>
                             </div>
-                            <button @click="show = false" class="text-red-600 hover:text-red-800 ml-4">
-                                <i class="fas fa-times"></i>
+                            <button @click="show = false" class="text-danger-600 hover:text-danger-800 hover:bg-danger-100 p-2 rounded-lg transition-all duration-200">
+                                <i class="fas fa-times text-sm"></i>
                             </button>
                         </div>
                     </div>
@@ -172,37 +339,82 @@
 
                     <!-- Warning Messages -->
                     @if(session('warning'))
-                    <div class="mb-6 px-4 py-3 rounded-md bg-yellow-50 text-yellow-800 border-l-4 border-yellow-500 shadow-soft-sm">
-                        <div class="flex items-center">
-                            <i class="fas fa-exclamation-triangle text-yellow-500 mr-3"></i>
-                            <span>{{ session('warning') }}</span>
+                    <div x-data="{ show: true }"
+                         x-show="show"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform scale-95"
+                         x-transition:enter-end="opacity-100 transform scale-100"
+                         class="mb-6 px-6 py-4 rounded-xl bg-gradient-to-r from-warning-50 to-yellow-50 text-warning-800 border border-warning-200 shadow-soft-lg backdrop-blur-sm">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 w-8 h-8 bg-warning-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-exclamation-triangle text-warning-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-warning-900">Warning!</p>
+                                    <p class="text-sm text-warning-700">{{ session('warning') }}</p>
+                                </div>
+                            </div>
+                            <button @click="show = false" class="text-warning-600 hover:text-warning-800 hover:bg-warning-100 p-2 rounded-lg transition-all duration-200">
+                                <i class="fas fa-times text-sm"></i>
+                            </button>
                         </div>
                     </div>
                     @endif
 
                     <!-- Info Messages -->
                     @if(session('info'))
-                    <div class="mb-6 px-4 py-3 rounded-md bg-blue-50 text-blue-800 border-l-4 border-blue-500 shadow-soft-sm">
-                        <div class="flex items-center">
-                            <i class="fas fa-info-circle text-blue-500 mr-3"></i>
-                            <span>{{ session('info') }}</span>
+                    <div x-data="{ show: true }"
+                         x-show="show"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform scale-95"
+                         x-transition:enter-end="opacity-100 transform scale-100"
+                         class="mb-6 px-6 py-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-800 border border-blue-200 shadow-soft-lg backdrop-blur-sm">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-info-circle text-blue-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-blue-900">Information</p>
+                                    <p class="text-sm text-blue-700">{{ session('info') }}</p>
+                                </div>
+                            </div>
+                            <button @click="show = false" class="text-blue-600 hover:text-blue-800 hover:bg-blue-100 p-2 rounded-lg transition-all duration-200">
+                                <i class="fas fa-times text-sm"></i>
+                            </button>
                         </div>
                     </div>
                     @endif
 
                     <!-- Validation Errors -->
                     @if($errors->any())
-                    <div class="mb-6 px-4 py-3 rounded-md bg-red-50 text-red-800 border-l-4 border-red-500 shadow-soft-sm">
-                        <div class="flex items-start">
-                            <i class="fas fa-exclamation-circle text-red-500 mr-3 mt-0.5"></i>
-                            <div>
-                                <p class="font-medium mb-2">Please correct the following errors:</p>
-                                <ul class="list-disc list-inside space-y-1">
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
+                    <div x-data="{ show: true }"
+                         x-show="show"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform scale-95"
+                         x-transition:enter-end="opacity-100 transform scale-100"
+                         class="mb-6 px-6 py-4 rounded-xl bg-gradient-to-r from-danger-50 to-red-50 text-danger-800 border border-danger-200 shadow-soft-lg backdrop-blur-sm">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 w-8 h-8 bg-danger-100 rounded-full flex items-center justify-center mr-4 mt-0.5">
+                                    <i class="fas fa-exclamation-circle text-danger-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-danger-900 mb-2">Please correct the following errors:</p>
+                                    <ul class="space-y-1">
+                                        @foreach($errors->all() as $error)
+                                            <li class="flex items-start">
+                                                <i class="fas fa-circle text-danger-400 text-xs mt-1.5 mr-2 flex-shrink-0"></i>
+                                                <span class="text-sm text-danger-700">{{ $error }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
                             </div>
+                            <button @click="show = false" class="text-danger-600 hover:text-danger-800 hover:bg-danger-100 p-2 rounded-lg transition-all duration-200 flex-shrink-0">
+                                <i class="fas fa-times text-sm"></i>
+                            </button>
                         </div>
                     </div>
                     @endif
@@ -219,6 +431,25 @@
     <!-- Sidebar Enhancement Script -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Ensure sidebar is visible on desktop
+        const desktopSidebar = document.querySelector('.lg\\:fixed.lg\\:inset-y-0.lg\\:flex.lg\\:w-72');
+        if (desktopSidebar) {
+            desktopSidebar.style.display = 'flex';
+            desktopSidebar.style.position = 'fixed';
+            desktopSidebar.style.width = '18rem';
+            desktopSidebar.style.zIndex = '30';
+        }
+
+        // Ensure College CMS header is visible
+        const cmsHeader = document.querySelector('.college-cms-header');
+        if (cmsHeader) {
+            cmsHeader.style.display = 'block';
+            cmsHeader.style.visibility = 'visible';
+            cmsHeader.style.opacity = '1';
+        }
+
+
+
         // Auto-close mobile sidebar when clicking on a link
         const mobileLinks = document.querySelectorAll('.lg\\:hidden a[href]');
         const sidebarToggle = document.querySelector('[x-data] button');
@@ -315,20 +546,43 @@
     <style>
     /* Enhanced sidebar styles */
     .active-menu-item {
-        background-color: #37a2bc !important;
+        background: linear-gradient(135deg, #37a2bc 0%, #4db3cc 100%) !important;
         color: white !important;
-        border-right: 3px solid #37a2bc !important;
+        border-right: 4px solid #37a2bc !important;
+        box-shadow: 0 4px 12px rgba(55, 162, 188, 0.3) !important;
+        transform: translateX(4px) !important;
     }
+
+    /* College CMS Header Styles */
+    .college-cms-header {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        z-index: 10 !important;
+    }
+
+    .college-cms-header h2 {
+        color: white !important;
+        font-weight: bold !important;
+        font-size: 1.125rem !important;
+        text-align: center !important;
+    }
+
+
 
     /* Smooth transitions for all sidebar elements */
     .sidebar-item,
     .group {
-        transition: all 0.2s ease-in-out;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Hover effects */
+    /* Enhanced hover effects */
     .group:hover {
-        transform: translateX(2px);
+        transform: translateX(4px) scale(1.02);
+        background: linear-gradient(135deg, rgba(55, 162, 188, 0.1) 0%, rgba(77, 179, 204, 0.05) 100%);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(55, 162, 188, 0.15);
     }
 
     /* Focus styles for accessibility */
@@ -336,13 +590,18 @@
     a:focus {
         outline: 2px solid #37a2bc;
         outline-offset: 2px;
+        border-radius: 8px;
     }
 
-    /* Loading animation for dynamic content */
+    /* Enhanced loading animation */
     .loading-skeleton {
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background: linear-gradient(90deg,
+            rgba(240, 240, 240, 0.8) 25%,
+            rgba(220, 220, 220, 0.8) 50%,
+            rgba(240, 240, 240, 0.8) 75%);
         background-size: 200% 100%;
-        animation: loading 1.5s infinite;
+        animation: loading 2s ease-in-out infinite;
+        border-radius: 8px;
     }
 
     @keyframes loading {
@@ -350,10 +609,150 @@
         100% { background-position: -200% 0; }
     }
 
+    /* Glass morphism effect */
+    .glass {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Custom scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #37a2bc, #4db3cc);
+        border-radius: 3px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #2d8299, #37a2bc);
+    }
+
+    /* Enhanced card styles */
+    .card-enhanced {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card-enhanced:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Gradient text */
+    .gradient-text {
+        background: linear-gradient(135deg, #37a2bc 0%, #4db3cc 50%, #2d8299 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Floating animation */
+    .float-animation {
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* Pulse glow effect */
+    .pulse-glow {
+        animation: pulse-glow 2s infinite;
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(55, 162, 188, 0.3); }
+        50% { box-shadow: 0 0 30px rgba(55, 162, 188, 0.6); }
+    }
+
     /* Responsive improvements */
     @media (max-width: 1024px) {
         .sidebar-text {
             font-size: 0.875rem;
+        }
+
+        .group:hover {
+            transform: translateX(2px) scale(1.01);
+        }
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 1024px) {
+        .sidebar-text {
+            font-size: 0.875rem;
+        }
+
+        .group:hover {
+            transform: translateX(2px) scale(1.01);
+        }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .card-enhanced {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    }
+
+    /* Ensure sidebar is visible on desktop */
+    @media (min-width: 1024px) {
+        .lg\\:fixed {
+            position: fixed !important;
+        }
+
+        .lg\\:flex {
+            display: flex !important;
+        }
+
+        .lg\\:w-72 {
+            width: 18rem !important;
+        }
+
+        .lg\\:pl-72 {
+            padding-left: 18rem !important;
+        }
+
+        .hidden.lg\\:fixed.lg\\:inset-y-0.lg\\:flex.lg\\:w-72.lg\\:flex-col {
+            display: flex !important;
+            position: fixed !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            width: 18rem !important;
+            flex-direction: column !important;
+            z-index: 30 !important;
+        }
+
+        .college-cms-header {
+            display: block !important;
+            visibility: visible !important;
+        }
+
+
+    }
+
+    /* Print styles */
+    @media print {
+        .sidebar, .top-navigation {
+            display: none !important;
+        }
+
+        .main-content {
+            margin: 0 !important;
+            padding: 0 !important;
         }
     }
     </style>

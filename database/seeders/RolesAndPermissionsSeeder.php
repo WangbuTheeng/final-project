@@ -39,6 +39,8 @@ class RolesAndPermissionsSeeder extends Seeder
             // Teaching Management
             'view-classes', 'create-classes', 'edit-classes', 'assign-homework',
             'grade-assignments', 'view-student-progress',
+            // Reports
+            'view-reports', 'generate-reports', 'export-reports',
             // Settings/Dashboard
             'access-admin-dashboard', 'access-teacher-dashboard', 'access-examiner-dashboard',
             'access-accountant-dashboard', 'manage-settings',
@@ -78,6 +80,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'create-payments', 'verify-payments', 'manage-payments', 'view-financial-reports',
             'manage-expenses', 'approve-expenses',
             'view-classes', 'create-classes', 'edit-classes', 'manage-classes',
+            'view-reports', 'generate-reports', 'export-reports',
             'access-admin-dashboard', 'manage-settings',
         ];
         $adminRole->givePermissionTo($adminPermissions);
@@ -87,6 +90,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-exams', 'create-exams', 'edit-exams', 'delete-exams', 'manage-exams',
             'view-grades', 'create-grades', 'edit-grades', 'delete-grades', 'manage-grades',
             'view-students', 'view-courses',
+            'view-reports', 'generate-reports',
             'access-examiner-dashboard',
         ]);
 
@@ -106,6 +110,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-enrollments', 'manage-enrollments',
             'view-exams', 'create-exams', 'edit-exams', 'manage-exams',
             'view-grades', 'create-grades', 'edit-grades', 'manage-grades',
+            'view-reports',
             'access-teacher-dashboard',
         ]);
 

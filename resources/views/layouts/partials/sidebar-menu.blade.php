@@ -337,35 +337,71 @@
         @endif
 
         <!-- Employee Management -->
-        @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Super Admin'))
-        <li>
-            <div x-data="{ open: false }" class="space-y-1">
-                <button
-                    @click="open = !open"
-                    class="text-gray-700 hover:bg-gray-50 hover:text-teal-600 group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out"
-                >
-                    <i class="fas fa-users mr-3 flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-teal-500"></i>
-                    <span class="flex-1 text-left">Employee Management</span>
-                    <i class="fas transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-                </button>
-            </div>
-        </li>
-        @endif
+      
 
 
 
         <!-- Reports -->
-        @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Super Admin'))
+        @if(auth()->user()->hasRole(['Super Admin', 'Admin']) || auth()->user()->can('view-reports') || auth()->user()->can('view-financial-reports'))
         <li>
-            <div x-data="{ open: false }" class="space-y-1">
+            <div x-data="{ open: {{ request()->routeIs('reports.*') ? 'true' : 'false' }} }" class="space-y-1">
                 <button
                     @click="open = !open"
-                    class="text-gray-700 hover:bg-gray-50 hover:text-teal-600 group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out"
+                    class="{{ request()->routeIs('reports.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('reports.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}
                 >
-                    <i class="fas fa-chart-bar mr-3 flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-teal-500"></i>
+                    <i class="fas fa-chart-bar mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('reports.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                     <span class="flex-1 text-left">Reports</span>
                     <i class="fas transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                 </button>
+                <div x-show="open"
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="transform opacity-0 -translate-y-2"
+                     x-transition:enter-end="transform opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-100"
+                     x-transition:leave-start="transform opacity-100 translate-y-0"
+                     x-transition:leave-end="transform opacity-0 -translate-y-2"
+                     class="pl-12 space-y-1"
+                     {{ request()->routeIs('reports.*') ? '' : 'style="display: none;"' }}>
+
+                    <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.index') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('reports.index') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-tachometer-alt mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('reports.index') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Reports Dashboard
+                    </a>
+
+                    <a href="{{ route('reports.students') }}" class="{{ request()->routeIs('reports.students') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('reports.students') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-user-graduate mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('reports.students') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Student Reports
+                    </a>
+
+                    <a href="{{ route('reports.academic') }}" class="{{ request()->routeIs('reports.academic') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('reports.academic') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-graduation-cap mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('reports.academic') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Academic Reports
+                    </a>
+
+                    <a href="{{ route('reports.teachers') }}" class="{{ request()->routeIs('reports.teachers') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('reports.teachers') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-chalkboard-teacher mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('reports.teachers') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Teacher Reports
+                    </a>
+
+                    <a href="{{ route('reports.enrollments') }}" class="{{ request()->routeIs('reports.enrollments') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('reports.enrollments') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-clipboard-list mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('reports.enrollments') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Enrollment Reports
+                    </a>
+
+                    @can('view-financial-reports')
+                    <a href="{{ route('finance.reports.index') }}" class="{{ request()->routeIs('finance.reports.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('finance.reports.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-chart-pie mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('finance.reports.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Financial Reports
+                    </a>
+                    @endcan
+
+                    @if(auth()->user()->hasRole('Super Admin'))
+                    <a href="{{ route('reports.system') }}" class="{{ request()->routeIs('reports.system') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('reports.system') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-cogs mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('reports.system') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        System Reports
+                    </a>
+                    @endif
+                </div>
             </div>
         </li>
         @endif

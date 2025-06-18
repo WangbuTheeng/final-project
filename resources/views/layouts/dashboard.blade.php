@@ -215,5 +215,147 @@
 
     <!-- Scripts -->
     @stack('scripts')
+
+    <!-- Sidebar Enhancement Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-close mobile sidebar when clicking on a link
+        const mobileLinks = document.querySelectorAll('.lg\\:hidden a[href]');
+        const sidebarToggle = document.querySelector('[x-data] button');
+
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                // Close mobile sidebar
+                if (window.Alpine) {
+                    const sidebarComponent = document.querySelector('[x-data*="sidebarOpen"]');
+                    if (sidebarComponent && sidebarComponent._x_dataStack) {
+                        sidebarComponent._x_dataStack[0].sidebarOpen = false;
+                    }
+                }
+            });
+        });
+
+        // Smooth scrolling for sidebar navigation
+        const sidebarContainer = document.querySelector('.overflow-y-auto');
+        if (sidebarContainer) {
+            sidebarContainer.style.scrollBehavior = 'smooth';
+        }
+
+        // Highlight active menu items
+        const currentPath = window.location.pathname;
+        const menuItems = document.querySelectorAll('a[href]');
+
+        menuItems.forEach(item => {
+            if (item.getAttribute('href') === currentPath) {
+                item.classList.add('active-menu-item');
+            }
+        });
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            // Alt + M to toggle mobile sidebar
+            if (e.altKey && e.key === 'm') {
+                e.preventDefault();
+                if (window.Alpine) {
+                    const sidebarComponent = document.querySelector('[x-data*="sidebarOpen"]');
+                    if (sidebarComponent && sidebarComponent._x_dataStack) {
+                        sidebarComponent._x_dataStack[0].sidebarOpen = !sidebarComponent._x_dataStack[0].sidebarOpen;
+                    }
+                }
+            }
+        });
+
+        // Add tooltips for collapsed sidebar items (future enhancement)
+        const sidebarItems = document.querySelectorAll('.sidebar-item');
+        sidebarItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                // Future: Show tooltip on hover
+            });
+        });
+
+        // Persist sidebar state in localStorage
+        const sidebarState = localStorage.getItem('sidebarState');
+        if (sidebarState) {
+            try {
+                const state = JSON.parse(sidebarState);
+                // Apply saved state to expandable menus
+                Object.keys(state).forEach(key => {
+                    const element = document.querySelector(`[x-data*="${key}"]`);
+                    if (element && element._x_dataStack) {
+                        element._x_dataStack[0].open = state[key];
+                    }
+                });
+            } catch (e) {
+                console.log('Error loading sidebar state:', e);
+            }
+        }
+
+        // Save sidebar state on changes
+        const expandableMenus = document.querySelectorAll('[x-data*="open"]');
+        expandableMenus.forEach(menu => {
+            const button = menu.querySelector('button');
+            if (button) {
+                button.addEventListener('click', function() {
+                    setTimeout(() => {
+                        const state = {};
+                        expandableMenus.forEach(m => {
+                            if (m._x_dataStack && m._x_dataStack[0].hasOwnProperty('open')) {
+                                const key = m.getAttribute('x-data').match(/open:\s*(\w+)/)?.[1] || 'open';
+                                state[key] = m._x_dataStack[0].open;
+                            }
+                        });
+                        localStorage.setItem('sidebarState', JSON.stringify(state));
+                    }, 100);
+                });
+            }
+        });
+    });
+    </script>
+
+    <style>
+    /* Enhanced sidebar styles */
+    .active-menu-item {
+        background-color: #37a2bc !important;
+        color: white !important;
+        border-right: 3px solid #37a2bc !important;
+    }
+
+    /* Smooth transitions for all sidebar elements */
+    .sidebar-item,
+    .group {
+        transition: all 0.2s ease-in-out;
+    }
+
+    /* Hover effects */
+    .group:hover {
+        transform: translateX(2px);
+    }
+
+    /* Focus styles for accessibility */
+    button:focus,
+    a:focus {
+        outline: 2px solid #37a2bc;
+        outline-offset: 2px;
+    }
+
+    /* Loading animation for dynamic content */
+    .loading-skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 1024px) {
+        .sidebar-text {
+            font-size: 0.875rem;
+        }
+    }
+    </style>
 </body>
 </html>

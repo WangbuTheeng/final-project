@@ -24,6 +24,7 @@ use App\Http\Controllers\ResultController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\CollegeSettingController;
+use App\Http\Controllers\ReportsController;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -369,10 +370,25 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/get-course-type', [ClassSectionController::class, 'getCourseType'])->name('getCourseType');
 
+// Reports Routes
+Route::middleware(['auth'])->prefix('reports')->name('reports.')->group(function () {
+    Route::get('/', [ReportsController::class, 'index'])->name('index');
+    Route::get('/students', [ReportsController::class, 'studentReports'])->name('students');
+    Route::get('/academic', [ReportsController::class, 'academicReports'])->name('academic');
+    Route::get('/teachers', [ReportsController::class, 'teacherReports'])->name('teachers');
+    Route::get('/enrollments', [ReportsController::class, 'enrollmentReports'])->name('enrollments');
+    Route::get('/system', [ReportsController::class, 'systemReports'])->name('system');
+    Route::get('/students/export', [ReportsController::class, 'exportStudents'])->name('export-students');
+});
+
 // Debug route
 Route::get('/debug/api-test', function() {
     return view('debug.api-test');
 })->middleware('auth');
+
+
+
+
 
 
 

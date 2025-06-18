@@ -272,17 +272,66 @@
         @endif
 
         <!-- Finance Management -->
-        @if(auth()->user()->hasRole('Accountant') || auth()->user()->hasRole('Super Admin'))
+        @if(auth()->user()->can('view-finances'))
         <li>
-            <div x-data="{ open: false }" class="space-y-1">
+            <div x-data="{ open: {{ request()->routeIs('finance.*') ? 'true' : 'false' }} }" class="space-y-1">
                 <button
                     @click="open = !open"
-                    class="text-gray-700 hover:bg-gray-50 hover:text-teal-600 group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out"
+                    class="{{ request()->routeIs('finance.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-teal-600' }} group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('finance.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}
                 >
-                    <i class="fas fa-money-bill-wave mr-3 flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-teal-500"></i>
+                    <i class="fas fa-money-bill-wave mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('finance.*') ? 'text-white' : 'text-gray-400 group-hover:text-teal-500' }}"></i>
                     <span class="flex-1 text-left">Finance Management</span>
                     <i class="fas transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                 </button>
+                <div x-show="open"
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="transform opacity-0 -translate-y-2"
+                     x-transition:enter-end="transform opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-100"
+                     x-transition:leave-start="transform opacity-100 translate-y-0"
+                     x-transition:leave-end="transform opacity-0 -translate-y-2"
+                     class="pl-12 space-y-1"
+                     {{ request()->routeIs('finance.*') ? '' : 'style="display: none;"' }}>
+
+                    <a href="{{ route('finance.dashboard') }}" class="{{ request()->routeIs('finance.dashboard') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('finance.dashboard') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-tachometer-alt mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('finance.dashboard') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Dashboard
+                    </a>
+
+                    <a href="{{ route('finance.fees.index') }}" class="{{ request()->routeIs('finance.fees.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('finance.fees.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-tags mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('finance.fees.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Fee Management
+                    </a>
+
+                    <a href="{{ route('finance.invoices.index') }}" class="{{ request()->routeIs('finance.invoices.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('finance.invoices.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-file-invoice mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('finance.invoices.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Invoices
+                    </a>
+
+                    <a href="{{ route('finance.payments.index') }}" class="{{ request()->routeIs('finance.payments.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('finance.payments.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-credit-card mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('finance.payments.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Payments
+                    </a>
+
+                    @can('manage-salaries')
+                    <a href="{{ route('finance.teachers.index') }}" class="{{ request()->routeIs('finance.teachers.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('finance.teachers.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-chalkboard-teacher mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('finance.teachers.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Teachers
+                    </a>
+
+                    <a href="{{ route('finance.salaries.index') }}" class="{{ request()->routeIs('finance.salaries.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('finance.salaries.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-money-check-alt mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('finance.salaries.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Salary Payments
+                    </a>
+                    @endcan
+
+                    @can('view-financial-reports')
+                    <a href="{{ route('finance.reports.index') }}" class="{{ request()->routeIs('finance.reports.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('finance.reports.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-chart-line mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('finance.reports.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Reports
+                    </a>
+                    @endcan
+                </div>
             </div>
         </li>
         @endif
@@ -303,21 +352,7 @@
         </li>
         @endif
 
-        <!-- Salary Management -->
-        @if(auth()->user()->hasRole('Accountant') || auth()->user()->hasRole('Super Admin'))
-        <li>
-            <div x-data="{ open: false }" class="space-y-1">
-                <button
-                    @click="open = !open"
-                    class="text-gray-700 hover:bg-gray-50 hover:text-teal-600 group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out"
-                >
-                    <i class="fas fa-money-check-alt mr-3 flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-teal-500"></i>
-                    <span class="flex-1 text-left">Salary Management</span>
-                    <i class="fas transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-                </button>
-            </div>
-        </li>
-        @endif
+
 
         <!-- Reports -->
         @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Super Admin'))

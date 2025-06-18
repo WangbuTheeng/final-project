@@ -1,0 +1,92 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        // Add course_id column if it doesn't exist
+        if (!Schema::hasColumn('fees', 'course_id')) {
+            Schema::table('fees', function (Blueprint $table) {
+                $table->foreignId('course_id')->nullable()->constrained('courses')->onDelete('cascade')->after('amount');
+            });
+        }
+
+        // Drop old indexes if they exist (skip if they don't exist or are used by foreign keys)
+        try {
+            Schema::table('fees', function (Blueprint $table) {
+                if (Schema::hasColumn('fees', 'semester')) {
+                    $table->dropIndex('fees_academic_year_id_semester_is_active_index');
+                }
+            });
+        } catch (\Exception $e) {
+            // Index might not exist or be used by foreign key, continue
+        }
+
+        try {
+            Schema::table('fees', function (Blueprint $table) {
+                if (Schema::hasColumn('fees', 'level')) {
+                    $table->dropIndex('fees_department_id_level_index');
+                }
+            });
+        } catch (\Exception $e) {
+            // Index might not exist, continue
+        }
+
+        // Remove old columns if they exist
+        Schema::table('fees', function (Blueprint $table) {
+            if (Schema::hasColumn('fees', 'semester')) {
+                $table->dropColumn('semester');
+            }
+            if (Schema::hasColumn('fees', 'study_mode')) {
+                $table->dropColumn('study_mode');
+            }
+            if (Schema::hasColumn('fees', 'level')) {
+                $table->dropColumn('level');
+            }
+        });
+
+        // Add new indexes
+        Schema::table('fees', function (Blueprint $table) {
+            $table->index(['academic_year_id', 'is_active']);
+            $table->index(['course_id', 'department_id']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        // Drop new indexes
+        Schema::table('fees', function (Blueprint $table) {
+            $table->dropIndex(['academic_year_id', 'is_active']);
+            $table->dropIndex(['course_id', 'department_id']);
+        });
+
+        // Remove course_id column
+        Schema::table('fees', function (Blueprint $table) {
+            $table->dropForeign(['course_id']);
+            $table->dropColumn('course_id');
+        });
+
+        // Add back old columns
+        Schema::table('fees', function (Blueprint $table) {
+            $table->integer('level')->nullable()->after('department_id');
+            $table->enum('study_mode', ['full_time', 'part_time', 'distance', 'all'])->default('all')->after('level');
+            $table->enum('semester', ['first', 'second', 'both'])->default('both')->after('academic_year_id');
+        });
+
+        // Restore old indexes
+        Schema::table('fees', function (Blueprint $table) {
+            $table->index(['academic_year_id', 'semester', 'is_active']);
+            $table->index(['department_id', 'level']);
+        });
+    }
+};

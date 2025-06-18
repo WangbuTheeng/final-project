@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('content')
 <div class="space-y-6">
@@ -9,11 +9,13 @@
             <p class="mt-1 text-sm text-gray-500">Manage student invoices and billing records</p>
         </div>
         <div class="mt-4 sm:mt-0">
-            <a href="{{ route('invoices.create') }}"
-               class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
+            @can('create-invoices')
+            <a href="{{ route('finance.invoices.create') }}"
+               class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 <i class="fas fa-plus mr-2"></i>
                 Create Invoice
             </a>
+            @endcan
         </div>
     </div>
 
@@ -114,7 +116,7 @@
     <!-- Filters -->
     <div class="bg-white shadow-sm rounded-lg border border-gray-200">
         <div class="px-6 py-4">
-            <form method="GET" action="{{ route('invoices.index') }}" class="grid grid-cols-1 md:grid-cols-6 gap-4">
+            <form method="GET" action="{{ route('finance.invoices.index') }}" class="grid grid-cols-1 md:grid-cols-6 gap-4">
                 <!-- Search -->
                 <div class="md:col-span-2">
                     <input type="text"
@@ -160,7 +162,7 @@
                         <i class="fas fa-search mr-1"></i>
                         Filter
                     </button>
-                    <a href="{{ route('invoices.index') }}"
+                    <a href="{{ route('finance.invoices.index') }}"
                        class="px-4 py-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                         <i class="fas fa-times"></i>
                     </a>
@@ -298,39 +300,19 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex items-center justify-end space-x-2">
-                                        <a href="{{ route('invoices.show', $invoice) }}"
-                                           class="action-btn text-primary-600 hover:text-primary-900 p-1 rounded-md hover:bg-primary-50"
+                                        <a href="{{ route('finance.invoices.show', $invoice) }}"
+                                           class="action-btn text-blue-600 hover:text-blue-900 p-1 rounded-md hover:bg-blue-50"
                                            title="View Invoice">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('invoices.edit', $invoice) }}"
-                                           class="action-btn text-yellow-600 hover:text-yellow-900 p-1 rounded-md hover:bg-yellow-50"
-                                           title="Edit Invoice">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        @if($invoice->status !== 'paid')
-                                            <a href="{{ route('invoices.payment', $invoice) }}"
+                                        @if($invoice->status !== 'paid' && $invoice->status !== 'cancelled')
+                                            @can('create-payments')
+                                            <a href="{{ route('finance.payments.create', ['invoice_id' => $invoice->id]) }}"
                                                class="action-btn text-green-600 hover:text-green-900 p-1 rounded-md hover:bg-green-50"
                                                title="Record Payment">
                                                 <i class="fas fa-dollar-sign"></i>
                                             </a>
-                                        @endif
-                                        <a href="{{ route('invoices.download', $invoice) }}"
-                                           class="action-btn text-blue-600 hover:text-blue-900 p-1 rounded-md hover:bg-blue-50"
-                                           title="Download PDF">
-                                            <i class="fas fa-download"></i>
-                                        </a>
-                                        @if($invoice->status !== 'paid')
-                                            <form method="POST" action="{{ route('invoices.destroy', $invoice) }}" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                        class="action-btn text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50"
-                                                        title="Delete Invoice"
-                                                        onclick="return confirm('Are you sure you want to delete this invoice?')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            @endcan
                                         @endif
                                     </div>
                                 </td>
@@ -355,11 +337,13 @@
                 <h3 class="mt-2 text-sm font-medium text-gray-900">No invoices found</h3>
                 <p class="mt-1 text-sm text-gray-500">Get started by creating your first invoice.</p>
                 <div class="mt-6">
-                    <a href="{{ route('invoices.create') }}"
-                       class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    @can('create-invoices')
+                    <a href="{{ route('finance.invoices.create') }}"
+                       class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
                         <i class="fas fa-plus mr-2"></i>
                         Create First Invoice
                     </a>
+                    @endcan
                 </div>
             </div>
         @endif

@@ -294,6 +294,9 @@ Route::middleware(['auth'])->group(function () {
     
     // Finance Routes
     Route::middleware(['permission:view-finances'])->prefix('finance')->name('finance.')->group(function () {
+        // Dashboard
+        Route::get('/', [FinanceController::class, 'dashboard'])->name('dashboard');
+
         // Fee Routes
         Route::get('/fees', [FinanceController::class, 'indexFees'])->name('fees.index');
         Route::get('/fees/create', [FinanceController::class, 'createFee'])->name('fees.create')->middleware('permission:manage-fees');
@@ -308,11 +311,59 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/invoices/create', [FinanceController::class, 'createInvoice'])->name('invoices.create')->middleware('permission:create-invoices');
         Route::post('/invoices', [FinanceController::class, 'storeInvoice'])->name('invoices.store')->middleware('permission:create-invoices');
         Route::get('/invoices/{invoice}', [FinanceController::class, 'showInvoice'])->name('invoices.show');
-        Route::post('/invoices/{invoice}/payment', [FinanceController::class, 'processPayment'])->name('invoices.payment')->middleware('permission:process-payments');
+        Route::get('/invoices/{invoice}/print', [FinanceController::class, 'printInvoice'])->name('invoices.print');
+        Route::post('/invoices/{invoice}/status', [FinanceController::class, 'updateInvoiceStatus'])->name('invoices.update-status')->middleware('permission:manage-invoices');
+        Route::get('/get-applicable-fees', [FinanceController::class, 'getApplicableFees'])->name('get-applicable-fees');
+        Route::get('/get-student-courses-classes', [FinanceController::class, 'getStudentCoursesAndClasses'])->name('get-student-courses-classes');
+        Route::get('/get-student-invoices', [FinanceController::class, 'getStudentInvoices'])->name('get-student-invoices');
+        Route::get('/get-student-outstanding-balance', [FinanceController::class, 'getStudentOutstandingBalance'])->name('get-student-outstanding-balance');
 
-        // Fee Statement Routes
-        Route::get('/statements/student/{student}', [FinanceController::class, 'studentFeeStatement'])->name('statements.student');
-        Route::get('/statements/student/{student}/pdf', [FinanceController::class, 'generateFeeStatementPDF'])->name('statements.student.pdf');
+        // Payment Routes
+        Route::get('/payments', [FinanceController::class, 'indexPayments'])->name('payments.index');
+        Route::get('/payments/create', [FinanceController::class, 'createPayment'])->name('payments.create')->middleware('permission:create-payments');
+        Route::post('/payments', [FinanceController::class, 'storePayment'])->name('payments.store')->middleware('permission:create-payments');
+        Route::get('/payments/{payment}', [FinanceController::class, 'showPayment'])->name('payments.show');
+        Route::post('/payments/{payment}/verify', [FinanceController::class, 'verifyPayment'])->name('payments.verify')->middleware('permission:verify-payments');
+        Route::post('/payments/{payment}/cancel', [FinanceController::class, 'cancelPayment'])->name('payments.cancel')->middleware('permission:manage-payments');
+
+        // Teacher Routes
+        Route::get('/teachers', [FinanceController::class, 'indexTeachers'])->name('teachers.index')->middleware('permission:manage-salaries');
+        Route::get('/teachers/create', [FinanceController::class, 'createTeacher'])->name('teachers.create')->middleware('permission:manage-salaries');
+        Route::post('/teachers', [FinanceController::class, 'storeTeacher'])->name('teachers.store')->middleware('permission:manage-salaries');
+        Route::get('/teachers/{teacher}', [FinanceController::class, 'showTeacher'])->name('teachers.show')->middleware('permission:manage-salaries');
+        Route::get('/teachers/{teacher}/edit', [FinanceController::class, 'editTeacher'])->name('teachers.edit')->middleware('permission:manage-salaries');
+        Route::put('/teachers/{teacher}', [FinanceController::class, 'updateTeacher'])->name('teachers.update')->middleware('permission:manage-salaries');
+
+        // Salary Payment Routes
+        Route::get('/salaries', [FinanceController::class, 'indexSalaryPayments'])->name('salaries.index')->middleware('permission:manage-salaries');
+        Route::get('/salaries/create', [FinanceController::class, 'createSalaryPayment'])->name('salaries.create')->middleware('permission:manage-salaries');
+        Route::post('/salaries', [FinanceController::class, 'storeSalaryPayment'])->name('salaries.store')->middleware('permission:manage-salaries');
+        Route::get('/salaries/bulk-process', [FinanceController::class, 'bulkProcessSalaries'])->name('salaries.bulk-process')->middleware('permission:manage-salaries');
+        Route::post('/salaries/bulk', [FinanceController::class, 'bulkSalaryPayment'])->name('salaries.bulk-store')->middleware('permission:manage-salaries');
+        Route::get('/salaries/{salaryPayment}', [FinanceController::class, 'showSalaryPayment'])->name('salaries.show')->middleware('permission:manage-salaries');
+        Route::post('/salaries/{salaryPayment}/approve', [FinanceController::class, 'approveSalaryPayment'])->name('salaries.approve')->middleware('permission:manage-salaries');
+        Route::get('/salaries/export', [FinanceController::class, 'exportSalaries'])->name('salaries.export')->middleware('permission:view-financial-reports');
+        Route::get('/salaries/export', [FinanceController::class, 'exportSalaries'])->name('salaries.export')->middleware('permission:view-financial-reports');
+
+        // Expense Routes
+        Route::get('/expenses', [FinanceController::class, 'indexExpenses'])->name('expenses.index');
+        Route::get('/expenses/create', [FinanceController::class, 'createExpense'])->name('expenses.create')->middleware('permission:manage-expenses');
+        Route::post('/expenses', [FinanceController::class, 'storeExpense'])->name('expenses.store')->middleware('permission:manage-expenses');
+        Route::get('/expenses/{expense}', [FinanceController::class, 'showExpense'])->name('expenses.show');
+        Route::get('/expenses/{expense}/edit', [FinanceController::class, 'editExpense'])->name('expenses.edit')->middleware('permission:manage-expenses');
+        Route::put('/expenses/{expense}', [FinanceController::class, 'updateExpense'])->name('expenses.update')->middleware('permission:manage-expenses');
+        Route::delete('/expenses/{expense}', [FinanceController::class, 'destroyExpense'])->name('expenses.destroy')->middleware('permission:manage-expenses');
+        Route::post('/expenses/{expense}/approve', [FinanceController::class, 'approveExpense'])->name('expenses.approve')->middleware('permission:approve-expenses');
+        Route::post('/expenses/{expense}/reject', [FinanceController::class, 'rejectExpense'])->name('expenses.reject')->middleware('permission:approve-expenses');
+        Route::get('/expenses/analytics', [FinanceController::class, 'expenseAnalytics'])->name('expenses.analytics')->middleware('permission:view-financial-reports');
+
+        // Financial Reports Routes
+        Route::get('/reports', [FinanceController::class, 'indexReports'])->name('reports.index')->middleware('permission:view-financial-reports');
+        Route::get('/reports/student-statement', [FinanceController::class, 'studentFeeStatement'])->name('reports.student-statement')->middleware('permission:view-financial-reports');
+        Route::get('/reports/payment-report', [FinanceController::class, 'paymentReport'])->name('reports.payment-report')->middleware('permission:view-financial-reports');
+        Route::get('/reports/outstanding-dues', [FinanceController::class, 'outstandingDuesReport'])->name('reports.outstanding-dues')->middleware('permission:view-financial-reports');
+        Route::get('/reports/salary-report', [FinanceController::class, 'salaryReport'])->name('reports.salary-report')->middleware('permission:view-financial-reports');
+        Route::get('/reports/student-statement/export', [FinanceController::class, 'exportStudentStatement'])->name('reports.export-student-statement')->middleware('permission:view-financial-reports');
     });
 });
 

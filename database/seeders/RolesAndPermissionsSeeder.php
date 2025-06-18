@@ -33,7 +33,9 @@ class RolesAndPermissionsSeeder extends Seeder
             // Grade Management
             'view-grades', 'create-grades', 'edit-grades', 'delete-grades', 'manage-grades',
             // Financial Management
-            'view-finances', 'manage-fees', 'create-invoices', 'process-payments',
+            'view-finances', 'manage-fees', 'create-invoices', 'manage-invoices',
+            'create-payments', 'verify-payments', 'manage-payments', 'manage-salaries',
+            'view-financial-reports', 'manage-expenses', 'approve-expenses',
             // Teaching Management
             'view-classes', 'create-classes', 'edit-classes', 'assign-homework',
             'grade-assignments', 'view-student-progress',
@@ -72,7 +74,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-enrollments', 'manage-enrollments', 'create-enrollments', 'drop-enrollments',
             'view-exams', 'create-exams', 'edit-exams', 'delete-exams', 'manage-exams',
             'view-grades', 'create-grades', 'edit-grades', 'delete-grades', 'manage-grades',
-            'view-finances', 'manage-fees',
+            'view-finances', 'manage-fees', 'create-invoices', 'manage-invoices',
+            'create-payments', 'verify-payments', 'manage-payments', 'view-financial-reports',
+            'manage-expenses', 'approve-expenses',
             'view-classes', 'create-classes', 'edit-classes', 'manage-classes',
             'access-admin-dashboard', 'manage-settings',
         ];
@@ -88,8 +92,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Accountant role permissions
         $accountantRole->givePermissionTo([
-            'view-finances', 'manage-fees', 'create-invoices', 'process-payments',
-            'view-students',
+            'view-finances', 'manage-fees', 'create-invoices', 'manage-invoices',
+            'create-payments', 'verify-payments', 'manage-payments', 'manage-salaries',
+            'view-financial-reports', 'view-students', 'manage-expenses', 'approve-expenses',
             'access-accountant-dashboard',
         ]);
 

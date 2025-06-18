@@ -83,13 +83,31 @@
                                     </button>
                                     <div x-show="open" @click.away="open = false" class="absolute z-10 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" style="display: none;">
                                         <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="financeDropdown">
+                                            <a href="{{ route('finance.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                                {{ __('Dashboard') }}
+                                            </a>
                                             <a href="{{ route('finance.fees.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
                                                 {{ __('Fees') }}
                                             </a>
                                             <a href="{{ route('finance.invoices.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
                                                 {{ __('Invoices') }}
                                             </a>
-                                            <!-- Add more finance links as needed -->
+                                            <a href="{{ route('finance.payments.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                                {{ __('Payments') }}
+                                            </a>
+                                            @can('manage-salaries')
+                                            <a href="{{ route('finance.salaries.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                                {{ __('Salaries') }}
+                                            </a>
+                                            @endcan
+                                            <a href="{{ route('finance.expenses.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                                {{ __('Expenses') }}
+                                            </a>
+                                            @can('view-financial-reports')
+                                            <a href="{{ route('finance.reports.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                                {{ __('Reports') }}
+                                            </a>
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>
@@ -173,12 +191,31 @@
                         </a>
                         @endcan
                         @can('view-finances')
+                        <a href="{{ route('finance.dashboard') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+                            {{ __('Finance Dashboard') }}
+                        </a>
                         <a href="{{ route('finance.fees.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
                             {{ __('Fees') }}
                         </a>
                         <a href="{{ route('finance.invoices.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
                             {{ __('Invoices') }}
                         </a>
+                        <a href="{{ route('finance.payments.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+                            {{ __('Payments') }}
+                        </a>
+                        @can('manage-salaries')
+                        <a href="{{ route('finance.salaries.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+                            {{ __('Salaries') }}
+                        </a>
+                        @endcan
+                        <a href="{{ route('finance.expenses.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+                            {{ __('Expenses') }}
+                        </a>
+                        @can('view-financial-reports')
+                        <a href="{{ route('finance.reports.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+                            {{ __('Reports') }}
+                        </a>
+                        @endcan
                         @endcan
                     @endauth
                 </div>

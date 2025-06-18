@@ -113,7 +113,7 @@ return new class extends Migration
             $table->string('phone', 20)->nullable();
             $table->string('email', 100)->nullable();
             $table->string('website')->nullable();
-            $table->decimal('budget', 12, 2)->nullable();
+
             $table->enum('status', ['active', 'inactive', 'merged', 'dissolved'])->default('active');
             $table->timestamps();
             

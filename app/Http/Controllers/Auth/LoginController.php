@@ -48,6 +48,9 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
+        // Update last login timestamp
+        $user->update(['last_login_at' => now()]);
+
         return redirect()->route('dashboard');
     }
 }

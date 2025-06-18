@@ -49,6 +49,41 @@ class Student extends Model
         return $this->belongsTo(User::class);
     }
 
+
+
+    /**
+     * Get student's total outstanding balance across all unpaid invoices
+     */
+    public function getOutstandingBalanceAttribute()
+    {
+        return $this->invoices()
+            ->whereIn('status', ['sent', 'partially_paid', 'overdue'])
+            ->sum('balance');
+    }
+
+    /**
+     * Get student's unpaid invoices
+     */
+    public function getUnpaidInvoices()
+    {
+        return $this->invoices()
+            ->whereIn('status', ['sent', 'partially_paid', 'overdue'])
+            ->where('balance', '>', 0)
+            ->orderBy('due_date', 'asc')
+            ->get();
+    }
+
+    /**
+     * Get student's outstanding balance for a specific academic year
+     */
+    public function getOutstandingBalanceForYear($academicYearId)
+    {
+        return $this->invoices()
+            ->where('academic_year_id', $academicYearId)
+            ->whereIn('status', ['sent', 'partially_paid', 'overdue'])
+            ->sum('balance');
+    }
+
     /**
      * Get the department this student belongs to
      */
@@ -348,6 +383,40 @@ class Student extends Model
             return 'Fail';
         }
     }
+
+    /**
+     * Get all invoices for this student
+     */
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * Get all payments made by this student
+     */
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Get total amount billed to this student
+     */
+    public function getTotalBilledAttribute()
+    {
+        return $this->invoices()->sum('total_amount');
+    }
+
+    /**
+     * Get total amount paid by this student
+     */
+    public function getTotalPaidAttribute()
+    {
+        return $this->payments()->where('status', 'completed')->sum('amount');
+    }
+
+
 
     /**
      * Generate a unique admission number

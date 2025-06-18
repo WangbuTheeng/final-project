@@ -150,7 +150,7 @@ CREATE TABLE departments (
     phone VARCHAR(20),
     email VARCHAR(100),
     website VARCHAR(255),
-    budget DECIMAL(12,2),
+
     status ENUM('active', 'inactive', 'merged', 'dissolved') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -163,7 +163,7 @@ CREATE TABLE departments (
 );
 
 
-The Departments table includes administrative information such as department head, budget allocation, and contact details. The table supports organizational hierarchy through the college_school field and maintains status tracking for department lifecycle management.
+The Departments table includes administrative information such as department head and contact details. The table supports organizational hierarchy through the college_school field and maintains status tracking for department lifecycle management.
 
 Courses Table
 

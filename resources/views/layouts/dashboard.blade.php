@@ -125,15 +125,88 @@
 
                 <!-- Main content area -->
                 <main class="p-4 lg:p-8 animate-fade-in" style="background-color: #f3f4f6;">
-                    @if(session('status'))
-                    <div class="mb-6 px-4 py-3 rounded-md bg-green-50 text-green-800 border-l-4 border-green-500 shadow-soft-sm">
-                        <div class="flex items-center">
-                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
-                            <span>{{ session('status') }}</span>
+                    <!-- Success Messages -->
+                    @if(session('success'))
+                    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="mb-6 px-4 py-3 rounded-md bg-green-50 text-green-800 border-l-4 border-green-500 shadow-soft-sm">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                <span>{{ session('success') }}</span>
+                            </div>
+                            <button @click="show = false" class="text-green-600 hover:text-green-800 ml-4">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
                     </div>
                     @endif
-                    
+
+                    <!-- Status Messages -->
+                    @if(session('status'))
+                    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="mb-6 px-4 py-3 rounded-md bg-green-50 text-green-800 border-l-4 border-green-500 shadow-soft-sm">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                <span>{{ session('status') }}</span>
+                            </div>
+                            <button @click="show = false" class="text-green-600 hover:text-green-800 ml-4">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    @endif
+
+                    <!-- Error Messages -->
+                    @if(session('error'))
+                    <div x-data="{ show: true }" x-show="show" class="mb-6 px-4 py-3 rounded-md bg-red-50 text-red-800 border-l-4 border-red-500 shadow-soft-sm">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
+                                <span>{{ session('error') }}</span>
+                            </div>
+                            <button @click="show = false" class="text-red-600 hover:text-red-800 ml-4">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    @endif
+
+                    <!-- Warning Messages -->
+                    @if(session('warning'))
+                    <div class="mb-6 px-4 py-3 rounded-md bg-yellow-50 text-yellow-800 border-l-4 border-yellow-500 shadow-soft-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 mr-3"></i>
+                            <span>{{ session('warning') }}</span>
+                        </div>
+                    </div>
+                    @endif
+
+                    <!-- Info Messages -->
+                    @if(session('info'))
+                    <div class="mb-6 px-4 py-3 rounded-md bg-blue-50 text-blue-800 border-l-4 border-blue-500 shadow-soft-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-info-circle text-blue-500 mr-3"></i>
+                            <span>{{ session('info') }}</span>
+                        </div>
+                    </div>
+                    @endif
+
+                    <!-- Validation Errors -->
+                    @if($errors->any())
+                    <div class="mb-6 px-4 py-3 rounded-md bg-red-50 text-red-800 border-l-4 border-red-500 shadow-soft-sm">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-circle text-red-500 mr-3 mt-0.5"></i>
+                            <div>
+                                <p class="font-medium mb-2">Please correct the following errors:</p>
+                                <ul class="list-disc list-inside space-y-1">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     @yield('content')
                 </main>
             </div>

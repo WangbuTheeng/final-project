@@ -61,7 +61,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-600">Amount</label>
-                        <p class="text-2xl font-bold text-green-600">₹{{ number_format($fee->amount, 2) }}</p>
+                        <p class="text-2xl font-bold text-green-600">NRs {{ number_format($fee->amount, 2) }}</p>
                     </div>
                     @if($fee->description)
                     <div>

@@ -39,6 +39,12 @@ class DashboardController extends Controller
         $user = Auth::user();
         $role = null;
 
+        // Check if user has any roles assigned
+        if (!$user->roles()->exists()) {
+            // User has no roles, show restricted access view
+            return view('dashboard.no-role');
+        }
+
         // Determine user's highest role (prioritizing the most important ones)
         if ($user->hasRole('Super Admin')) {
             $role = 'Super Admin';

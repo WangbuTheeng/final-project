@@ -45,7 +45,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-600">This Month Paid</p>
-                    <p class="text-2xl font-bold text-gray-900">₹{{ number_format($thisMonthPaid, 2) }}</p>
+                    <p class="text-2xl font-bold text-gray-900">NRs {{ number_format($thisMonthPaid, 2) }}</p>
                 </div>
             </div>
         </div>
@@ -141,7 +141,7 @@
                                 {{ DateTime::createFromFormat('Y-m', $payment->month)->format('F Y') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                ₹{{ number_format($payment->amount, 2) }}
+                                NRs {{ number_format($payment->amount, 2) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {{ $payment->payment_date ? $payment->payment_date->format('M d, Y') : 'N/A' }}

@@ -555,7 +555,7 @@ class FinanceController extends Controller
             if ($includeOutstanding) {
                 $outstandingBalance = $student->getOutstandingBalanceForYear($request->academic_year_id);
                 if ($outstandingBalance > 0) {
-                    $successMessage .= ' Outstanding balance of ₹' . number_format($outstandingBalance, 2) . ' has been included.';
+                    $successMessage .= ' Outstanding balance of NRs ' . number_format($outstandingBalance, 2) . ' has been included.';
                 }
             }
 
@@ -726,7 +726,7 @@ class FinanceController extends Controller
             $invoice = Invoice::find($request->invoice_id);
             if ($invoice && $request->amount > $invoice->balance) {
                 return redirect()->back()
-                    ->with('error', 'Payment amount (₹' . number_format($request->amount, 2) . ') cannot exceed remaining balance of ₹' . number_format($invoice->balance, 2))
+                    ->with('error', 'Payment amount (NRs ' . number_format($request->amount, 2) . ') cannot exceed remaining balance of NRs ' . number_format($invoice->balance, 2))
                     ->withInput();
             }
         }

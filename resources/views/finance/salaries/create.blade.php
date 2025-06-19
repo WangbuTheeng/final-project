@@ -99,7 +99,7 @@
 
                     <!-- Salary Amount -->
                     <div>
-                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Salary Amount (₹) *</label>
+                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Salary Amount (NRs) *</label>
                         <input type="number" id="amount" name="amount" value="{{ old('amount') }}" 
                                step="0.01" min="0"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('amount') border-red-500 @enderror" 
@@ -211,7 +211,7 @@
                                         <input type="checkbox" name="teacher_ids[]" value="{{ $teacher->id }}"
                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                         <span class="ml-2 text-sm text-gray-700">
-                                            {{ $teacher->teacher_name }} ({{ $teacher->employee_id }}) - ₹{{ number_format($teacher->basic_salary, 2) }}
+                                            {{ $teacher->teacher_name }} ({{ $teacher->employee_id }}) - NRs {{ number_format($teacher->basic_salary, 2) }}
                                             @if($teacher->facultyInfo)
                                                 <span class="text-xs text-gray-500">- {{ $teacher->facultyInfo->name }}</span>
                                             @endif
@@ -270,7 +270,7 @@
                                 {{ DateTime::createFromFormat('Y-m', $payment->month)->format('F Y') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                ₹{{ number_format($payment->amount, 2) }}
+                                NRs {{ number_format($payment->amount, 2) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
@@ -310,7 +310,7 @@ function updateTeacherDetails() {
         document.getElementById('employee-id').textContent = employeeId;
         document.getElementById('faculty').textContent = faculty;
         document.getElementById('department').textContent = department;
-        document.getElementById('basic-salary').textContent = '₹' + parseFloat(salary).toLocaleString();
+        document.getElementById('basic-salary').textContent = 'NRs ' + parseFloat(salary).toLocaleString();
 
         amountInput.value = salary;
         detailsDiv.classList.remove('hidden');

@@ -189,9 +189,9 @@
     </script>
 </head>
 <body class="font-sans antialiased bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
-    <div class="min-h-screen relative">
+    <div class="min-h-screen relative bg-gray-50">
         <!-- Background Pattern -->
-        <div class="fixed inset-0 z-0 opacity-30">
+        <div class="fixed inset-0 z-0 opacity-30 hidden lg:block">
             <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-purple-50/50"></div>
             <div class="absolute inset-0" style="background-image: radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);"></div>
         </div>
@@ -220,17 +220,18 @@
                 x-transition:leave="transition ease-in-out duration-300 transform"
                 x-transition:leave-start="translate-x-0"
                 x-transition:leave-end="-translate-x-full"
-                class="fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl shadow-soft-2xl border-r border-gray-200/50 lg:hidden animate-slide-in-right"
+                class="fixed inset-y-0 left-0 z-50 w-80 max-w-sm bg-white shadow-2xl lg:hidden"
                 style="display: none;"
             >
-                <div class="flex items-center justify-end h-16 px-4 border-b border-gray-200/50 bg-gradient-to-r from-white/80 to-gray-50/80">
-                    <button @click="sidebarOpen = false" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-white/80 rounded-xl transition-all duration-200 ease-in-out hover:scale-105">
+                <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200" style="background-color: #37a2bc;">
+                    <h2 class="text-lg font-bold text-white">College CMS</h2>
+                    <button @click="sidebarOpen = false" class="p-2 text-white hover:bg-white/20 rounded-lg transition-all duration-200">
                         <span class="sr-only">Close sidebar</span>
                         <i class="fas fa-times text-lg"></i>
                     </button>
                 </div>
                 <!-- Mobile sidebar content -->
-                <div class="overflow-y-auto overflow-x-hidden h-[calc(100vh-4rem)] px-1 bg-gradient-to-b from-white/90 to-gray-50/90">
+                <div class="overflow-y-auto h-[calc(100vh-4rem)] bg-white">
                     @include('layouts.partials.sidebar-menu')
                 </div>
             </div>
@@ -245,12 +246,12 @@
             </div>
 
             <!-- Main content -->
-            <div class="lg:pl-72 relative z-20">
+            <div class="w-full lg:pl-72 relative z-20">
                 <!-- Top navigation -->
                 @include('layouts.partials.top-navigation')
 
                 <!-- Main content area -->
-                <main class="p-4 lg:p-8 animate-fade-in-up min-h-screen">
+                <main class="p-4 sm:p-6 lg:p-8 animate-fade-in-up min-h-screen bg-gray-50">
                     <!-- Success Messages -->
                     @if(session('success'))
                     <div x-data="{ show: true }"
@@ -425,6 +426,9 @@
         </div>
     </div>
 
+    <!-- Responsive Utilities -->
+    @include('layouts.partials.responsive-utilities')
+
     <!-- Scripts -->
     @stack('scripts')
 
@@ -495,6 +499,49 @@
                 }
             }
         });
+
+        // Responsive behavior enhancements
+        function handleResponsiveChanges() {
+            const isMobile = window.innerWidth < 640;
+            const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+            const isDesktop = window.innerWidth >= 1024;
+
+            // Add responsive classes to body
+            document.body.classList.toggle('mobile-view', isMobile);
+            document.body.classList.toggle('tablet-view', isTablet);
+            document.body.classList.toggle('desktop-view', isDesktop);
+
+            // Auto-close mobile sidebar on desktop
+            if (isDesktop && window.Alpine) {
+                const sidebarComponent = document.querySelector('[x-data*="sidebarOpen"]');
+                if (sidebarComponent && sidebarComponent._x_dataStack) {
+                    sidebarComponent._x_dataStack[0].sidebarOpen = false;
+                }
+            }
+
+            // Adjust table responsiveness
+            const tables = document.querySelectorAll('table');
+            tables.forEach(table => {
+                const wrapper = table.closest('.overflow-x-auto');
+                if (wrapper) {
+                    wrapper.classList.toggle('responsive-table', isMobile || isTablet);
+                }
+            });
+
+            // Adjust grid responsiveness
+            const grids = document.querySelectorAll('.grid');
+            grids.forEach(grid => {
+                if (grid.classList.contains('grid-cols-4') ||
+                    grid.classList.contains('grid-cols-3') ||
+                    grid.classList.contains('grid-cols-2')) {
+                    grid.classList.toggle('responsive-grid', isMobile || isTablet);
+                }
+            });
+        }
+
+        // Initial call and resize listener
+        handleResponsiveChanges();
+        window.addEventListener('resize', handleResponsiveChanges);
 
         // Add tooltips for collapsed sidebar items (future enhancement)
         const sidebarItems = document.querySelectorAll('.sidebar-item');
@@ -677,25 +724,88 @@
         50% { box-shadow: 0 0 30px rgba(55, 162, 188, 0.6); }
     }
 
-    /* Responsive improvements */
-    @media (max-width: 1024px) {
+    /* Enhanced Responsive Design */
+
+    /* Mobile optimizations */
+    @media (max-width: 640px) {
         .sidebar-text {
             font-size: 0.875rem;
         }
 
         .group:hover {
-            transform: translateX(2px) scale(1.01);
+            transform: translateX(1px) scale(1.005);
+        }
+
+        /* Compact spacing for mobile */
+        .mobile-compact {
+            padding: 0.5rem !important;
+        }
+
+        /* Hide non-essential elements on mobile */
+        .mobile-hidden {
+            display: none !important;
+        }
+
+        /* Adjust font sizes for mobile */
+        .mobile-text-sm {
+            font-size: 0.75rem !important;
+        }
+
+        .mobile-text-xs {
+            font-size: 0.625rem !important;
+        }
+
+        /* Fix mobile layout */
+        body {
+            overflow-x: hidden;
+        }
+
+        /* Ensure main content takes full width on mobile */
+        .lg\\:pl-72 {
+            padding-left: 0 !important;
+        }
+
+        /* Mobile sidebar fixes */
+        .mobile-sidebar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            height: 100vh !important;
+            z-index: 50 !important;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .mobile-sidebar.open {
+            transform: translateX(0);
         }
     }
 
-    /* Responsive improvements */
-    @media (max-width: 1024px) {
+    /* Tablet optimizations */
+    @media (min-width: 641px) and (max-width: 1024px) {
         .sidebar-text {
             font-size: 0.875rem;
         }
 
         .group:hover {
             transform: translateX(2px) scale(1.01);
+        }
+
+        /* Tablet-specific adjustments */
+        .tablet-compact {
+            padding: 0.75rem !important;
+        }
+    }
+
+    /* Desktop optimizations */
+    @media (min-width: 1025px) {
+        .desktop-enhanced {
+            transition: all 0.3s ease;
+        }
+
+        .desktop-enhanced:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
     }
 
@@ -740,8 +850,82 @@
             display: block !important;
             visibility: visible !important;
         }
+    }
 
+    /* Mobile layout fixes */
+    @media (max-width: 1023px) {
+        /* Ensure main content is not offset by sidebar on mobile */
+        .lg\\:pl-72 {
+            padding-left: 0 !important;
+        }
 
+        /* Hide desktop sidebar completely on mobile */
+        .hidden.lg\\:fixed {
+            display: none !important;
+        }
+
+        /* Ensure mobile sidebar is properly positioned */
+        .fixed.inset-y-0.left-0.z-50 {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            height: 100vh !important;
+            z-index: 50 !important;
+        }
+    }
+
+    /* Responsive table improvements */
+    @media (max-width: 768px) {
+        .responsive-table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .responsive-table table {
+            min-width: 600px;
+        }
+
+        .responsive-table th,
+        .responsive-table td {
+            padding: 0.5rem !important;
+            font-size: 0.75rem !important;
+        }
+    }
+
+    /* Responsive grid improvements */
+    @media (max-width: 640px) {
+        .responsive-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+        }
+    }
+
+    @media (min-width: 641px) and (max-width: 768px) {
+        .responsive-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 1.5rem !important;
+        }
+    }
+
+    /* Responsive card improvements */
+    .responsive-card {
+        transition: all 0.3s ease;
+    }
+
+    @media (max-width: 640px) {
+        .responsive-card {
+            padding: 1rem !important;
+            margin: 0.5rem 0 !important;
+        }
+
+        .responsive-card h3 {
+            font-size: 1rem !important;
+        }
+
+        .responsive-card p {
+            font-size: 0.875rem !important;
+        }
     }
 
     /* Print styles */
@@ -753,6 +937,11 @@
         .main-content {
             margin: 0 !important;
             padding: 0 !important;
+        }
+
+        .responsive-card {
+            break-inside: avoid;
+            margin-bottom: 1rem;
         }
     }
     </style>

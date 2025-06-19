@@ -68,7 +68,7 @@
                             <!-- Pre-selected invoice -->
                             <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
                                 <span class="text-gray-900 font-medium">#{{ $invoice->invoice_number }}</span>
-                                <span class="text-gray-600">- ₹{{ number_format($invoice->balance, 2) }} due</span>
+                                <span class="text-gray-600">- NRs {{ number_format($invoice->balance, 2) }} due</span>
                                 <span class="text-gray-500">({{ $invoice->due_date->format('M d, Y') }})</span>
                             </div>
                             <input type="hidden" id="invoice_id" name="invoice_id" value="{{ $invoice->id }}">
@@ -89,7 +89,7 @@
 
                     <!-- Payment Amount -->
                     <div>
-                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Payment Amount (₹) *</label>
+                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Payment Amount (NRs) *</label>
                         <input type="number" id="amount" name="amount"
                                value="{{ old('amount', $invoice ? $invoice->balance : '') }}"
                                step="0.01" min="0.01"
@@ -101,7 +101,7 @@
                         @enderror
                         @if($invoice)
                             <div class="mt-1 text-sm text-gray-500">
-                                Outstanding balance: <span class="font-medium text-red-600">₹{{ number_format($invoice->balance, 2) }}</span>
+                                Outstanding balance: <span class="font-medium text-red-600">NRs {{ number_format($invoice->balance, 2) }}</span>
                                 <span class="text-xs text-gray-400">(Maximum payment amount)</span>
                             </div>
                         @else
@@ -213,9 +213,9 @@
                                 <p>Invoice: <span class="font-mono">#{{ $invoice->invoice_number }}</span></p>
                                 <p>Issue Date: <span class="font-medium">{{ $invoice->issue_date->format('M d, Y') }}</span></p>
                                 <p>Due Date: <span class="font-medium">{{ $invoice->due_date->format('M d, Y') }}</span></p>
-                                <p>Total Amount: <span class="font-medium">₹{{ number_format($invoice->total_amount, 2) }}</span></p>
-                                <p>Amount Paid: <span class="font-medium">₹{{ number_format($invoice->amount_paid, 2) }}</span></p>
-                                <p>Balance Due: <span class="font-medium text-red-600">₹{{ number_format($invoice->balance, 2) }}</span></p>
+                                <p>Total Amount: <span class="font-medium">NRs {{ number_format($invoice->total_amount, 2) }}</span></p>
+                                <p>Amount Paid: <span class="font-medium">NRs {{ number_format($invoice->amount_paid, 2) }}</span></p>
+                                <p>Balance Due: <span class="font-medium text-red-600">NRs {{ number_format($invoice->balance, 2) }}</span></p>
                                 <p>Academic Year: <span class="font-medium">{{ $invoice->academicYear->name }}</span></p>
                             </div>
                         </div>
@@ -283,7 +283,7 @@ function loadStudentInvoices() {
                 data.invoices.forEach(invoice => {
                     const option = document.createElement('option');
                     option.value = invoice.id;
-                    option.textContent = `#${invoice.invoice_number} - ₹${parseFloat(invoice.balance).toFixed(2)} due`;
+                    option.textContent = `#${invoice.invoice_number} - NRs ${parseFloat(invoice.balance).toFixed(2)} due`;
                     option.dataset.invoice = JSON.stringify(invoice);
                     invoiceSelect.appendChild(option);
                 });
@@ -319,13 +319,13 @@ function updateInvoiceDetails() {
 
         // Show invoice details
         document.getElementById('invoice-number').textContent = invoice.invoice_number;
-        document.getElementById('invoice-total').textContent = `₹${parseFloat(invoice.total_amount).toFixed(2)}`;
-        document.getElementById('invoice-paid').textContent = `₹${parseFloat(invoice.amount_paid).toFixed(2)}`;
-        document.getElementById('invoice-balance-amount').textContent = `₹${parseFloat(invoice.balance).toFixed(2)}`;
+        document.getElementById('invoice-total').textContent = `NRs ${parseFloat(invoice.total_amount).toFixed(2)}`;
+        document.getElementById('invoice-paid').textContent = `NRs ${parseFloat(invoice.amount_paid).toFixed(2)}`;
+        document.getElementById('invoice-balance-amount').textContent = `NRs ${parseFloat(invoice.balance).toFixed(2)}`;
 
         // Show balance info
         if (invoiceBalance) {
-            invoiceBalance.querySelector('span').textContent = `₹${parseFloat(invoice.balance).toFixed(2)}`;
+            invoiceBalance.querySelector('span').textContent = `NRs ${parseFloat(invoice.balance).toFixed(2)}`;
             invoiceBalance.classList.remove('hidden');
         }
 
@@ -378,7 +378,7 @@ function validatePaymentAmount(maxAmount) {
         const errorDiv = document.createElement('div');
         errorDiv.id = 'amount-error';
         errorDiv.className = 'mt-1 text-sm text-red-600';
-        errorDiv.textContent = `Payment amount cannot exceed balance of ₹${parseFloat(maxAmount).toFixed(2)}`;
+        errorDiv.textContent = `Payment amount cannot exceed balance of NRs ${parseFloat(maxAmount).toFixed(2)}`;
         amountInput.parentNode.appendChild(errorDiv);
 
         // Disable submit button
@@ -494,7 +494,7 @@ function validateFormSubmission() {
     if (maxAmount !== null) {
         const currentAmount = parseFloat(amountInput.value);
         if (currentAmount > maxAmount) {
-            alert(`Payment amount (₹${currentAmount.toFixed(2)}) cannot exceed the remaining balance of ₹${maxAmount.toFixed(2)}`);
+            alert(`Payment amount (NRs ${currentAmount.toFixed(2)}) cannot exceed the remaining balance of NRs ${maxAmount.toFixed(2)}`);
             return false;
         }
     }

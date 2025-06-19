@@ -52,7 +52,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-600">Total Revenue</p>
-                    <p class="text-2xl font-bold text-gray-900">₹{{ number_format($totalRevenue, 2) }}</p>
+                    <p class="text-2xl font-bold text-gray-900">NRs {{ number_format($totalRevenue, 2) }}</p>
                 </div>
             </div>
         </div>
@@ -67,7 +67,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-600">Outstanding</p>
-                    <p class="text-2xl font-bold text-gray-900">₹{{ number_format($outstandingAmount, 2) }}</p>
+                    <p class="text-2xl font-bold text-gray-900">NRs {{ number_format($outstandingAmount, 2) }}</p>
                 </div>
             </div>
         </div>
@@ -100,7 +100,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-600">Paid This Month</p>
-                    <p class="text-2xl font-bold text-gray-900">₹{{ number_format($salariesPaidThisMonth, 2) }}</p>
+                    <p class="text-2xl font-bold text-gray-900">NRs {{ number_format($salariesPaidThisMonth, 2) }}</p>
                 </div>
             </div>
         </div>
@@ -123,7 +123,7 @@
                                     <p class="text-sm text-gray-600">{{ $payment->payment_reference }} - {{ $payment->payment_method_display }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="font-semibold text-gray-900">₹{{ number_format($payment->amount, 2) }}</p>
+                                    <p class="font-semibold text-gray-900">NRs {{ number_format($payment->amount, 2) }}</p>
                                     <p class="text-sm text-gray-600">{{ $payment->payment_date->format('M d, Y') }}</p>
                                 </div>
                             </div>
@@ -153,7 +153,7 @@
                                     <p class="text-sm text-gray-600">{{ $invoice->invoice_number }} - Due: {{ $invoice->due_date->format('M d, Y') }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="font-semibold text-red-600">₹{{ number_format($invoice->balance, 2) }}</p>
+                                    <p class="font-semibold text-red-600">NRs {{ number_format($invoice->balance, 2) }}</p>
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                         Overdue
                                     </span>

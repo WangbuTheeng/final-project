@@ -115,7 +115,7 @@
                 <div class="space-y-4">
                     <div class="bg-blue-50 p-4 rounded-lg">
                         <div class="text-sm font-medium text-blue-600">Monthly Salary</div>
-                        <div class="text-2xl font-bold text-blue-900">₦{{ number_format($teacher->basic_salary, 2) }}</div>
+                        <div class="text-2xl font-bold text-blue-900">NRs {{ number_format($teacher->basic_salary, 2) }}</div>
                     </div>
 
                     @if(isset($unpaidMonths) && count($unpaidMonths) > 0)

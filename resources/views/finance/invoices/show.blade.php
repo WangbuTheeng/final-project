@@ -175,7 +175,7 @@
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 font-mono">{{ $item['fee_code'] ?? 'N/A' }}</td>
                             <td class="px-6 py-4 text-sm text-gray-900 text-center">{{ $item['quantity'] }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900 text-right font-medium">₹{{ number_format($item['amount'], 2) }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 text-right font-medium">NRs {{ number_format($item['amount'], 2) }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -189,34 +189,34 @@
                 <div class="w-80 space-y-3">
                     <div class="flex justify-between text-lg">
                         <span class="text-gray-700 font-medium">Subtotal:</span>
-                        <span class="text-gray-900 font-medium">₹{{ number_format($invoice->subtotal, 2) }}</span>
+                        <span class="text-gray-900 font-medium">NRs {{ number_format($invoice->subtotal, 2) }}</span>
                     </div>
                     @if($invoice->discount > 0)
                     <div class="flex justify-between text-lg">
                         <span class="text-gray-700 font-medium">Discount:</span>
-                        <span class="text-red-600 font-medium">-₹{{ number_format($invoice->discount, 2) }}</span>
+                        <span class="text-red-600 font-medium">-NRs {{ number_format($invoice->discount, 2) }}</span>
                     </div>
                     @endif
                     @if($invoice->tax > 0)
                     <div class="flex justify-between text-lg">
                         <span class="text-gray-700 font-medium">Tax:</span>
-                        <span class="text-gray-900 font-medium">₹{{ number_format($invoice->tax, 2) }}</span>
+                        <span class="text-gray-900 font-medium">NRs {{ number_format($invoice->tax, 2) }}</span>
                     </div>
                     @endif
                     <div class="flex justify-between text-2xl font-bold border-t-2 border-gray-300 pt-3">
                         <span class="text-gray-900">Total Amount:</span>
-                        <span class="text-gray-900">₹{{ number_format($invoice->total_amount, 2) }}</span>
+                        <span class="text-gray-900">NRs {{ number_format($invoice->total_amount, 2) }}</span>
                     </div>
                     @if($invoice->amount_paid > 0)
                     <div class="flex justify-between text-lg">
                         <span class="text-gray-700 font-medium">Amount Paid:</span>
-                        <span class="text-green-600 font-medium">₹{{ number_format($invoice->amount_paid, 2) }}</span>
+                        <span class="text-green-600 font-medium">NRs {{ number_format($invoice->amount_paid, 2) }}</span>
                     </div>
                     @endif
                     @if($invoice->balance > 0)
                     <div class="flex justify-between text-xl font-bold text-red-600 border-t border-gray-200 pt-2">
                         <span>Balance Due:</span>
-                        <span>₹{{ number_format($invoice->balance, 2) }}</span>
+                        <span>NRs {{ number_format($invoice->balance, 2) }}</span>
                     </div>
                     @endif
                 </div>
@@ -252,16 +252,16 @@
                 <div class="space-y-3">
                     <div class="flex justify-between">
                         <span class="text-gray-600">Total Amount:</span>
-                        <span class="font-medium">₹{{ number_format($invoice->total_amount, 2) }}</span>
+                        <span class="font-medium">NRs {{ number_format($invoice->total_amount, 2) }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">Amount Paid:</span>
-                        <span class="font-medium text-green-600">₹{{ number_format($invoice->amount_paid, 2) }}</span>
+                        <span class="font-medium text-green-600">NRs {{ number_format($invoice->amount_paid, 2) }}</span>
                     </div>
                     <div class="flex justify-between border-t pt-3">
                         <span class="text-gray-900 font-semibold">Balance Due:</span>
                         <span class="font-semibold {{ $invoice->balance > 0 ? 'text-red-600' : 'text-green-600' }}">
-                            ₹{{ number_format($invoice->balance, 2) }}
+                            NRs {{ number_format($invoice->balance, 2) }}
                         </span>
                     </div>
                 </div>
@@ -287,7 +287,7 @@
                     <div class="border-l-4 border-green-400 pl-4 py-2">
                         <div class="flex justify-between items-start">
                             <div>
-                                <p class="font-medium text-gray-900">₹{{ number_format($payment->amount, 2) }}</p>
+                                <p class="font-medium text-gray-900">NRs {{ number_format($payment->amount, 2) }}</p>
                                 <p class="text-sm text-gray-600">{{ $payment->payment_date->format('M d, Y') }}</p>
                                 <p class="text-xs text-gray-500">{{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}</p>
                             </div>

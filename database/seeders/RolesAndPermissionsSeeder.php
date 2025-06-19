@@ -44,6 +44,8 @@ class RolesAndPermissionsSeeder extends Seeder
             // Settings/Dashboard
             'access-admin-dashboard', 'access-teacher-dashboard', 'access-examiner-dashboard',
             'access-accountant-dashboard', 'manage-settings',
+            // Faculty and Department Management
+            'view-faculties', 'manage-faculties',
             // New permission for subjects
             'view-subjects',
         ];
@@ -77,6 +79,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-grades', 'create-grades', 'edit-grades', 'delete-grades', 'manage-grades',
             'view-classes', 'create-classes', 'edit-classes', 'manage-classes',
             'view-subjects',
+            // Faculty and Department Management
+            'view-faculties', 'manage-faculties',
             // Reports and Settings
             'view-reports', 'generate-reports', 'export-reports',
             'access-admin-dashboard', 'manage-settings',
@@ -110,7 +114,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-exams',
             'view-grades',
             'view-reports',
-            'manage-settings', // For viewing faculties
+            'view-faculties', // For viewing faculties only
             'access-teacher-dashboard', // Keep dashboard access
         ]);
 

@@ -1,17 +1,19 @@
-<!-- College CMS Header -->
-<div class="p-6 text-white" style="background-color: #37a2bc;">
-    <div class="text-center mb-4">
-        <h2 class="text-xl font-bold">College CMS</h2>
-        <div class="w-16 h-0.5 bg-white mx-auto mt-2 opacity-50"></div>
+<!-- College CMS Header - Only show on desktop, mobile has header in sidebar container -->
+<div class="hidden lg:block p-4 sm:p-6 text-white" style="background-color: #37a2bc;">
+    <div class="text-center mb-3 sm:mb-4">
+        <h2 class="text-lg sm:text-xl font-bold">College CMS</h2>
+        <div class="w-12 sm:w-16 h-0.5 bg-white mx-auto mt-2 opacity-50"></div>
     </div>
-    <div class="flex items-center space-x-3">
-        <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
-            <span class="font-bold text-lg" style="color: #37a2bc;">{{ substr(auth()->user()->name, 0, 1) }}</span>
+    <div class="flex items-center space-x-2 sm:space-x-3">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+            <span class="font-bold text-base sm:text-lg" style="color: #37a2bc;">{{ substr(auth()->user()->name, 0, 1) }}</span>
         </div>
-        <div>
-            <h3 class="font-semibold text-lg">{{ auth()->user()->name }}</h3>
-            <p class="text-white text-sm opacity-90">
-                @if(auth()->user()->hasRole('Super Admin'))
+        <div class="min-w-0 flex-1">
+            <h3 class="font-semibold text-base sm:text-lg truncate">{{ auth()->user()->name }}</h3>
+            <p class="text-white text-xs sm:text-sm opacity-90 truncate">
+                @if(!auth()->user()->roles()->exists())
+                    NO ROLE ASSIGNED
+                @elseif(auth()->user()->hasRole('Super Admin'))
                     SUPER ADMIN
                 @elseif(auth()->user()->hasRole('Admin'))
                     ADMIN
@@ -29,14 +31,44 @@
     </div>
 </div>
 
+<!-- Mobile User Info -->
+<div class="lg:hidden p-4 border-b border-gray-200 bg-gray-50">
+    <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span class="font-bold text-sm text-white">{{ substr(auth()->user()->name, 0, 1) }}</span>
+        </div>
+        <div class="min-w-0 flex-1">
+            <h3 class="font-semibold text-sm text-gray-900 truncate">{{ auth()->user()->name }}</h3>
+            <p class="text-xs text-gray-500 truncate">
+                @if(!auth()->user()->roles()->exists())
+                    No Role Assigned
+                @elseif(auth()->user()->hasRole('Super Admin'))
+                    Super Admin
+                @elseif(auth()->user()->hasRole('Admin'))
+                    Admin
+                @elseif(auth()->user()->hasRole('Teacher'))
+                    Teacher
+                @elseif(auth()->user()->hasRole('Examiner'))
+                    Examiner
+                @elseif(auth()->user()->hasRole('Accountant'))
+                    Accountant
+                @else
+                    User
+                @endif
+            </p>
+        </div>
+    </div>
+</div>
+
 <!-- Navigation Menu -->
-<div class="py-4">
+<div class="py-3 sm:py-4">
     <ul class="space-y-1">
+        @if(auth()->user()->roles()->exists())
         <li>
             <!-- Dashboard - visible to all users -->
-            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50' }} group flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out {{ request()->routeIs('dashboard') ? '' : 'hover:text-gray-900' }}" {{ request()->routeIs('dashboard') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}>
-                <i class="fas fa-tachometer-alt mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('dashboard') ? 'text-white' : 'text-gray-400' }} {{ request()->routeIs('dashboard') ? '' : 'group-hover:text-gray-600' }}"></i>
-                Dashboard
+            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-gray-700 hover:bg-gray-50' }} group flex items-center px-4 py-3 text-sm font-medium transition-all duration-150 ease-in-out {{ request()->routeIs('dashboard') ? '' : 'hover:text-gray-900' }} rounded-r-lg mx-2">
+                <i class="fas fa-tachometer-alt mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('dashboard') ? 'text-blue-600' : 'text-gray-400' }} {{ request()->routeIs('dashboard') ? '' : 'group-hover:text-gray-600' }}"></i>
+                <span class="truncate">Dashboard</span>
             </a>
         </li>
 
@@ -46,11 +78,11 @@
             <div x-data="{ open: {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'true' : 'false' }} }" class="space-y-1">
                 <button
                     @click="open = !open"
-                    class="{{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}
+                    class="{{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-4 py-3 text-sm font-medium transition-all duration-150 ease-in-out rounded-r-lg mx-2"
                 >
-                    <i class="fas fa-university mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
-                    <span class="flex-1 text-left">Academic Structure</span>
-                    <i class="fas transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                    <i class="fas fa-university mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                    <span class="flex-1 text-left truncate">Academic Structure</span>
+                    <i class="fas transition-transform duration-200 text-sm {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'text-blue-600' : 'text-gray-400' }}" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                 </button>
                 <div x-show="open"
                      x-transition:enter="transition ease-out duration-100"
@@ -155,6 +187,7 @@
                     </a>
                     @endcan
 
+                    
                     @can('manage-enrollments')
                     <a href="{{ route('enrollments.index') }}" class="{{ request()->routeIs('enrollments.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('enrollments.*') ? 'style=background-color:#37a2bc;' : '' }}>
                         <i class="fas fa-clipboard-list mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('enrollments.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
@@ -385,7 +418,7 @@
 
         <!-- My Profile -->
         <li>
-            <a href="#" class="{{ request()->routeIs('profile.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('profile.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}>
+            <a href="{{ route('profile.show') }}" class="{{ request()->routeIs('profile.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('profile.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}>
                 <i class="fas fa-user-circle mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('profile.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                 My Profile
             </a>
@@ -401,6 +434,32 @@
                 </button>
             </form>
         </li>
+
+        @else
+        <!-- No Role Assigned - Show only logout -->
+        <li>
+            <div class="px-6 py-4">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                    <div class="flex items-center justify-center mb-2">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 text-lg"></i>
+                    </div>
+                    <p class="text-yellow-800 text-sm text-center font-medium mb-1">Access Restricted</p>
+                    <p class="text-yellow-700 text-xs text-center">Contact the owner to view the dashboard</p>
+                </div>
+            </div>
+        </li>
+
+        <!-- Logout for users without roles -->
+        <li>
+            <form id="sidebar-logout-form" action="{{ route('logout') }}" method="POST" class="w-full">
+                @csrf
+                <button type="submit" class="text-gray-700 hover:bg-gray-50 hover:text-red-600 group flex items-center px-6 py-3 text-sm font-medium w-full text-left transition-all duration-150 ease-in-out">
+                    <i class="fas fa-sign-out-alt mr-3 flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-red-500"></i>
+                    Logout
+                </button>
+            </form>
+        </li>
+        @endif
 
     </ul>
 </div>

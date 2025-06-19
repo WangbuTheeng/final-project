@@ -318,6 +318,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $student->academicYear->name ?? 'N/A' }}
                                 </td>
+                                @can('manage-students')
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex items-center space-x-2">
                                         <a href="{{ route('students.show', $student) }}"
@@ -346,6 +347,7 @@
                                         @endcan
                                     </div>
                                 </td>
+                                @endcan
                             </tr>
                         @empty
                             <tr>

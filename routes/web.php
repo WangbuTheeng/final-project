@@ -38,6 +38,11 @@ Route::get('/test', function() {
     return view('test');
 });
 
+// Test route for mobile layout
+Route::get('/test-mobile', function() {
+    return view('test-mobile');
+});
+
 // Test route for college settings
 Route::get('/test-college-settings', function() {
     $settings = \App\Models\CollegeSetting::getSettings();
@@ -85,6 +90,13 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
+    // Profile Routes
+    Route::get('profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('profile/password', [App\Http\Controllers\ProfileController::class, 'editPassword'])->name('profile.password');
+    Route::put('profile/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
     // Global Search Routes
     Route::get('search', [GlobalSearchController::class, 'search'])->name('global.search');
     Route::get('search/results', [GlobalSearchController::class, 'results'])->name('search.results');
@@ -137,8 +149,14 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Faculty Routes
-    Route::middleware(['permission:manage-settings'])->group(function () {
-        Route::resource('faculties', FacultyController::class);
+    Route::middleware(['permission:manage-faculties'])->group(function () {
+        Route::resource('faculties', FacultyController::class)->except(['index', 'show']);
+    });
+
+    // Faculty view routes (accessible by teachers and admins)
+    Route::middleware(['permission:view-faculties|manage-faculties'])->group(function () {
+        Route::get('faculties', [FacultyController::class, 'index'])->name('faculties.index');
+        Route::get('faculties/{faculty}', [FacultyController::class, 'show'])->name('faculties.show');
     });
 
     // Department Routes
@@ -157,9 +175,15 @@ Route::middleware(['auth'])->group(function () {
 
     // Class Section Routes
     Route::middleware(['permission:manage-classes'])->group(function () {
-        Route::resource('classes', ClassSectionController::class);
+        Route::resource('classes', ClassSectionController::class)->except(['index', 'show']);
         Route::post('classes/{class}/assign-instructor', [ClassSectionController::class, 'assignInstructor'])
             ->name('classes.assign-instructor');
+    });
+
+    // Class view routes (accessible by teachers and admins)
+    Route::middleware(['permission:view-classes|manage-classes'])->group(function () {
+        Route::get('classes', [ClassSectionController::class, 'index'])->name('classes.index');
+        Route::get('classes/{class}', [ClassSectionController::class, 'show'])->name('classes.show');
     });
 
     // Subject Routes
@@ -223,9 +247,9 @@ Route::middleware(['auth'])->group(function () {
         });
     });
     
-    // Exam Routes
-    Route::middleware(['permission:manage-exams|view-exams'])->group(function () {
-        Route::resource('exams', ExamController::class);
+    // Exam Management Routes (Admin/Examiner only)
+    Route::middleware(['permission:manage-exams'])->group(function () {
+        Route::resource('exams', ExamController::class)->except(['index', 'show']);
         Route::get('exams/{exam}/grades', [ExamController::class, 'grades'])
             ->name('exams.grades');
         Route::post('exams/{exam}/grades', [ExamController::class, 'storeGrades'])
@@ -236,6 +260,12 @@ Route::middleware(['auth'])->group(function () {
             ->name('exams.subject-marks');
         Route::get('exams/class-marks', [ExamController::class, 'getClassMarks'])
             ->name('exams.class-marks');
+    });
+
+    // Exam View Routes (accessible by teachers and admins)
+    Route::middleware(['permission:view-exams|manage-exams'])->group(function () {
+        Route::get('exams', [ExamController::class, 'index'])->name('exams.index');
+        Route::get('exams/{exam}', [ExamController::class, 'show'])->name('exams.show');
     });
 
     // Bulk Marks Entry Routes

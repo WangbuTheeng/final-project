@@ -9,11 +9,13 @@
             <p class="mt-1 text-sm text-gray-500">{{ $class->course ? $class->course->title : 'Course not found' }} - {{ $class->academicYear ? $class->academicYear->name : 'Academic year not found' }}</p>
         </div>
         <div class="mt-4 sm:mt-0 flex space-x-3">
+            @can('manage-classes')
             <a href="{{ route('classes.edit', $class) }}"
                class="inline-flex items-center px-4 py-2 bg-yellow-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-700 focus:bg-yellow-700 active:bg-yellow-900 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 <i class="fas fa-edit mr-2"></i>
                 Edit Class
             </a>
+            @endcan
             <a href="{{ route('classes.index') }}"
                class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 <i class="fas fa-arrow-left mr-2"></i>
@@ -339,12 +341,14 @@
                         <div class="text-center py-4">
                             <i class="fas fa-user-slash text-gray-400 text-2xl mb-2"></i>
                             <p class="text-sm text-gray-500">No instructor assigned</p>
+                            @can('manage-classes')
                             <button type="button" 
                                     class="mt-2 inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                                     onclick="document.getElementById('assign-instructor-modal').classList.remove('hidden')">
                                 <i class="fas fa-plus mr-2"></i>
                                 Assign Instructor
                             </button>
+                            @endcan
                         </div>
                     @endif
                 </div>
@@ -381,6 +385,7 @@
             </div>
 
             <!-- Actions -->
+             @can('manage-classes')
             <div class="bg-white shadow-sm rounded-lg border border-gray-200">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h3 class="text-lg font-medium text-gray-900">Actions</h3>
@@ -407,6 +412,7 @@
                     @endif
                 </div>
             </div>
+            @endcan
         </div>
     </div>
 </div>

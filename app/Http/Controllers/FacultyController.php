@@ -19,7 +19,10 @@ class FacultyController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('manage-settings');
+        // Allow both manage-faculties and view-faculties permissions
+        if (!auth()->user()->can('manage-faculties') && !auth()->user()->can('view-faculties')) {
+            abort(403, 'Unauthorized');
+        }
 
         $query = Faculty::with(['dean', 'departments'])->withCount('departments');
 
@@ -44,7 +47,7 @@ class FacultyController extends Controller
      */
     public function create()
     {
-        $this->authorize('manage-settings');
+        $this->authorize('manage-faculties');
 
         // Get users who can be deans (teachers, admins, etc.)
         $potentialDeans = User::whereHas('roles', function($query) {
@@ -59,7 +62,7 @@ class FacultyController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('manage-settings');
+        $this->authorize('manage-faculties');
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -98,7 +101,10 @@ class FacultyController extends Controller
      */
     public function show(Faculty $faculty)
     {
-        $this->authorize('manage-settings');
+        // Allow both manage-faculties and view-faculties permissions
+        if (!auth()->user()->can('manage-faculties') && !auth()->user()->can('view-faculties')) {
+            abort(403, 'Unauthorized');
+        }
 
         $faculty->load(['dean', 'departments.hod']);
 
@@ -110,7 +116,7 @@ class FacultyController extends Controller
      */
     public function edit(Faculty $faculty)
     {
-        $this->authorize('manage-settings');
+        $this->authorize('manage-faculties');
 
         // Get users who can be deans
         $potentialDeans = User::whereHas('roles', function($query) {
@@ -125,7 +131,7 @@ class FacultyController extends Controller
      */
     public function update(Request $request, Faculty $faculty)
     {
-        $this->authorize('manage-settings');
+        $this->authorize('manage-faculties');
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -164,7 +170,7 @@ class FacultyController extends Controller
      */
     public function destroy(Faculty $faculty)
     {
-        $this->authorize('manage-settings');
+        $this->authorize('manage-faculties');
 
         if (!$faculty->canBeDeleted()) {
             return redirect()->route('faculties.index')

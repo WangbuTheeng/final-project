@@ -102,7 +102,7 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div>
                                     <div class="text-sm font-medium text-gray-900">{{ $fee->fee_type_display }}</div>
-                                    <div class="text-sm font-semibold text-green-600">₹{{ number_format($fee->amount, 2) }}</div>
+                                    <div class="text-sm font-semibold text-green-600">NRs {{ number_format($fee->amount, 2) }}</div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">

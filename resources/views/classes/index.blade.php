@@ -8,6 +8,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Class Sections</h1>
             <p class="mt-1 text-sm text-gray-500">Manage class sections and their schedules</p>
         </div>
+        @can('manage-classes')
         <div class="mt-4 sm:mt-0">
             <a href="{{ route('classes.create') }}"
                class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -15,6 +16,7 @@
                 Add Class Section
             </a>
         </div>
+        @endcan
     </div>
 
     <!-- Success/Error Messages -->
@@ -245,13 +247,14 @@
                                            title="View Details">
                                             <i class="fas fa-eye"></i>
                                         </a>
+                                        @can('manage-classes')
                                         <a href="{{ route('classes.edit', $class) }}"
                                            class="text-yellow-600 hover:text-yellow-900 transition-colors duration-200"
                                            title="Edit Class">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('classes.destroy', $class) }}" 
-                                              method="POST" 
+                                        <form action="{{ route('classes.destroy', $class) }}"
+                                              method="POST"
                                               class="inline-block"
                                               onsubmit="return confirm('Are you sure you want to delete this class section? This action cannot be undone.')">
                                             @csrf
@@ -262,6 +265,7 @@
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>
@@ -282,7 +286,14 @@
                     <i class="fas fa-chalkboard-teacher text-4xl"></i>
                 </div>
                 <h3 class="mt-2 text-sm font-medium text-gray-900">No class sections found</h3>
-                <p class="mt-1 text-sm text-gray-500">Get started by creating a new class section.</p>
+                <p class="mt-1 text-sm text-gray-500">
+                    @can('manage-classes')
+                        Get started by creating a new class section.
+                    @else
+                        No class sections are available to view.
+                    @endcan
+                </p>
+                @can('manage-classes')
                 <div class="mt-6">
                     <a href="{{ route('classes.create') }}"
                        class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -290,6 +301,7 @@
                         Add Class Section
                     </a>
                 </div>
+                @endcan
             </div>
         @endif
     </div>

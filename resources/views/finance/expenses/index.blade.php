@@ -192,7 +192,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                ₹{{ number_format($expense->amount, 2) }}
+                                NRs {{ number_format($expense->amount, 2) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {{ $expense->expense_date->format('M d, Y') }}

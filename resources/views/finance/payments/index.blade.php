@@ -123,7 +123,7 @@
                                 <div class="text-sm text-gray-500">{{ $payment->invoice->academicYear->name }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-semibold text-gray-900">₹{{ number_format($payment->amount, 2) }}</div>
+                                <div class="text-sm font-semibold text-gray-900">NRs {{ number_format($payment->amount, 2) }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ $payment->payment_method_display }}</div>
@@ -209,7 +209,7 @@
         </div>
         <div class="bg-white rounded-lg shadow-md p-4">
             <div class="text-sm font-medium text-gray-600">Total Amount</div>
-            <div class="text-2xl font-bold text-gray-900">₹{{ number_format($payments->sum('amount'), 2) }}</div>
+            <div class="text-2xl font-bold text-gray-900">NRs {{ number_format($payments->sum('amount'), 2) }}</div>
         </div>
         <div class="bg-white rounded-lg shadow-md p-4">
             <div class="text-sm font-medium text-gray-600">Completed</div>

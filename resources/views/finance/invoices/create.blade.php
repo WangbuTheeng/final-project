@@ -60,7 +60,7 @@
                         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                             <div class="flex items-center justify-between mb-3">
                                 <h4 class="text-sm font-medium text-yellow-900">Outstanding Balance</h4>
-                                <span id="outstanding-amount" class="text-lg font-bold text-red-600">₹0.00</span>
+                                <span id="outstanding-amount" class="text-lg font-bold text-red-600">NRs 0.00</span>
                             </div>
 
                             <div id="unpaid-invoices-list" class="space-y-2 mb-3">
@@ -188,7 +188,7 @@
                         <div id="fees-summary" class="mt-6 pt-4 border-t border-gray-200 hidden">
                             <div class="flex justify-between items-center">
                                 <span class="text-lg font-medium text-gray-900">Total Amount:</span>
-                                <span class="text-xl font-bold text-blue-600" id="total-amount">₹0.00</span>
+                                <span class="text-xl font-bold text-blue-600" id="total-amount">NRs 0.00</span>
                             </div>
                         </div>
                     </div>
@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const outstandingBalance = parseFloat(data.outstanding_balance);
 
                     if (outstandingBalance > 0) {
-                        outstandingAmountSpan.textContent = `₹${outstandingBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+                        outstandingAmountSpan.textContent = `NRs ${outstandingBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
 
                         // Display unpaid invoices
                         let invoicesHtml = '';
@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 invoicesHtml += `
                                     <div class="flex justify-between items-center text-xs">
                                         <span class="text-gray-700">#${invoice.invoice_number} (${invoice.academic_year})</span>
-                                        <span class="font-medium text-red-600">₹${parseFloat(invoice.balance).toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                                        <span class="font-medium text-red-600">NRs ${parseFloat(invoice.balance).toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
                                     </div>
                                 `;
                             });
@@ -361,7 +361,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                             ${fee.is_mandatory ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-1">Mandatory</span>' : ''}
                                         </div>
                                     </div>
-                                    <div class="text-sm font-semibold text-gray-900">₹${parseFloat(fee.amount).toLocaleString('en-IN', {minimumFractionDigits: 2})}</div>
+                                    <div class="text-sm font-semibold text-gray-900">NRs ${parseFloat(fee.amount).toLocaleString('en-IN', {minimumFractionDigits: 2})}</div>
                                 </div>
                                 <div class="fee-description-container ${fee.is_mandatory ? '' : 'hidden'} mt-2">
                                     <label class="block text-xs font-medium text-gray-700 mb-1">Description/Details:</label>
@@ -442,7 +442,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                placeholder="e.g., Late fee, Processing fee, etc." required>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Amount (₹) *</label>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Amount (NRs) *</label>
                         <input type="number" name="custom_expenses[${customExpenseCounter}][amount]"
                                class="custom-expense-amount w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                                placeholder="0.00" min="0" step="0.01" required>
@@ -510,12 +510,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Add outstanding balance if included
         if (includeOutstandingCheckbox && includeOutstandingCheckbox.checked) {
-            const outstandingText = outstandingAmountSpan.textContent.replace('₹', '').replace(/,/g, '');
+            const outstandingText = outstandingAmountSpan.textContent.replace('NRs ', '').replace(/,/g, '');
             const outstandingAmount = parseFloat(outstandingText) || 0;
             total += outstandingAmount;
         }
 
-        totalAmountSpan.textContent = `₹${total.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        totalAmountSpan.textContent = `NRs ${total.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
         updateSubmitButton();
     }
 

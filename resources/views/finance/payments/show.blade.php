@@ -89,7 +89,7 @@
                 <div class="border-t border-gray-200 pt-6">
                     <div class="text-center">
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">Payment Amount</h3>
-                        <p class="text-4xl font-bold text-green-600">₹{{ number_format($payment->amount, 2) }}</p>
+                        <p class="text-4xl font-bold text-green-600">NRs {{ number_format($payment->amount, 2) }}</p>
                     </div>
                 </div>
 
@@ -194,7 +194,7 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">Amount:</span>
-                        <span class="font-medium text-green-600">₹{{ number_format($payment->amount, 2) }}</span>
+                        <span class="font-medium text-green-600">NRs {{ number_format($payment->amount, 2) }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">Method:</span>

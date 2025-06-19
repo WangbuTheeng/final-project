@@ -33,7 +33,10 @@ class ExamController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('manage-exams');
+        // Allow both view-exams and manage-exams permissions
+        if (!auth()->user()->can('view-exams') && !auth()->user()->can('manage-exams')) {
+            abort(403, 'Unauthorized');
+        }
 
         $query = Exam::with(['class.course', 'subject', 'academicYear', 'creator']);
 
@@ -273,8 +276,10 @@ class ExamController extends Controller
      */
     public function show(Exam $exam)
     {
-        // Check if user has permission to view exams
-        $this->authorize('manage-exams');
+        // Allow both view-exams and manage-exams permissions
+        if (!auth()->user()->can('view-exams') && !auth()->user()->can('manage-exams')) {
+            abort(403, 'Unauthorized');
+        }
 
         $exam->load(['class.course.faculty', 'subject', 'academicYear', 'creator', 'grades.student.user']);
 

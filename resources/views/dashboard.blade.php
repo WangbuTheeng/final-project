@@ -30,15 +30,15 @@
 </div>
 
 <!-- Statistics Cards -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     @if($role === 'Examiner')
         <!-- Upcoming Exams Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div class="flex items-center">
-                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
+                <div class="p-3 rounded-lg flex-shrink-0" style="background-color: rgba(55, 162, 188, 0.1);">
                     <i class="fas fa-file-alt text-xl" style="color: #37a2bc;"></i>
                 </div>
-                <div class="ml-4 flex-1">
+                <div class="ml-4 flex-1 min-w-0">
                     <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">UPCOMING EXAMS</p>
                     <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['upcoming_exams']) }}</p>
                     <p class="text-xs text-gray-500 mt-1">
@@ -49,14 +49,14 @@
         </div>
 
         <!-- Total Exams Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 responsive-card">
             <div class="flex items-center">
-                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
-                    <i class="fas fa-clipboard-list text-xl" style="color: #37a2bc;"></i>
+                <div class="p-2 sm:p-3 rounded-lg flex-shrink-0" style="background-color: rgba(55, 162, 188, 0.1);">
+                    <i class="fas fa-clipboard-list text-lg sm:text-xl" style="color: #37a2bc;"></i>
                 </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">TOTAL EXAMS</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_exams'] ?? 0) }}</p>
+                <div class="ml-3 sm:ml-4 flex-1 min-w-0">
+                    <p class="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide truncate">TOTAL EXAMS</p>
+                    <p class="text-xl sm:text-2xl font-bold text-gray-900">{{ number_format($stats['total_exams'] ?? 0) }}</p>
                     <p class="text-xs text-gray-500 mt-1">
                         <span class="text-gray-500">All time</span>
                     </p>
@@ -104,7 +104,7 @@
                 </div>
                 <div class="ml-4 flex-1">
                     <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">TOTAL REVENUE</p>
-                    <p class="text-2xl font-bold text-gray-900">₹{{ number_format($financeStats['total_revenue'] ?? 0, 2) }}</p>
+                    <p class="text-2xl font-bold text-gray-900">NRs {{ number_format($financeStats['total_revenue'] ?? 0, 2) }}</p>
                     <p class="text-xs text-gray-500 mt-1">
                         <span class="text-gray-500">All time</span>
                     </p>
@@ -120,7 +120,7 @@
                 </div>
                 <div class="ml-4 flex-1">
                     <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">OUTSTANDING</p>
-                    <p class="text-2xl font-bold text-gray-900">₹{{ number_format($financeStats['outstanding_amount'] ?? 0, 2) }}</p>
+                    <p class="text-2xl font-bold text-gray-900">NRs {{ number_format($financeStats['outstanding_amount'] ?? 0, 2) }}</p>
                     <p class="text-xs text-gray-500 mt-1">
                         <span class="text-gray-500">{{ $financeStats['pending_invoices'] ?? 0 }} pending</span>
                     </p>
@@ -136,7 +136,7 @@
                 </div>
                 <div class="ml-4 flex-1">
                     <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">THIS MONTH</p>
-                    <p class="text-2xl font-bold text-gray-900">₹{{ number_format($financeStats['this_month_revenue'] ?? 0, 2) }}</p>
+                    <p class="text-2xl font-bold text-gray-900">NRs {{ number_format($financeStats['this_month_revenue'] ?? 0, 2) }}</p>
                     <p class="text-xs text-gray-500 mt-1">
                         <span class="text-gray-500">Revenue</span>
                     </p>
@@ -276,7 +276,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-green-100 text-sm font-medium uppercase tracking-wide">Total Revenue</p>
-                        <p class="text-2xl font-bold">₹{{ number_format($financeStats['total_revenue'], 2) }}</p>
+                        <p class="text-2xl font-bold">NRs {{ number_format($financeStats['total_revenue'], 2) }}</p>
                         <p class="text-xs text-green-100 mt-1">All time collections</p>
                     </div>
                     <div class="p-3 rounded-lg bg-white bg-opacity-20">
@@ -290,7 +290,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-blue-100 text-sm font-medium uppercase tracking-wide">This Month</p>
-                        <p class="text-2xl font-bold">₹{{ number_format($financeStats['this_month_revenue'], 2) }}</p>
+                        <p class="text-2xl font-bold">NRs {{ number_format($financeStats['this_month_revenue'], 2) }}</p>
                         <p class="text-xs text-blue-100 mt-1">
                             @if($financeStats['revenue_growth'] > 0)
                                 ↗ {{ $financeStats['revenue_growth'] }}% from last month
@@ -312,7 +312,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-orange-100 text-sm font-medium uppercase tracking-wide">Outstanding</p>
-                        <p class="text-2xl font-bold">₹{{ number_format($financeStats['outstanding_amount'], 2) }}</p>
+                        <p class="text-2xl font-bold">NRs {{ number_format($financeStats['outstanding_amount'], 2) }}</p>
                         <p class="text-xs text-orange-100 mt-1">{{ $financeStats['pending_invoices'] }} pending invoices</p>
                     </div>
                     <div class="p-3 rounded-lg bg-white bg-opacity-20">
@@ -427,7 +427,7 @@
                             <div class="w-24 bg-gray-200 rounded-full h-2">
                                 <div class="h-2 rounded-full" style="background-color: #37a2bc; width: {{ $maxAmount > 0 ? ($day['amount'] / $maxAmount) * 100 : 0 }}%"></div>
                             </div>
-                            <span class="text-sm font-medium text-gray-900 w-20 text-right">₹{{ number_format($day['amount'], 0) }}</span>
+                            <span class="text-sm font-medium text-gray-900 w-20 text-right">NRs {{ number_format($day['amount'], 0) }}</span>
                         </div>
                     </div>
                 @endforeach
@@ -435,7 +435,7 @@
             <div class="mt-4 pt-4 border-t border-gray-200">
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-500">Total (7 days)</span>
-                    <span class="font-medium text-gray-900">₹{{ number_format($last7Days->sum('amount'), 2) }}</span>
+                    <span class="font-medium text-gray-900">NRs {{ number_format($last7Days->sum('amount'), 2) }}</span>
                 </div>
             </div>
         </div>
@@ -443,7 +443,7 @@
 @endif
 
 <!-- Content Grid -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 responsive-grid">
     @if($role === 'Examiner')
         <!-- Examiner-specific content -->
         <!-- Recent Exams -->
@@ -508,7 +508,7 @@
                         <div class="flex-1">
                             <div class="flex items-center">
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium bg-green-500">
-                                    ₹
+                                    NRs
                                 </div>
                                 <div class="ml-3">
                                     <h4 class="text-sm font-medium text-gray-900">{{ $payment['student_name'] }}</h4>
@@ -517,7 +517,7 @@
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm font-medium text-green-600">₹{{ number_format($payment['amount'], 2) }}</p>
+                            <p class="text-sm font-medium text-green-600">NRs {{ number_format($payment['amount'], 2) }}</p>
                             <p class="text-xs text-gray-500">{{ $payment['payment_date'] }}</p>
                         </div>
                     </div>
@@ -553,7 +553,7 @@
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm font-medium text-red-600">₹{{ number_format($invoice['amount'], 2) }}</p>
+                            <p class="text-sm font-medium text-red-600">NRs {{ number_format($invoice['amount'], 2) }}</p>
                             <p class="text-xs text-gray-500">Due: {{ $invoice['due_date'] }}</p>
                         </div>
                     </div>
@@ -858,7 +858,7 @@
                 <div class="space-y-3">
                     <div class="flex justify-between items-center">
                         <span class="text-sm text-gray-600">Today's Collections</span>
-                        <span class="text-lg font-semibold text-green-600">₹{{ number_format($todayPayments, 2) }}</span>
+                        <span class="text-lg font-semibold text-green-600">NRs {{ number_format($todayPayments, 2) }}</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-sm text-gray-600">New Invoices</span>
@@ -866,7 +866,7 @@
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-sm text-gray-600">Outstanding</span>
-                        <span class="text-lg font-semibold text-orange-600">₹{{ number_format($financeStats['outstanding_amount'], 2) }}</span>
+                        <span class="text-lg font-semibold text-orange-600">NRs {{ number_format($financeStats['outstanding_amount'], 2) }}</span>
                     </div>
                 </div>
             </div>
@@ -923,15 +923,15 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-green-600">₹{{ number_format($financeStats['total_revenue'], 2) }}</div>
+                    <div class="text-2xl font-bold text-green-600">NRs {{ number_format($financeStats['total_revenue'], 2) }}</div>
                     <div class="text-sm text-gray-500">Total Revenue</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-blue-600">₹{{ number_format($financeStats['this_month_revenue'], 2) }}</div>
+                    <div class="text-2xl font-bold text-blue-600">NRs {{ number_format($financeStats['this_month_revenue'], 2) }}</div>
                     <div class="text-sm text-gray-500">This Month</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-orange-600">₹{{ number_format($financeStats['outstanding_amount'], 2) }}</div>
+                    <div class="text-2xl font-bold text-orange-600">NRs {{ number_format($financeStats['outstanding_amount'], 2) }}</div>
                     <div class="text-sm text-gray-500">Outstanding</div>
                 </div>
                 <div class="text-center">

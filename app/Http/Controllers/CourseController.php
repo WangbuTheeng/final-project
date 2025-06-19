@@ -21,7 +21,7 @@ class CourseController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('view-courses');
 
         $query = Course::with(['faculty', 'department'])
             ->withCount('classes');
@@ -163,7 +163,7 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('view-courses');
 
         $course->load(['faculty', 'department', 'classes.academicYear']);
 

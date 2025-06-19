@@ -214,23 +214,7 @@
                         @enderror
                     </div>
 
-                    <div>
-                        <label for="current_level" class="block text-sm font-medium text-gray-700">Current Level *</label>
-                        <div class="mt-1">
-                            <select name="current_level" id="current_level" required
-                                    class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md @error('current_level') border-red-500 @enderror">
-                                <option value="">Select Level</option>
-                                <option value="100" {{ old('current_level') == '100' ? 'selected' : '' }}>100 Level</option>
-                                <option value="200" {{ old('current_level') == '200' ? 'selected' : '' }}>200 Level</option>
-                                <option value="300" {{ old('current_level') == '300' ? 'selected' : '' }}>300 Level</option>
-                                <option value="400" {{ old('current_level') == '400' ? 'selected' : '' }}>400 Level</option>
-                                <option value="500" {{ old('current_level') == '500' ? 'selected' : '' }}>500 Level</option>
-                            </select>
-                        </div>
-                        @error('current_level')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+
 
                     <div>
                         <label for="mode_of_entry" class="block text-sm font-medium text-gray-700">Mode of Entry *</label>
@@ -248,21 +232,7 @@
                         @enderror
                     </div>
 
-                    <div>
-                        <label for="study_mode" class="block text-sm font-medium text-gray-700">Study Mode *</label>
-                        <div class="mt-1">
-                            <select name="study_mode" id="study_mode" required
-                                    class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md @error('study_mode') border-red-500 @enderror">
-                                <option value="">Select Study Mode</option>
-                                <option value="full_time" {{ old('study_mode') == 'full_time' ? 'selected' : '' }}>Full Time</option>
-                                <option value="part_time" {{ old('study_mode') == 'part_time' ? 'selected' : '' }}>Part Time</option>
-                                <option value="distance" {{ old('study_mode') == 'distance' ? 'selected' : '' }}>Distance Learning</option>
-                            </select>
-                        </div>
-                        @error('study_mode')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+
                 </div>
             </div>
         </div>

@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -60,11 +62,45 @@ class User extends Authenticatable
     }
 
     /**
+     * Activity log configuration
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'name',
+                'first_name',
+                'last_name',
+                'email',
+                'phone',
+                'contact_number',
+                'date_of_birth',
+                'gender',
+                'address',
+                'role',
+                'status',
+                'last_login_at'
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "User {$eventName}")
+            ->useLogName('user_management');
+    }
+
+    /**
      * Get the student record associated with the user
      */
     public function student()
     {
         return $this->hasOne(Student::class);
+    }
+
+    /**
+     * Get the teacher record associated with the user
+     */
+    public function teacher()
+    {
+        return $this->hasOne(Teacher::class);
     }
 
     /**

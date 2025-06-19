@@ -382,9 +382,7 @@ class EnrollmentApiController extends Controller
                 $reasons[] = 'Student is already enrolled in this course for the selected semester';
             }
 
-            if ($course->level != $student->current_level) {
-                $reasons[] = 'Course level does not match student\'s current level';
-            }
+            // Note: Course level checking removed as student levels are no longer tracked
 
             if (!empty($course->prerequisites)) {
                 $completedCourses = $student->completedEnrollments()
@@ -443,11 +441,7 @@ class EnrollmentApiController extends Controller
             'dropped' => $query->where('status', 'dropped')->count(),
         ];
 
-        // Get enrollment by level
-        $enrollmentsByLevel = $query->with('student')
-            ->get()
-            ->groupBy('student.current_level')
-            ->map->count();
+        // Note: Enrollment by level removed as student levels are no longer tracked
 
         // Get enrollment by course type
         $enrollmentsByCourseType = $query->with('class.course')
@@ -457,7 +451,6 @@ class EnrollmentApiController extends Controller
 
         return response()->json([
             'stats' => $stats,
-            'by_level' => $enrollmentsByLevel,
             'by_course_type' => $enrollmentsByCourseType
         ]);
     }

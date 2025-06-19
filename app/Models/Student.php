@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log; // Import Log facade
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Student extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'user_id',
@@ -16,9 +18,7 @@ class Student extends Model
         'department_id',
         'faculty_id',
         'academic_year_id',
-        'current_level',
         'mode_of_entry',
-        'study_mode',
         'status',
         'cgpa',
         'total_credits_earned',
@@ -30,7 +30,6 @@ class Student extends Model
     protected $casts = [
         'cgpa' => 'decimal:2',
         'total_credits_earned' => 'integer',
-        'current_level' => 'integer',
         'expected_graduation_date' => 'date',
         'actual_graduation_date' => 'date',
         'guardian_info' => 'array'
@@ -40,6 +39,30 @@ class Student extends Model
         'expected_graduation_date',
         'actual_graduation_date'
     ];
+
+    /**
+     * Activity log configuration
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'admission_number',
+                'department_id',
+                'faculty_id',
+                'academic_year_id',
+                'mode_of_entry',
+                'status',
+                'cgpa',
+                'total_credits_earned',
+                'expected_graduation_date',
+                'actual_graduation_date'
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Student {$eventName}")
+            ->useLogName('student_management');
+    }
 
     /**
      * Get the user associated with the student
@@ -177,13 +200,7 @@ class Student extends Model
         return $query->where('faculty_id', $facultyId);
     }
 
-    /**
-     * Scope to get students by level
-     */
-    public function scopeByLevel($query, $level)
-    {
-        return $query->where('current_level', $level);
-    }
+
 
     /**
      * Scope to get students by academic year
@@ -201,21 +218,7 @@ class Student extends Model
         return $this->user->first_name . ' ' . $this->user->last_name;
     }
 
-    /**
-     * Get student's level name
-     */
-    public function getLevelNameAttribute()
-    {
-        $levels = [
-            100 => '100 Level (Year 1)',
-            200 => '200 Level (Year 2)',
-            300 => '300 Level (Year 3)',
-            400 => '400 Level (Year 4)',
-            500 => '500 Level (Year 5)'
-        ];
 
-        return $levels[$this->current_level] ?? 'Unknown Level';
-    }
 
     /**
      * Check if student can enroll in a course
@@ -236,11 +239,7 @@ class Student extends Model
             $reasons[] = 'Student is already enrolled in this specific class for the selected semester.';
         }
 
-        // Check if course level matches student level (only if course has level defined)
-        // Use $class->course->level instead of $course->level
-        if (isset($class->course->level) && $class->course->level !== null && $class->course->level != $this->current_level) {
-            $reasons[] = 'Course level (' . $class->course->level . ') does not match student\'s current level (' . $this->current_level . ').';
-        }
+        // Note: Course level checking removed as student levels are no longer tracked
 
         // Check prerequisites (only if course has prerequisites defined)
         // Use $class->course->prerequisites instead of $course->prerequisites

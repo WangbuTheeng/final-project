@@ -21,7 +21,7 @@ class SubjectController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('manage-courses'); // Using course permission as subjects are part of classes
+        $this->authorize('view-subjects');
 
         $query = Subject::with(['class.course.faculty', 'instructor'])
             ->withCount(['class']);
@@ -274,7 +274,7 @@ class SubjectController extends Controller
      */
     public function show(Subject $subject)
     {
-        $this->authorize('manage-courses');
+        $this->authorize('view-subjects');
 
         $subject->load(['class.course.faculty', 'class.academicYear', 'instructor']);
 

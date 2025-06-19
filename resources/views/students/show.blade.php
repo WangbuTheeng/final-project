@@ -58,20 +58,7 @@
             </div>
         </div>
 
-        <!-- Level Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-layer-group text-blue-600 text-sm"></i>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Current Level</p>
-                    <p class="text-lg font-semibold text-gray-900">{{ $student->current_level }} Level</p>
-                </div>
-            </div>
-        </div>
+
 
         <!-- CGPA Card -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -168,10 +155,7 @@
                             <dt class="text-sm font-medium text-gray-500">Mode of Entry</dt>
                             <dd class="mt-1 text-sm text-gray-900 uppercase">{{ str_replace('_', ' ', $student->mode_of_entry) }}</dd>
                         </div>
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Study Mode</dt>
-                            <dd class="mt-1 text-sm text-gray-900 capitalize">{{ str_replace('_', ' ', $student->study_mode) }}</dd>
-                        </div>
+
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Expected Graduation</dt>
                             <dd class="mt-1 text-sm text-gray-900">{{ $student->expected_graduation_date?->format('M Y') ?? 'Not calculated' }}</dd>

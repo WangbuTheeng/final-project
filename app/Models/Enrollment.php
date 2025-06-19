@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Enrollment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'student_id',
@@ -40,6 +42,33 @@ class Enrollment extends Model
         'drop_date',
         'deleted_at'
     ];
+
+    /**
+     * Activity log configuration
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'student_id',
+                'class_id',
+                'academic_year_id',
+                'semester',
+                'status',
+                'enrollment_date',
+                'drop_date',
+                'drop_reason',
+                'attendance_percentage',
+                'ca_score',
+                'exam_score',
+                'total_score',
+                'final_grade'
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Enrollment {$eventName}")
+            ->useLogName('enrollment_management');
+    }
 
     /**
      * Get the student that owns the enrollment

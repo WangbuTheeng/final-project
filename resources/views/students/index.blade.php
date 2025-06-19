@@ -10,6 +10,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Students</h1>
             <p class="mt-1 text-sm text-gray-500">Manage student records and information</p>
         </div>
+        @can('manage-students')
         <div class="mt-4 sm:mt-0">
             <a href="{{ route('students.create') }}"
                class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -17,6 +18,7 @@
                 Add Student
             </a>
         </div>
+        @endcan
     </div>
 
     <!-- Statistics Cards -->
@@ -323,6 +325,7 @@
                                            title="View Details">
                                             <i class="fas fa-eye w-4 h-4"></i>
                                         </a>
+                                        @can('manage-students')
                                         <a href="{{ route('students.edit', $student) }}"
                                            class="action-btn inline-flex items-center p-2 border border-transparent rounded-md text-yellow-600 hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
                                            title="Edit">
@@ -340,6 +343,7 @@
                                                 </button>
                                             </form>
                                         @endif
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>
@@ -351,12 +355,20 @@
                                             <i class="fas fa-users text-gray-400 text-2xl"></i>
                                         </div>
                                         <h3 class="text-lg font-medium text-gray-900 mb-2">No students found</h3>
-                                        <p class="text-gray-500 mb-6">No students match the selected criteria. Try adjusting your filters or add a new student.</p>
+                                        <p class="text-gray-500 mb-6">
+                                            @can('manage-students')
+                                                No students match the selected criteria. Try adjusting your filters or add a new student.
+                                            @else
+                                                No students match the selected criteria. Try adjusting your filters.
+                                            @endcan
+                                        </p>
+                                        @can('manage-students')
                                         <a href="{{ route('students.create') }}"
                                            class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                             <i class="fas fa-plus mr-2"></i>
                                             Add First Student
                                         </a>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>

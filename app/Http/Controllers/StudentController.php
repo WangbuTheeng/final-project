@@ -127,9 +127,7 @@ class StudentController extends Controller
             'faculty_id' => 'required|exists:faculties,id',
             'department_id' => 'nullable|exists:departments,id',
             'academic_year_id' => 'required|exists:academic_years,id',
-            'current_level' => 'required|in:100,200,300,400,500',
             'mode_of_entry' => 'required|in:entrance_exam,direct_entry,transfer',
-            'study_mode' => 'required|in:full_time,part_time,distance',
             
             // Guardian information
             'guardian_name' => 'nullable|string|max:255',
@@ -191,13 +189,26 @@ class StudentController extends Controller
                 'faculty_id' => $request->faculty_id,
                 'department_id' => $request->department_id,
                 'academic_year_id' => $request->academic_year_id,
-                'current_level' => $request->current_level,
                 'mode_of_entry' => $request->mode_of_entry,
-                'study_mode' => $request->study_mode,
                 'status' => 'active',
                 'expected_graduation_date' => $expectedGraduationDate,
                 'guardian_info' => $guardianInfo
             ]);
+
+            // Log activity
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($student)
+                ->withProperties([
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'url' => $request->fullUrl(),
+                    'method' => $request->method(),
+                    'admission_number' => $admissionNumber,
+                    'faculty_name' => $student->faculty->name ?? 'N/A',
+                    'department_name' => $student->department->name ?? 'N/A'
+                ])
+                ->log('Student created successfully');
 
             DB::commit();
 
@@ -272,9 +283,7 @@ class StudentController extends Controller
             // Student fields
             'faculty_id' => 'required|exists:faculties,id',
             'department_id' => 'nullable|exists:departments,id',
-            'current_level' => 'required|in:100,200,300,400,500',
             'mode_of_entry' => 'required|in:entrance_exam,direct_entry,transfer',
-            'study_mode' => 'required|in:full_time,part_time,distance',
             'status' => 'required|in:active,graduated,suspended,withdrawn,deferred',
             
             // Guardian information
@@ -316,12 +325,25 @@ class StudentController extends Controller
             $student->update([
                 'faculty_id' => $request->faculty_id,
                 'department_id' => $request->department_id,
-                'current_level' => $request->current_level,
                 'mode_of_entry' => $request->mode_of_entry,
-                'study_mode' => $request->study_mode,
                 'status' => $request->status,
                 'guardian_info' => $guardianInfo
             ]);
+
+            // Log activity
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($student)
+                ->withProperties([
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'url' => $request->fullUrl(),
+                    'method' => $request->method(),
+                    'admission_number' => $student->admission_number,
+                    'faculty_name' => $student->faculty->name ?? 'N/A',
+                    'department_name' => $student->department->name ?? 'N/A'
+                ])
+                ->log('Student updated successfully');
 
             DB::commit();
 
@@ -350,6 +372,22 @@ class StudentController extends Controller
             if ($activeEnrollments > 0) {
                 return back()->with('error', 'Cannot delete student with active enrollments.');
             }
+
+            // Log activity before deletion
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($student)
+                ->withProperties([
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'url' => request()->fullUrl(),
+                    'method' => request()->method(),
+                    'admission_number' => $student->admission_number,
+                    'student_name' => $student->user->name,
+                    'faculty_name' => $student->faculty->name ?? 'N/A',
+                    'department_name' => $student->department->name ?? 'N/A'
+                ])
+                ->log('Student deleted');
 
             $student->delete();
             $student->user->delete();

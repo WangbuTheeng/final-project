@@ -44,6 +44,8 @@ class RolesAndPermissionsSeeder extends Seeder
             // Settings/Dashboard
             'access-admin-dashboard', 'access-teacher-dashboard', 'access-examiner-dashboard',
             'access-accountant-dashboard', 'manage-settings',
+            // New permission for subjects
+            'view-subjects',
         ];
 
         foreach ($permissions as $permission) {
@@ -65,53 +67,51 @@ class RolesAndPermissionsSeeder extends Seeder
         // Super Admin gets all permissions
         $superAdminRole->givePermissionTo($allPermissions);
 
-        // Admin gets most permissions for managing content, users, and roles
+        // Admin gets most permissions except user management, activity logs, and financial management
         $adminPermissions = [
-            'view-users', 'create-users', 'edit-users', 'delete-users',
-            'view-roles', 'create-roles', 'edit-roles', 'delete-roles',
-            'view-permissions', 'create-permissions', 'edit-permissions', 'delete-permissions',
-            'assign-roles-to-users', 'assign-permissions-to-roles',
+            // Academic Management
             'view-courses', 'create-courses', 'edit-courses', 'delete-courses', 'manage-courses',
             'view-students', 'create-students', 'edit-students', 'delete-students', 'manage-students',
             'view-enrollments', 'manage-enrollments', 'create-enrollments', 'drop-enrollments',
             'view-exams', 'create-exams', 'edit-exams', 'delete-exams', 'manage-exams',
             'view-grades', 'create-grades', 'edit-grades', 'delete-grades', 'manage-grades',
-            'view-finances', 'manage-fees', 'create-invoices', 'manage-invoices',
-            'create-payments', 'verify-payments', 'manage-payments', 'view-financial-reports',
-            'manage-expenses', 'approve-expenses',
             'view-classes', 'create-classes', 'edit-classes', 'manage-classes',
+            'view-subjects',
+            // Reports and Settings
             'view-reports', 'generate-reports', 'export-reports',
             'access-admin-dashboard', 'manage-settings',
         ];
         $adminRole->givePermissionTo($adminPermissions);
 
-        // Examiner role permissions
+        // Examiner role permissions - Only exam management + limited dashboard
         $examinerRole->givePermissionTo([
             'view-exams', 'create-exams', 'edit-exams', 'delete-exams', 'manage-exams',
             'view-grades', 'create-grades', 'edit-grades', 'delete-grades', 'manage-grades',
-            'view-students', 'view-courses',
-            'view-reports', 'generate-reports',
+            'view-students', 'view-courses', 'view-subjects', // Needed to see students/courses for exams
+            'view-reports', 'generate-reports', // For exam reports
             'access-examiner-dashboard',
         ]);
 
-        // Accountant role permissions
+        // Accountant role permissions - Only financial management + limited dashboard
         $accountantRole->givePermissionTo([
             'view-finances', 'manage-fees', 'create-invoices', 'manage-invoices',
             'create-payments', 'verify-payments', 'manage-payments', 'manage-salaries',
-            'view-financial-reports', 'view-students', 'manage-expenses', 'approve-expenses',
+            'view-financial-reports', 'manage-expenses', 'approve-expenses',
+            'view-students', // Needed for financial operations
             'access-accountant-dashboard',
         ]);
 
         // Teacher role permissions
         $teacherRole->givePermissionTo([
-            'view-classes', 'edit-classes', 'assign-homework',
-            'grade-assignments', 'view-student-progress',
-            'view-students', 'view-courses',
-            'view-enrollments', 'manage-enrollments',
-            'view-exams', 'create-exams', 'edit-exams', 'manage-exams',
-            'view-grades', 'create-grades', 'edit-grades', 'manage-grades',
+            'view-courses',
+            'view-classes',
+            'view-subjects',
+            'view-students',
+            'view-exams',
+            'view-grades',
             'view-reports',
-            'access-teacher-dashboard',
+            'manage-settings', // For viewing faculties
+            'access-teacher-dashboard', // Keep dashboard access
         ]);
 
         // 4. Create test users for each role

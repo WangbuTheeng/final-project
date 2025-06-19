@@ -115,9 +115,8 @@ class EnrollmentService
      */
     public function getEnrollmentRecommendations(Student $student, $academicYearId, $semester)
     {
-        // Get courses for student's level and department
+        // Get courses for student's department (level checking removed)
         $availableCourses = Course::where('department_id', $student->department_id)
-            ->where('level', $student->current_level)
             ->where('is_active', true)
             ->where(function ($query) use ($semester) {
                 $query->where('semester', $semester)
@@ -228,7 +227,7 @@ class EnrollmentService
             'unique_students' => $enrollments->unique('student_id')->count(),
             'unique_courses' => $enrollments->unique('class.course.id')->count(),
             'by_status' => $enrollments->groupBy('status')->map->count(),
-            'by_level' => $enrollments->groupBy('student.current_level')->map->count(),
+
             'by_course' => $enrollments->groupBy('class.course.code')->map->count()
         ];
 

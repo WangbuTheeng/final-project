@@ -22,7 +22,7 @@ class ClassSectionController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('manage-classes');
+        $this->authorize('view-classes');
 
         $query = ClassSection::with(['course.department', 'academicYear', 'instructor'])
             ->withCount('enrollments');
@@ -198,7 +198,7 @@ class ClassSectionController extends Controller
      */
     public function show(ClassSection $class)
     {
-        $this->authorize('manage-classes');
+        $this->authorize('view-classes');
 
         // Load relationships with null safety
         $class->load(['course.department', 'academicYear', 'instructor', 'enrollments.student.user']);

@@ -29,7 +29,10 @@ class ResultController extends Controller
      */
     public function index()
     {
-        $this->authorize('manage-exams');
+        // Allow both manage-exams and view-exams (for teachers)
+        if (!auth()->user()->can('manage-exams') && !auth()->user()->can('view-exams')) {
+            abort(403, 'Unauthorized');
+        }
 
         // Get completed exams with marks
         $exams = Exam::with(['class.course.faculty', 'academicYear', 'marks'])
@@ -56,7 +59,10 @@ class ResultController extends Controller
      */
     public function generate(Request $request, Exam $exam)
     {
-        $this->authorize('manage-exams');
+        // Allow both manage-exams and view-exams (for teachers to view results)
+        if (!auth()->user()->can('manage-exams') && !auth()->user()->can('view-exams')) {
+            abort(403, 'Unauthorized');
+        }
 
         $exam->load(['class.course.faculty', 'academicYear', 'subjects']);
 

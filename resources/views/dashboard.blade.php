@@ -31,85 +31,234 @@
 
 <!-- Statistics Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <!-- Total Students Card -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center">
-            <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
-                <i class="fas fa-user-graduate text-xl" style="color: #37a2bc;"></i>
-            </div>
-            <div class="ml-4 flex-1">
-                <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">TOTAL STUDENTS</p>
-                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_students']) }}</p>
-                <p class="text-xs text-gray-500 mt-1">
-                    @if($stats['students_growth'] > 0)
-                        <span style="color: #37a2bc;">↗ {{ $stats['students_growth'] }}%</span> from last month
-                    @elseif($stats['students_growth'] < 0)
-                        <span class="text-red-500">↘ {{ abs($stats['students_growth']) }}%</span> from last month
-                    @else
-                        <span class="text-gray-500">No change from last month</span>
-                    @endif
-                </p>
+    @if($role === 'Examiner')
+        <!-- Upcoming Exams Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
+                    <i class="fas fa-file-alt text-xl" style="color: #37a2bc;"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">UPCOMING EXAMS</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['upcoming_exams']) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span class="text-gray-500">Next 30 days</span>
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Active Classes Card -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center">
-            <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
-                <i class="fas fa-chalkboard text-xl" style="color: #37a2bc;"></i>
-            </div>
-            <div class="ml-4 flex-1">
-                <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">ACTIVE CLASSES</p>
-                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['active_classes']) }}</p>
-                <p class="text-xs text-gray-500 mt-1">
-                    <span class="text-gray-500">Current academic year</span>
-                </p>
+        <!-- Total Exams Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
+                    <i class="fas fa-clipboard-list text-xl" style="color: #37a2bc;"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">TOTAL EXAMS</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_exams'] ?? 0) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span class="text-gray-500">All time</span>
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Upcoming Exams Card -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center">
-            <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
-                <i class="fas fa-file-alt text-xl" style="color: #37a2bc;"></i>
-            </div>
-            <div class="ml-4 flex-1">
-                <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">UPCOMING EXAMS</p>
-                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['upcoming_exams']) }}</p>
-                <p class="text-xs text-gray-500 mt-1">
-                    <span class="text-gray-500">Next 30 days</span>
-                </p>
+        <!-- Pending Results Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
+                    <i class="fas fa-hourglass-half text-xl" style="color: #37a2bc;"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">PENDING RESULTS</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['pending_results'] ?? 0) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span class="text-gray-500">Awaiting grades</span>
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Total Users Card -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center">
-            <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
-                <i class="fas fa-users text-xl" style="color: #37a2bc;"></i>
-            </div>
-            <div class="ml-4 flex-1">
-                <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">TOTAL USERS</p>
-                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_users']) }}</p>
-                <p class="text-xs text-gray-500 mt-1">
-                    @if($stats['users_growth'] > 0)
-                        <span style="color: #37a2bc;">↗ {{ $stats['users_growth'] }}%</span> from last month
-                    @elseif($stats['users_growth'] < 0)
-                        <span class="text-red-500">↘ {{ abs($stats['users_growth']) }}%</span> from last month
-                    @else
-                        <span class="text-gray-500">No change from last month</span>
-                    @endif
-                </p>
+        <!-- Students in Exams Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
+                    <i class="fas fa-user-graduate text-xl" style="color: #37a2bc;"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">STUDENTS</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_students']) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span class="text-gray-500">In system</span>
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
+    @elseif($role === 'Accountant')
+        <!-- Total Revenue Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg" style="background-color: rgba(34, 197, 94, 0.1);">
+                    <i class="fas fa-rupee-sign text-xl text-green-600"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">TOTAL REVENUE</p>
+                    <p class="text-2xl font-bold text-gray-900">₹{{ number_format($financeStats['total_revenue'] ?? 0, 2) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span class="text-gray-500">All time</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Outstanding Amount Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg" style="background-color: rgba(249, 115, 22, 0.1);">
+                    <i class="fas fa-exclamation-triangle text-xl text-orange-600"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">OUTSTANDING</p>
+                    <p class="text-2xl font-bold text-gray-900">₹{{ number_format($financeStats['outstanding_amount'] ?? 0, 2) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span class="text-gray-500">{{ $financeStats['pending_invoices'] ?? 0 }} pending</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- This Month Revenue Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg" style="background-color: rgba(59, 130, 246, 0.1);">
+                    <i class="fas fa-chart-line text-xl text-blue-600"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">THIS MONTH</p>
+                    <p class="text-2xl font-bold text-gray-900">₹{{ number_format($financeStats['this_month_revenue'] ?? 0, 2) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span class="text-gray-500">Revenue</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
+                    <i class="fas fa-user-graduate text-xl" style="color: #37a2bc;"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">STUDENTS</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_students']) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span class="text-gray-500">Total enrolled</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    @else
+        <!-- Default cards for Super Admin, Admin, Teacher -->
+        <!-- Total Students Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
+                    <i class="fas fa-user-graduate text-xl" style="color: #37a2bc;"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">TOTAL STUDENTS</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_students']) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        @if($stats['students_growth'] > 0)
+                            <span style="color: #37a2bc;">↗ {{ $stats['students_growth'] }}%</span> from last month
+                        @elseif($stats['students_growth'] < 0)
+                            <span class="text-red-500">↘ {{ abs($stats['students_growth']) }}%</span> from last month
+                        @else
+                            <span class="text-gray-500">No change from last month</span>
+                        @endif
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Classes Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
+                    <i class="fas fa-chalkboard text-xl" style="color: #37a2bc;"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">ACTIVE CLASSES</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['active_classes']) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span class="text-gray-500">Current academic year</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Exams Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
+                    <i class="fas fa-file-alt text-xl" style="color: #37a2bc;"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">UPCOMING EXAMS</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['upcoming_exams']) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span class="text-gray-500">Next 30 days</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        @if($role === 'Super Admin')
+        <!-- Total Users Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
+                    <i class="fas fa-users text-xl" style="color: #37a2bc;"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">TOTAL USERS</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_users']) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        @if($stats['users_growth'] > 0)
+                            <span style="color: #37a2bc;">↗ {{ $stats['users_growth'] }}%</span> from last month
+                        @elseif($stats['users_growth'] < 0)
+                            <span class="text-red-500">↘ {{ abs($stats['users_growth']) }}%</span> from last month
+                        @else
+                            <span class="text-gray-500">No change from last month</span>
+                        @endif
+                    </p>
+                </div>
+            </div>
+        </div>
+        @else
+        <!-- Total Courses Card for Admin/Teacher -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
+                    <i class="fas fa-book text-xl" style="color: #37a2bc;"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">TOTAL COURSES</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_courses'] ?? 0) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span class="text-gray-500">Available courses</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        @endif
+    @endif
 </div>
 
 <!-- Finance Overview Section -->
-@if($role === 'Super Admin' || $role === 'Admin' || $role === 'Accountant' || auth()->user()->can('view-finances'))
+@if(($role === 'Super Admin' || $role === 'Accountant') && auth()->user()->can('view-finances'))
     <div class="mb-8">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-xl font-bold text-gray-900">Finance Overview</h2>
@@ -295,8 +444,56 @@
 
 <!-- Content Grid -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    @if($role === 'Examiner')
+        <!-- Examiner-specific content -->
+        <!-- Recent Exams -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-900">Recent Exams</h3>
+                @can('manage-exams')
+                    <a href="{{ route('exams.index') }}" class="text-sm font-medium hover:underline" style="color: #37a2bc;">View All</a>
+                @endcan
+            </div>
+            <div class="p-6">
+                @forelse($upcomingExams as $exam)
+                    <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+                        <div class="flex-1">
+                            <h4 class="text-sm font-medium text-gray-900">{{ $exam['title'] }}</h4>
+                            <p class="text-xs text-gray-500">{{ $exam['course'] }} - {{ $exam['class'] }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-gray-900">{{ $exam['date'] }}</p>
+                            <p class="text-xs text-gray-500">{{ $exam['time'] }}</p>
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-calendar-alt text-3xl text-gray-300 mb-3"></i>
+                        <p>No exams found</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Exam Results -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-900">Exam Results</h3>
+                @can('view-reports')
+                    <a href="{{ route('results.index') }}" class="text-sm font-medium hover:underline" style="color: #37a2bc;">View All</a>
+                @endcan
+            </div>
+            <div class="p-6">
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-chart-bar text-3xl text-gray-300 mb-3"></i>
+                    <p>Exam results and analytics</p>
+                    <p class="text-xs mt-1">View detailed exam performance</p>
+                </div>
+            </div>
+        </div>
+    @else
     <!-- Finance Content Row -->
-    @if($role === 'Super Admin' || $role === 'Admin' || $role === 'Accountant' || auth()->user()->can('view-finances'))
+    @if(($role === 'Super Admin' || $role === 'Accountant') && auth()->user()->can('view-finances'))
         <!-- Recent Payments -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
             <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
@@ -459,6 +656,7 @@
             @endforelse
         </div>
     </div>
+    @endif
 </div>
 
 <!-- Additional Dashboard Sections for Different Roles -->
@@ -509,7 +707,7 @@
                 </a>
             @endcan
 
-            @can('view-finances')
+            @if(auth()->user()->can('view-finances') && !auth()->user()->hasRole('Admin'))
                 <a href="{{ route('finance.dashboard') }}" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
                     <div class="flex items-center">
                         <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
@@ -521,7 +719,7 @@
                         </div>
                     </div>
                 </a>
-            @endcan
+            @endif
         </div>
     </div>
 @endif
@@ -719,7 +917,7 @@
 @endif
 
 <!-- Finance Summary for All Users -->
-@if($role !== 'Accountant' && ($role === 'Super Admin' || $role === 'Admin' || auth()->user()->can('view-finances')))
+@if($role !== 'Accountant' && $role === 'Super Admin' && auth()->user()->can('view-finances'))
     <div class="mt-8">
         <h2 class="text-xl font-bold text-gray-900 mb-6">Finance Summary</h2>
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

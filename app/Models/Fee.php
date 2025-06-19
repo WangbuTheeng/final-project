@@ -160,20 +160,7 @@ class Fee extends Model
 
 
 
-    /**
-     * Get study mode display name
-     */
-    public function getStudyModeDisplayAttribute()
-    {
-        $modes = [
-            'full_time' => 'Full Time',
-            'part_time' => 'Part Time',
-            'distance' => 'Distance Learning',
-            'all' => 'All Modes'
-        ];
 
-        return $modes[$this->study_mode] ?? 'Unknown';
-    }
 
     /**
      * Check if fee is overdue

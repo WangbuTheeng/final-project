@@ -8,6 +8,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Exams</h1>
             <p class="mt-1 text-sm text-gray-500">Manage exams, types, and grade entry</p>
         </div>
+        @can('manage-exams')
         <div class="mt-4 sm:mt-0">
             <a href="{{ route('exams.create') }}"
                class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -15,6 +16,7 @@
                 Create Exam
             </a>
         </div>
+        @endcan
     </div>
 
     <!-- Success/Error Messages -->
@@ -314,6 +316,7 @@
                                            title="View Exam">
                                             <i class="fas fa-eye"></i>
                                         </a>
+                                        @can('manage-exams')
                                         <a href="{{ route('exams.grades', $exam) }}"
                                            class="action-btn text-green-600 hover:text-green-900 p-1 rounded-md hover:bg-green-50"
                                            title="Enter Grades">
@@ -336,6 +339,7 @@
                                                 </button>
                                             </form>
                                         @endif
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>
@@ -357,7 +361,14 @@
                     <i class="fas fa-file-alt text-4xl"></i>
                 </div>
                 <h3 class="mt-2 text-sm font-medium text-gray-900">No exams found</h3>
-                <p class="mt-1 text-sm text-gray-500">Get started by creating your first exam.</p>
+                <p class="mt-1 text-sm text-gray-500">
+                    @can('manage-exams')
+                        Get started by creating your first exam.
+                    @else
+                        No exams are available to view.
+                    @endcan
+                </p>
+                @can('manage-exams')
                 <div class="mt-6">
                     <a href="{{ route('exams.create') }}"
                        class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -365,6 +376,7 @@
                         Create First Exam
                     </a>
                 </div>
+                @endcan
             </div>
         @endif
     </div>

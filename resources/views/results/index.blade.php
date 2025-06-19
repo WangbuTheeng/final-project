@@ -190,16 +190,22 @@
                                         <div class="flex items-center justify-end space-x-2">
                                             <a href="{{ route('results.generate', $exam) }}"
                                                class="inline-flex items-center px-3 py-2 bg-purple-600 text-white text-xs font-medium rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200"
-                                               title="Generate Results">
+                                               title="View Results">
                                                 <i class="fas fa-chart-line mr-1"></i>
-                                                Generate
+                                                @can('manage-exams')
+                                                    Generate
+                                                @else
+                                                    View Results
+                                                @endcan
                                             </a>
+                                            @can('manage-exams')
                                             <a href="{{ route('results.generate-pdf', $exam) }}"
                                                class="inline-flex items-center px-3 py-2 bg-red-600 text-white text-xs font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200"
                                                title="Download PDF">
                                                 <i class="fas fa-file-pdf mr-1"></i>
                                                 PDF
                                             </a>
+                                            @endcan
                                             <a href="{{ route('exams.show', $exam) }}"
                                                class="inline-flex items-center px-3 py-2 bg-gray-600 text-white text-xs font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
                                                title="View Exam">

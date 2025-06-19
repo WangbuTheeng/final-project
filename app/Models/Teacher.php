@@ -20,13 +20,22 @@ class Teacher extends Model
         'basic_salary',
         'status',
         'bank_account',
-        'address'
+        'address',
+        'user_id'
     ];
 
     protected $casts = [
         'hire_date' => 'date',
         'basic_salary' => 'decimal:2'
     ];
+
+    /**
+     * Get the user that owns the teacher profile.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
      * Get all salary payments for this teacher

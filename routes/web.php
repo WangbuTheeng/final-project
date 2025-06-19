@@ -107,6 +107,8 @@ Route::middleware(['auth'])->group(function () {
     // Activity Logs Route (Super Admin only)
     Route::middleware(['role:Super Admin'])->group(function () {
         Route::get('activity-logs', [App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-logs.index');
+        Route::get('activity-logs/{id}', [App\Http\Controllers\ActivityLogController::class, 'show'])->name('activity-logs.show');
+        Route::get('activity-logs-export', [App\Http\Controllers\ActivityLogController::class, 'export'])->name('activity-logs.export');
     });
     
     // Academic Year Routes
@@ -147,7 +149,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Course Routes
-    Route::middleware(['permission:manage-courses'])->group(function () {
+    Route::middleware(['permission:manage-courses|view-courses'])->group(function () {
         Route::resource('courses', CourseController::class);
     });
 
@@ -161,7 +163,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Subject Routes
-    Route::middleware(['permission:manage-courses'])->group(function () {
+    Route::middleware(['permission:manage-courses|view-subjects'])->group(function () {
         Route::resource('subjects', SubjectController::class);
         Route::get('classes/{class}/subjects', [SubjectController::class, 'getByClass'])
             ->name('subjects.by-class');
@@ -172,7 +174,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Student Management Routes
-    Route::middleware(['permission:manage-students'])->group(function () {
+    Route::middleware(['permission:manage-students|view-students'])->group(function () {
         Route::resource('students', StudentController::class);
     });
 
@@ -222,7 +224,7 @@ Route::middleware(['auth'])->group(function () {
     });
     
     // Exam Routes
-    Route::middleware(['permission:manage-exams'])->group(function () {
+    Route::middleware(['permission:manage-exams|view-exams'])->group(function () {
         Route::resource('exams', ExamController::class);
         Route::get('exams/{exam}/grades', [ExamController::class, 'grades'])
             ->name('exams.grades');
@@ -284,7 +286,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Result Management Routes
-    Route::middleware(['permission:manage-exams'])->group(function () {
+    Route::middleware(['permission:manage-exams|view-exams|view-grades'])->group(function () {
         Route::get('results', [ResultController::class, 'index'])->name('results.index');
         Route::get('results/exam/{exam}/generate', [ResultController::class, 'generate'])->name('results.generate');
         Route::get('results/exam/{exam}/pdf', [ResultController::class, 'generatePdf'])->name('results.generate-pdf');

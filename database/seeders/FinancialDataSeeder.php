@@ -62,8 +62,6 @@ class FinancialDataSeeder extends Seeder
                 'fee_type' => 'other',
                 'amount' => 3000,
                 'department_id' => $department->id,
-                'level' => null,
-                'study_mode' => 'all',
                 'academic_year_id' => $academicYear->id,
                 'semester' => 'both',
                 'is_mandatory' => false,

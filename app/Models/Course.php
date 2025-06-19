@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Course extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'title',
@@ -28,6 +30,31 @@ class Course extends Model
         'credit_units' => 'integer',
         'year' => 'integer'
     ];
+
+    /**
+     * Activity log configuration
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'title',
+                'code',
+                'description',
+                'faculty_id',
+                'department_id',
+                'credit_units',
+                'organization_type',
+                'year',
+                'semester_period',
+                'course_type',
+                'is_active'
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Course {$eventName}")
+            ->useLogName('course_management');
+    }
 
     /**
      * Get the faculty this course belongs to

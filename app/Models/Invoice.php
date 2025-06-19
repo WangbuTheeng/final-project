@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Invoice extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'invoice_number',
@@ -42,6 +44,35 @@ class Invoice extends Model
         'paid_date' => 'date',
         'line_items' => 'array'
     ];
+
+    /**
+     * Activity log configuration
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'invoice_number',
+                'student_id',
+                'academic_year_id',
+                'semester',
+                'subtotal',
+                'discount',
+                'tax',
+                'total_amount',
+                'amount_paid',
+                'balance',
+                'status',
+                'issue_date',
+                'due_date',
+                'paid_date',
+                'notes'
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Invoice {$eventName}")
+            ->useLogName('financial_management');
+    }
 
     /**
      * Get the student this invoice belongs to

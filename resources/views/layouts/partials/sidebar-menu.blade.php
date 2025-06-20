@@ -66,7 +66,7 @@
         @if(auth()->user()->roles()->exists())
         <li>
             <!-- Dashboard - visible to all users -->
-            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-gray-700 hover:bg-gray-50' }} group flex items-center px-4 py-3 text-sm font-medium transition-all duration-150 ease-in-out {{ request()->routeIs('dashboard') ? '' : 'hover:text-gray-900' }} rounded-r-lg mx-2">
+            <a href="{{ route('dashboard') }}" class="ripple-container mobile-touch {{ request()->routeIs('dashboard') ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-gray-700 hover:bg-gray-50' }} group flex items-center px-4 py-3 text-sm font-medium transition-all duration-150 ease-in-out {{ request()->routeIs('dashboard') ? '' : 'hover:text-gray-900' }} rounded-r-lg mx-2">
                 <i class="fas fa-tachometer-alt mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('dashboard') ? 'text-blue-600' : 'text-gray-400' }} {{ request()->routeIs('dashboard') ? '' : 'group-hover:text-gray-600' }}"></i>
                 <span class="truncate">Dashboard</span>
             </a>
@@ -78,7 +78,7 @@
             <div x-data="{ open: {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'true' : 'false' }} }" class="space-y-1">
                 <button
                     @click="open = !open"
-                    class="{{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-4 py-3 text-sm font-medium transition-all duration-150 ease-in-out rounded-r-lg mx-2"
+                    class="ripple-button mobile-touch {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-4 py-3 text-sm font-medium transition-all duration-150 ease-in-out rounded-r-lg mx-2"
                 >
                     <i class="fas fa-university mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                     <span class="flex-1 text-left truncate">Academic Structure</span>
@@ -418,7 +418,7 @@
 
         <!-- My Profile -->
         <li>
-            <a href="{{ route('profile.show') }}" class="{{ request()->routeIs('profile.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('profile.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}>
+            <a href="{{ route('profile.show') }}" class="ripple-container mobile-touch {{ request()->routeIs('profile.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('profile.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}>
                 <i class="fas fa-user-circle mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('profile.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                 My Profile
             </a>
@@ -428,7 +428,7 @@
         <li>
             <form id="sidebar-logout-form" action="{{ route('logout') }}" method="POST" class="w-full">
                 @csrf
-                <button type="submit" class="text-gray-700 hover:bg-gray-50 hover:text-red-600 group flex items-center px-6 py-3 text-sm font-medium w-full text-left transition-all duration-150 ease-in-out">
+                <button type="submit" class="ripple-button mobile-touch text-gray-700 hover:bg-gray-50 hover:text-red-600 group flex items-center px-6 py-3 text-sm font-medium w-full text-left transition-all duration-150 ease-in-out">
                     <i class="fas fa-sign-out-alt mr-3 flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-red-500"></i>
                     Logout
                 </button>

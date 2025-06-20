@@ -207,7 +207,7 @@
                 x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0"
                 class="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm lg:hidden"
-                @click="sidebarOpen = false"
+                @click="sidebarOpen = false; document.body.classList.remove('mobile-sidebar-open')"
                 style="display: none;"
             ></div>
 
@@ -225,7 +225,7 @@
             >
                 <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200" style="background-color: #37a2bc;">
                     <h2 class="text-lg font-bold text-white">College CMS</h2>
-                    <button @click="sidebarOpen = false" class="p-2 text-white hover:bg-white/20 rounded-lg transition-all duration-200">
+                    <button @click="sidebarOpen = false; document.body.classList.remove('mobile-sidebar-open')" class="ripple-button mobile-touch touch-feedback p-2 text-white hover:bg-white/20 rounded-lg transition-all duration-200">
                         <span class="sr-only">Close sidebar</span>
                         <i class="fas fa-times text-lg"></i>
                     </button>
@@ -465,10 +465,38 @@
                     const sidebarComponent = document.querySelector('[x-data*="sidebarOpen"]');
                     if (sidebarComponent && sidebarComponent._x_dataStack) {
                         sidebarComponent._x_dataStack[0].sidebarOpen = false;
+                        // Remove body scroll lock
+                        document.body.classList.remove('mobile-sidebar-open');
                     }
                 }
             });
         });
+
+        // Handle mobile sidebar state changes
+        function handleSidebarStateChange() {
+            if (window.Alpine) {
+                const sidebarComponent = document.querySelector('[x-data*="sidebarOpen"]');
+                if (sidebarComponent && sidebarComponent._x_dataStack) {
+                    const isOpen = sidebarComponent._x_dataStack[0].sidebarOpen;
+                    document.body.classList.toggle('mobile-sidebar-open', isOpen);
+                }
+            }
+        }
+
+        // Watch for sidebar state changes
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    handleSidebarStateChange();
+                }
+            });
+        });
+
+        // Start observing mobile sidebar
+        const mobileSidebar = document.querySelector('.fixed.inset-y-0.left-0.z-50.w-80');
+        if (mobileSidebar) {
+            observer.observe(mobileSidebar, { attributes: true });
+        }
 
         // Smooth scrolling for sidebar navigation
         const sidebarContainer = document.querySelector('.overflow-y-auto');
@@ -516,6 +544,36 @@
                 const sidebarComponent = document.querySelector('[x-data*="sidebarOpen"]');
                 if (sidebarComponent && sidebarComponent._x_dataStack) {
                     sidebarComponent._x_dataStack[0].sidebarOpen = false;
+                    // Remove body scroll lock when closing sidebar
+                    document.body.classList.remove('mobile-sidebar-open');
+                }
+            }
+
+            // Force mobile layout fixes
+            if (isMobile || isTablet) {
+                // Ensure main content takes full width
+                const mainContent = document.querySelector('.w-full.lg\\:pl-72');
+                if (mainContent) {
+                    mainContent.style.paddingLeft = '0';
+                    mainContent.style.marginLeft = '0';
+                    mainContent.style.width = '100%';
+                    mainContent.classList.add('mobile-content');
+                }
+
+                // Hide desktop sidebar
+                const desktopSidebar = document.querySelector('.hidden.lg\\:fixed, .lg\\:fixed.lg\\:inset-y-0.lg\\:flex.lg\\:w-72');
+                if (desktopSidebar) {
+                    desktopSidebar.style.display = 'none';
+                    desktopSidebar.style.visibility = 'hidden';
+                }
+
+                // Ensure main element is full width
+                const mainElement = document.querySelector('main');
+                if (mainElement) {
+                    mainElement.style.width = '100%';
+                    mainElement.style.marginLeft = '0';
+                    mainElement.style.paddingLeft = '1rem';
+                    mainElement.style.paddingRight = '1rem';
                 }
             }
 
@@ -587,7 +645,116 @@
                 });
             }
         });
+
+        // Initialize ripple effects
+        initializeRippleEffects();
+
+        // Initialize mobile touch enhancements
+        initializeMobileTouchEnhancements();
     });
+
+    // Ripple Effect Functions
+    function initializeRippleEffects() {
+        // Add ripple effect to buttons and clickable elements
+        const rippleElements = document.querySelectorAll('.ripple-container, .ripple-button, button, .group, a[href]');
+
+        rippleElements.forEach(element => {
+            // Skip if already has ripple
+            if (element.hasAttribute('data-ripple-initialized')) return;
+
+            element.setAttribute('data-ripple-initialized', 'true');
+
+            // Add ripple classes if not present
+            if (!element.classList.contains('ripple-container') && !element.classList.contains('ripple-button')) {
+                element.classList.add('ripple-container');
+            }
+
+            element.addEventListener('click', function(e) {
+                createRipple(e, this);
+            });
+        });
+    }
+
+    function createRipple(event, element) {
+        // Remove existing ripples
+        const existingRipples = element.querySelectorAll('.ripple-wave');
+        existingRipples.forEach(ripple => ripple.remove());
+
+        // Create ripple element
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple-wave');
+
+        // Get element dimensions and position
+        const rect = element.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = event.clientX - rect.left - size / 2;
+        const y = event.clientY - rect.top - size / 2;
+
+        // Set ripple styles
+        ripple.style.cssText = `
+            position: absolute;
+            width: ${size}px;
+            height: ${size}px;
+            left: ${x}px;
+            top: ${y}px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+            z-index: 1;
+        `;
+
+        // Add dark ripple for light backgrounds
+        if (element.classList.contains('bg-white') || element.classList.contains('bg-gray-50') || element.classList.contains('bg-gray-100')) {
+            ripple.style.background = 'rgba(0, 0, 0, 0.1)';
+        }
+
+        // Add colored ripples based on element classes
+        if (element.classList.contains('bg-blue-500') || element.classList.contains('bg-blue-600')) {
+            ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+        } else if (element.classList.contains('bg-green-500') || element.classList.contains('bg-green-600')) {
+            ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+        } else if (element.classList.contains('bg-red-500') || element.classList.contains('bg-red-600')) {
+            ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+        }
+
+        // Ensure element has relative positioning
+        if (getComputedStyle(element).position === 'static') {
+            element.style.position = 'relative';
+        }
+
+        // Ensure element has overflow hidden
+        element.style.overflow = 'hidden';
+
+        // Add ripple to element
+        element.appendChild(ripple);
+
+        // Remove ripple after animation
+        setTimeout(() => {
+            if (ripple.parentNode) {
+                ripple.parentNode.removeChild(ripple);
+            }
+        }, 600);
+    }
+
+    function initializeMobileTouchEnhancements() {
+        // Add mobile touch classes to interactive elements
+        const isMobile = window.innerWidth < 1024;
+
+        if (isMobile) {
+            const touchElements = document.querySelectorAll('button, a[href], .group, [role="button"]');
+
+            touchElements.forEach(element => {
+                element.classList.add('mobile-touch', 'touch-feedback');
+
+                // Add minimum touch target size for buttons
+                if (element.tagName === 'BUTTON') {
+                    element.classList.add('mobile-button');
+                }
+            });
+        }
+    }
     </script>
 
     <style>
@@ -654,6 +821,18 @@
     @keyframes loading {
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
+    }
+
+    /* Ripple animation */
+    @keyframes ripple-animation {
+        0% {
+            transform: scale(0);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(4);
+            opacity: 0;
+        }
     }
 
     /* Glass morphism effect */
@@ -779,6 +958,35 @@
         .mobile-sidebar.open {
             transform: translateX(0);
         }
+
+        /* Prevent body scroll when mobile sidebar is open */
+        body.mobile-sidebar-open {
+            overflow: hidden;
+        }
+
+        /* Mobile navigation improvements */
+        .mobile-nav-button {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem;
+            background: transparent;
+            border: none;
+            color: #6b7280;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-nav-button:hover {
+            color: #37a2bc;
+            background-color: rgba(55, 162, 188, 0.1);
+        }
+
+        /* Mobile content adjustments */
+        .mobile-content {
+            width: 100% !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+        }
     }
 
     /* Tablet optimizations */
@@ -854,23 +1062,72 @@
 
     /* Mobile layout fixes */
     @media (max-width: 1023px) {
-        /* Ensure main content is not offset by sidebar on mobile */
+        /* Force hide desktop sidebar on mobile/tablet */
+        .hidden.lg\\:fixed,
+        .lg\\:fixed.lg\\:inset-y-0.lg\\:flex.lg\\:w-72.lg\\:flex-col {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        /* Ensure main content container takes full width */
+        .w-full.lg\\:pl-72 {
+            width: 100% !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+            transform: translateX(0) !important;
+        }
+
+        /* Remove any left padding from main content */
         .lg\\:pl-72 {
             padding-left: 0 !important;
         }
 
-        /* Hide desktop sidebar completely on mobile */
-        .hidden.lg\\:fixed {
-            display: none !important;
+        /* Ensure main content area is full width */
+        main {
+            width: 100% !important;
+            margin-left: 0 !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            max-width: 100% !important;
         }
 
-        /* Ensure mobile sidebar is properly positioned */
+        /* Mobile sidebar positioning */
         .fixed.inset-y-0.left-0.z-50 {
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
             height: 100vh !important;
             z-index: 50 !important;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Mobile sidebar backdrop */
+        .fixed.inset-0.z-40 {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            z-index: 40 !important;
+        }
+
+        /* Force full width layout on mobile */
+        body.mobile-view .w-full,
+        body.tablet-view .w-full {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        /* Override any desktop-specific positioning */
+        .relative.z-10 {
+            position: relative !important;
+            z-index: 10 !important;
+        }
+
+        /* Ensure content doesn't get pushed by sidebar */
+        .min-h-screen {
+            width: 100% !important;
         }
     }
 
@@ -890,6 +1147,185 @@
         .responsive-table td {
             padding: 0.5rem !important;
             font-size: 0.75rem !important;
+        }
+
+        /* Additional mobile fixes for very small screens */
+        .mobile-nav-button {
+            padding: 0.5rem !important;
+        }
+
+        /* Ensure mobile sidebar is full height */
+        .fixed.inset-y-0.left-0.z-50.w-80 {
+            width: 85vw !important;
+            max-width: 320px !important;
+        }
+
+        /* Mobile content padding adjustments */
+        main.p-4 {
+            padding: 0.75rem !important;
+        }
+
+        /* Top navigation height adjustment for mobile */
+        .sticky.top-0.z-30.flex.h-16 {
+            height: 3.5rem !important;
+        }
+    }
+
+    /* Extra small mobile devices */
+    @media (max-width: 480px) {
+        .fixed.inset-y-0.left-0.z-50.w-80 {
+            width: 90vw !important;
+            max-width: 280px !important;
+        }
+
+        main {
+            padding: 0.5rem !important;
+        }
+
+        .mobile-nav-button {
+            padding: 0.375rem !important;
+        }
+    }
+
+    /* Mobile content styling */
+    .mobile-content {
+        width: 100% !important;
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+        max-width: 100% !important;
+    }
+
+    /* Force mobile layout on small screens */
+    @media (max-width: 1023px) {
+        .mobile-content,
+        .mobile-content main {
+            width: 100% !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            margin-left: 0 !important;
+        }
+
+        /* Override any Tailwind classes that might interfere */
+        .lg\\:pl-72.mobile-content {
+            padding-left: 1rem !important;
+        }
+
+        /* Ensure dashboard content is properly positioned */
+        .w-full.lg\\:pl-72.mobile-content {
+            transform: translateX(0) !important;
+        }
+    }
+
+    /* Ripple Effect Styles */
+    .ripple-container {
+        position: relative;
+        overflow: hidden;
+        transform: translate3d(0, 0, 0);
+    }
+
+    .ripple-container:before {
+        content: "";
+        display: block;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .ripple-container:active:before {
+        width: 300px;
+        height: 300px;
+        transition: width 0s, height 0s;
+    }
+
+    /* Enhanced ripple for buttons */
+    .ripple-button {
+        position: relative;
+        overflow: hidden;
+        transform: translate3d(0, 0, 0);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .ripple-button:before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.6);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .ripple-button:active:before {
+        width: 200px;
+        height: 200px;
+        transition: width 0s, height 0s;
+    }
+
+    /* Dark ripple for light backgrounds */
+    .ripple-dark:before {
+        background: rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Colored ripples */
+    .ripple-blue:before {
+        background: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    .ripple-green:before {
+        background: rgba(34, 197, 94, 0.3) !important;
+    }
+
+    .ripple-red:before {
+        background: rgba(239, 68, 68, 0.3) !important;
+    }
+
+    /* Ripple animation */
+    @keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+
+    /* Touch feedback enhancement */
+    .touch-feedback {
+        transition: all 0.15s ease;
+        transform: scale(1);
+    }
+
+    .touch-feedback:active {
+        transform: scale(0.95);
+    }
+
+    /* Mobile-specific touch enhancements */
+    @media (max-width: 1023px) {
+        .mobile-touch {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .mobile-touch:active {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Enhanced button feedback for mobile */
+        .mobile-button {
+            min-height: 44px;
+            min-width: 44px;
+            touch-action: manipulation;
         }
     }
 

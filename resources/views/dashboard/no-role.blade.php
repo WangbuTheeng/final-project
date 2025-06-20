@@ -99,7 +99,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-yellow-800 mb-2">Access Restricted</h3>
                     <p class="text-yellow-700 text-sm leading-relaxed">
-                        Contact the owner to view the dashboard
+                        Contact the owner to view the dashboard (+977 981818181818)
                     </p>
                 </div>
                 

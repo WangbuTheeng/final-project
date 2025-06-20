@@ -43,6 +43,11 @@ Route::get('/test-mobile', function() {
     return view('test-mobile');
 });
 
+// Test route for responsive design
+Route::get('/test-responsive', function() {
+    return view('test-responsive');
+})->middleware('auth');
+
 // Test route for college settings
 Route::get('/test-college-settings', function() {
     $settings = \App\Models\CollegeSetting::getSettings();

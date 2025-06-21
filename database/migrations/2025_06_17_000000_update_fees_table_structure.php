@@ -52,11 +52,22 @@ return new class extends Migration
             }
         });
 
-        // Add new indexes
-        Schema::table('fees', function (Blueprint $table) {
-            $table->index(['academic_year_id', 'is_active']);
-            $table->index(['course_id', 'department_id']);
-        });
+        // Add new indexes (skip if they already exist)
+        try {
+            Schema::table('fees', function (Blueprint $table) {
+                $table->index(['academic_year_id', 'is_active']);
+            });
+        } catch (\Exception $e) {
+            // Index might already exist, continue
+        }
+
+        try {
+            Schema::table('fees', function (Blueprint $table) {
+                $table->index(['course_id', 'department_id']);
+            });
+        } catch (\Exception $e) {
+            // Index might already exist, continue
+        }
     }
 
     /**

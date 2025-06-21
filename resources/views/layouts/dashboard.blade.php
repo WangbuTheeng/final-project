@@ -187,6 +187,36 @@
             },
         }
     </script>
+
+    <!-- Mobile Sidebar Styles -->
+    <style>
+        /* Ensure hamburger button is always visible on mobile */
+        @media (max-width: 1023px) {
+            .mobile-nav-button {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        /* Mobile sidebar body lock */
+        body.mobile-sidebar-open {
+            overflow: hidden;
+        }
+
+        /* Force show mobile sidebar when open */
+        .mobile-sidebar-open .mobile-sidebar {
+            display: block !important;
+            transform: translateX(0) !important;
+        }
+
+        /* Ensure desktop sidebar is always visible */
+        @media (min-width: 1024px) {
+            .desktop-sidebar {
+                display: flex !important;
+            }
+        }
+    </style>
 </head>
 <body class="font-sans antialiased bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
     <div class="min-h-screen relative bg-gray-50">
@@ -220,7 +250,7 @@
                 x-transition:leave="transition ease-in-out duration-300 transform"
                 x-transition:leave-start="translate-x-0"
                 x-transition:leave-end="-translate-x-full"
-                class="fixed inset-y-0 left-0 z-50 w-80 max-w-sm bg-white shadow-2xl lg:hidden"
+                class="mobile-sidebar fixed inset-y-0 left-0 z-50 w-80 max-w-sm bg-white shadow-2xl lg:hidden"
                 style="display: none;"
             >
                 <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200" style="background-color: #37a2bc;">
@@ -237,7 +267,7 @@
             </div>
 
             <!-- Static sidebar for desktop -->
-            <div class="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col z-30">
+            <div class="desktop-sidebar hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col z-30">
                 <div class="flex flex-col flex-1 min-h-0 bg-white/95 backdrop-blur-xl shadow-soft-2xl border-r border-gray-200/50 h-full">
                     <div class="flex flex-col flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-white/90 to-gray-50/90">
                         @include('layouts.partials.sidebar-menu')
@@ -432,16 +462,44 @@
     <!-- Scripts -->
     @stack('scripts')
 
+    <!-- Mobile Sidebar Test Button (Remove after testing) -->
+    <div class="fixed bottom-4 right-4 z-50 lg:hidden">
+        <button
+            onclick="
+                const sidebarComponent = document.querySelector('[x-data*=sidebarOpen]');
+                if (sidebarComponent && sidebarComponent._x_dataStack) {
+                    sidebarComponent._x_dataStack[0].sidebarOpen = true;
+                    document.body.classList.add('mobile-sidebar-open');
+                }
+            "
+            class="bg-red-500 text-white p-3 rounded-full shadow-lg hover:bg-red-600 transition-colors"
+            title="Test Mobile Sidebar"
+        >
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
     <!-- Sidebar Enhancement Script -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Ensure sidebar is visible on desktop
-        const desktopSidebar = document.querySelector('.lg\\:fixed.lg\\:inset-y-0.lg\\:flex.lg\\:w-72');
+        const desktopSidebar = document.querySelector('.desktop-sidebar');
         if (desktopSidebar) {
             desktopSidebar.style.display = 'flex';
             desktopSidebar.style.position = 'fixed';
             desktopSidebar.style.width = '18rem';
             desktopSidebar.style.zIndex = '30';
+        }
+
+        // Ensure hamburger button is visible on mobile
+        const hamburgerBtn = document.querySelector('.mobile-nav-button');
+        if (hamburgerBtn) {
+            // Force show on mobile screens
+            if (window.innerWidth < 1024) {
+                hamburgerBtn.style.display = 'flex';
+                hamburgerBtn.style.alignItems = 'center';
+                hamburgerBtn.style.justifyContent = 'center';
+            }
         }
 
         // Ensure College CMS header is visible
@@ -493,10 +551,27 @@
         });
 
         // Start observing mobile sidebar
-        const mobileSidebar = document.querySelector('.fixed.inset-y-0.left-0.z-50.w-80');
+        const mobileSidebar = document.querySelector('.mobile-sidebar');
         if (mobileSidebar) {
             observer.observe(mobileSidebar, { attributes: true });
         }
+
+        // Handle window resize to show/hide hamburger button
+        window.addEventListener('resize', function() {
+            const hamburgerBtn = document.querySelector('.mobile-nav-button');
+            if (hamburgerBtn) {
+                if (window.innerWidth < 1024) {
+                    hamburgerBtn.style.display = 'flex';
+                } else {
+                    // Close mobile sidebar if window becomes large
+                    const sidebarComponent = document.querySelector('[x-data*=sidebarOpen]');
+                    if (sidebarComponent && sidebarComponent._x_dataStack) {
+                        sidebarComponent._x_dataStack[0].sidebarOpen = false;
+                        document.body.classList.remove('mobile-sidebar-open');
+                    }
+                }
+            }
+        });
 
         // Smooth scrolling for sidebar navigation
         const sidebarContainer = document.querySelector('.overflow-y-auto');

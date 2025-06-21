@@ -4,7 +4,13 @@
     <button
         type="button"
         class="mobile-nav-button ripple-button ripple-dark mobile-touch touch-feedback px-3 sm:px-4 text-gray-500 hover:text-brand hover:bg-brand/5 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand/20 lg:hidden rounded-lg mx-1 sm:mx-2 my-2"
-        @click="sidebarOpen = true; document.body.classList.add('mobile-sidebar-open')"
+        @click="
+            const sidebarComponent = document.querySelector('[x-data*=sidebarOpen]');
+            if (sidebarComponent && sidebarComponent._x_dataStack) {
+                sidebarComponent._x_dataStack[0].sidebarOpen = true;
+                document.body.classList.add('mobile-sidebar-open');
+            }
+        "
     >
         <span class="sr-only">Open sidebar</span>
         <i class="fas fa-bars text-base sm:text-lg"></i>

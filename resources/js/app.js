@@ -3,6 +3,9 @@ import './bootstrap';
 // Import Alpine.js
 import Alpine from 'alpinejs';
 
+// Import keyboard shortcuts
+import './keyboard-shortcuts';
+
 // Import Vue.js and Inertia.js
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';

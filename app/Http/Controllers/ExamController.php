@@ -69,7 +69,10 @@ class ExamController extends Controller
         $exams = $query->orderBy('exam_date', 'desc')->paginate(15);
 
         // Get filter options
-        $academicYears = AcademicYear::active()->orderBy('name')->get();
+        $academicYears = AcademicYear::query()->where('is_active', true)->orderBy('name')->get();
+        // OR use the scope method properly
+        // $academicYears = AcademicYear::query()->active()->orderBy('name')->get();
+
         $examTypes = array_keys(Exam::getExamTypes());
         $statuses = ['scheduled', 'ongoing', 'completed', 'cancelled'];
 
@@ -285,7 +288,7 @@ class ExamController extends Controller
 
         // Get exam statistics
         $stats = [
-            'total_enrolled' => $exam->getEnrolledStudentsCount(),
+            'total_enrolled' => $exam->class ? $exam->getEnrolledStudentsCount() : 0,
             'total_graded' => $exam->getGradedStudentsCount(),
             'average_score' => $exam->getAverageScore(),
             'pass_rate' => $exam->getPassRate(),

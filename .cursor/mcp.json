@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "laravel-docs": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-laravel-docs"],
+      "env": {}
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    }
+  }
+} 

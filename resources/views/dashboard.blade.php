@@ -493,7 +493,7 @@
 
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <!-- Dashboard Refresh (Always Available) -->
-        <button onclick="window.location.reload()" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-blue-200 text-center">
+        <button onclick="refreshDashboard()" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-blue-200 text-center">
             <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
                 <i class="fas fa-sync-alt text-white text-lg"></i>
             </div>
@@ -1629,7 +1629,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                 datasets: [{
                     label: 'New Enrollments',
-                    data: [{{ $stats['enrollment_data'] ?? '45, 52, 38, 65, 72, 58' }}],
+                    data: "{{ $stats['enrollment_data'] ?? '45, 52, 38, 65, 72, 58' }}".split(',').map(Number),
                     borderColor: '#3B82F6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     borderWidth: 3,
@@ -1666,7 +1666,7 @@ document.addEventListener('DOMContentLoaded', function() {
             data: {
                 labels: ['Excellent', 'Good', 'Average', 'Below Average'],
                 datasets: [{
-                    data: [{{ $stats['performance_data'] ?? '25, 35, 30, 10' }}],
+                    data: "{{ $stats['performance_data'] ?? '25, 35, 30, 10' }}".split(',').map(Number),
                     backgroundColor: [
                         '#10B981',
                         '#3B82F6',
@@ -1710,7 +1710,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                 datasets: [{
                     label: 'Revenue (NRs)',
-                    data: [{{ $financeStats['monthly_revenue'] ?? '150000, 180000, 165000, 220000, 195000, 210000' }}],
+                    data: "{{ $financeStats['monthly_revenue'] ?? '150000, 180000, 165000, 220000, 195000, 210000' }}".split(',').map(Number),
                     backgroundColor: 'rgba(16, 185, 129, 0.8)',
                     borderColor: '#10B981',
                     borderWidth: 2,
@@ -1745,7 +1745,7 @@ document.addEventListener('DOMContentLoaded', function() {
             data: {
                 labels: ['Paid', 'Pending', 'Overdue'],
                 datasets: [{
-                    data: [{{ $financeStats['payment_status'] ?? '65, 25, 10' }}],
+                    data: "{{ $financeStats['payment_status'] ?? '65, 25, 10' }}".split(',').map(Number),
                     backgroundColor: [
                         '#10B981',
                         '#F59E0B',
@@ -1915,9 +1915,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips for quick actions
     document.querySelectorAll('.group').forEach(element => {
         element.addEventListener('mouseenter', function() {
-            const title = this.querySelector('h3').textContent;
-            const description = this.querySelector('p').textContent;
-
+            const h3 = this.querySelector('h3');
+            const p = this.querySelector('p');
+            const title = h3 ? h3.textContent : '';
+            const description = p ? p.textContent : '';
             // Create tooltip (simplified version)
             this.setAttribute('title', `${title}: ${description}`);
         });
@@ -1944,6 +1945,39 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(`Dashboard loaded in ${loadTime}ms`);
         });
     }
+
+    // Global functions for compatibility
+    window.toggleShortcutVisibility = function(shortcutId) {
+        // This function is handled by Alpine.js components
+        console.log('toggleShortcutVisibility called for:', shortcutId);
+    };
+
+    window.isShortcutVisible = function(shortcutId) {
+        // This function is handled by Alpine.js components
+        return true;
+    };
+
+    // Fix for visitableShortcuts error
+    if (typeof window.visitableShortcuts === 'undefined') {
+        window.visitableShortcuts = [];
+    }
+
+    // Global toast functions
+    window.showSuccessToast = function(message) {
+        showNotification(message, 'success');
+    };
+
+    window.showErrorToast = function(message) {
+        showNotification(message, 'error');
+    };
+
+    window.showWarningToast = function(message) {
+        showNotification(message, 'warning');
+    };
+
+    window.showInfoToast = function(message) {
+        showNotification(message, 'info');
+    };
 });
 
 // Add CSS for ripple effect

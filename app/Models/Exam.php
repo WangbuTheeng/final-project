@@ -277,11 +277,19 @@ class Exam extends Model
      */
     public function getEnrolledStudentsCount()
     {
-        return $this->class->enrollments()
+        if (!$this->class) {
+            return 0;
+        }
+        
+        $query = $this->class->enrollments()
             ->where('academic_year_id', $this->academic_year_id)
-            ->where('semester', $this->semester)
-            ->where('status', 'enrolled')
-            ->count();
+            ->where('status', 'enrolled');
+
+        if ($this->semester) {
+            $query->where('semester', $this->semester);
+        }
+
+        return $query->count();
     }
 
     /**

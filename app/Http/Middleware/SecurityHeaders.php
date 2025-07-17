@@ -61,16 +61,16 @@ class SecurityHeaders
         $policies = [
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-            "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tailwindcss.com",
+            "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com",
             "img-src 'self' data: https: blob:",
-            "connect-src 'self' https:",
+            "connect-src 'self' https: ws: wss:",  // Added WebSocket support
             "media-src 'self'",
             "object-src 'none'",
-            "frame-src 'none'",
+            "frame-src 'self'",  // Changed from 'none' to 'self' to allow frames from same origin
             "base-uri 'self'",
             "form-action 'self'",
-            "frame-ancestors 'none'"
+            "frame-ancestors 'self'"  // Changed from 'none' to 'self' to allow framing from same origin
         ];
 
         return implode('; ', $policies);
@@ -90,7 +90,7 @@ class SecurityHeaders
             'magnetometer=()',
             'gyroscope=()',
             'accelerometer=()',
-            'ambient-light-sensor=()',
+            // Removed 'ambient-light-sensor=()' as it's causing errors
             'autoplay=()',
             'encrypted-media=()',
             'fullscreen=(self)',

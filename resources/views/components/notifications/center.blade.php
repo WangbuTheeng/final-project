@@ -203,14 +203,44 @@ function notificationCenter() {
         async loadNotifications() {
             this.loading = true;
             try {
-                const response = await fetch('/notifications/recent');
+                const response = await fetch('/notifications/recent', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned non-JSON response');
+                }
+
                 const data = await response.json();
-                
-                this.notifications = data.notifications;
-                this.unreadCount = data.unread_count;
+
+                this.notifications = data.notifications || [];
+                this.unreadCount = data.unread_count || 0;
                 this.hasNewNotifications = false;
             } catch (error) {
                 console.error('Failed to load notifications:', error);
+                // Set fallback data
+                this.notifications = [];
+                this.unreadCount = 0;
+                this.hasNewNotifications = false;
+
+                // Only show error toast if it's not a network/auth issue
+                if (error.message !== 'Failed to fetch' && !error.message.includes('401')) {
+                    if (window.showErrorToast) {
+                        window.showErrorToast('Unable to load notifications');
+                    }
+                }
             } finally {
                 this.loading = false;
             }
@@ -311,19 +341,24 @@ function notificationCenter() {
         },
 
         startPolling() {
-            // Poll for new notifications every 30 seconds
+            // Poll for new notifications every 60 seconds (reduced frequency to prevent spam)
             this.pollInterval = setInterval(async () => {
-                if (!this.isOpen) {
-                    const oldCount = this.unreadCount;
-                    await this.loadNotifications();
-                    if (this.unreadCount > oldCount) {
-                        this.hasNewNotifications = true;
-                        setTimeout(() => {
-                            this.hasNewNotifications = false;
-                        }, 3000);
+                if (!this.isOpen && document.visibilityState === 'visible') {
+                    try {
+                        const oldCount = this.unreadCount;
+                        await this.loadNotifications();
+                        if (this.unreadCount > oldCount) {
+                            this.hasNewNotifications = true;
+                            setTimeout(() => {
+                                this.hasNewNotifications = false;
+                            }, 3000);
+                        }
+                    } catch (error) {
+                        // Silently fail during polling to prevent console spam
+                        console.debug('Notification polling failed:', error);
                     }
                 }
-            }, 30000);
+            }, 60000);
         },
 
         destroy() {

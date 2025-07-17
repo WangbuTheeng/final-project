@@ -101,7 +101,7 @@
     // Filter shortcuts based on permissions
     $availableShortcuts = collect($allShortcuts)->filter(function ($shortcut) {
         return !isset($shortcut['permission']) || auth()->user()->can($shortcut['permission']);
-    })->take(8); // Limit to 8 shortcuts for better UX
+    })->take(8)->values(); // Limit to 8 shortcuts and ensure it's an array
 
     $colorClasses = [
         'blue' => 'from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700',
@@ -309,6 +309,9 @@ function dashboardShortcuts(shortcuts) {
             const customization = JSON.parse(localStorage.getItem('shortcuts_customization') || '[]');
             if (customization.length > 0) {
                 this.visibleShortcuts = this.allShortcuts.filter(s => customization.includes(s.id));
+            }
+            if (typeof this.visibleShortcuts === 'object' && !Array.isArray(this.visibleShortcuts)) {
+                this.visibleShortcuts = Object.values(this.visibleShortcuts);
             }
         },
 

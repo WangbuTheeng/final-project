@@ -39,33 +39,54 @@ class NotificationController extends Controller
      */
     public function getRecent(Request $request)
     {
-        $user = Auth::user();
-        $limit = $request->get('limit', 5);
-        
-        $notifications = $this->notificationService->getRecentNotifications($user->id, $limit);
-        $unreadCount = $this->notificationService->getUnreadCount($user->id);
+        try {
+            $user = Auth::user();
 
-        return response()->json([
-            'notifications' => $notifications->map(function ($notification) {
-                return [
-                    'id' => $notification->id,
-                    'title' => $notification->title,
-                    'message' => $notification->message,
-                    'type' => $notification->type,
-                    'category' => $notification->category,
-                    'priority' => $notification->priority,
-                    'icon' => $notification->icon,
-                    'color' => $notification->color,
-                    'action_url' => $notification->action_url,
-                    'action_text' => $notification->action_text,
-                    'is_read' => $notification->isRead(),
-                    'time_ago' => $notification->time_ago,
-                    'created_at' => $notification->created_at->toISOString(),
-                ];
-            }),
-            'unread_count' => $unreadCount,
-            'has_more' => $notifications->count() >= $limit,
-        ]);
+            if (!$user) {
+                return response()->json([
+                    'notifications' => [],
+                    'unread_count' => 0,
+                    'has_more' => false,
+                    'error' => 'User not authenticated'
+                ], 401);
+            }
+
+            $limit = $request->get('limit', 5);
+
+            $notifications = $this->notificationService->getRecentNotifications($user->id, $limit);
+            $unreadCount = $this->notificationService->getUnreadCount($user->id);
+
+            return response()->json([
+                'notifications' => $notifications->map(function ($notification) {
+                    return [
+                        'id' => $notification->id,
+                        'title' => $notification->title,
+                        'message' => $notification->message,
+                        'type' => $notification->type,
+                        'category' => $notification->category,
+                        'priority' => $notification->priority,
+                        'icon' => $notification->icon,
+                        'color' => $notification->color,
+                        'action_url' => $notification->action_url,
+                        'action_text' => $notification->action_text,
+                        'is_read' => $notification->isRead(),
+                        'time_ago' => $notification->time_ago,
+                        'created_at' => $notification->created_at->toISOString(),
+                    ];
+                }),
+                'unread_count' => $unreadCount,
+                'has_more' => $notifications->count() >= $limit,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to load recent notifications: ' . $e->getMessage());
+
+            return response()->json([
+                'notifications' => [],
+                'unread_count' => 0,
+                'has_more' => false,
+                'error' => 'Failed to load notifications'
+            ], 500);
+        }
     }
 
     /**

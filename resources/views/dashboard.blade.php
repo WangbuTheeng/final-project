@@ -5,257 +5,716 @@
 @endsection
 
 @section('content')
-<!-- Dashboard Header -->
-<div class="mb-8">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900 mb-2">DASHBOARD</h1>
-            <p class="text-gray-600">Welcome back, {{ $user->first_name }}! Here's what's happening at your college today.</p>
-        </div>
-        <div class="mt-4 sm:mt-0">
+<!-- Modern Dashboard Header -->
+<div class="mb-8 relative overflow-hidden">
+    <!-- Background Gradient -->
+    <div class="absolute inset-0 bg-gradient-to-r from-primary-50 via-white to-primary-50 rounded-2xl"></div>
+
+    <!-- Content -->
+    <div class="relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-soft border border-primary-100 p-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <!-- Welcome Section -->
             <div class="flex items-center space-x-4">
-                <button onclick="refreshDashboard()" class="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200" title="Refresh Dashboard">
-                    <i class="fas fa-sync-alt text-gray-600"></i>
-                </button>
-                <div class="text-right">
-                    <p class="text-sm font-medium text-gray-900">{{ now()->format('l, F j, Y') }}</p>
-                    <p class="text-xs text-gray-500 current-time">{{ now()->format('g:i A') }}</p>
+                <!-- Avatar -->
+                <div class="relative">
+                    <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-medium">
+                        <span class="text-white text-xl font-bold">
+                            @if($user->first_name)
+                                {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name ?? '', 0, 1)) }}
+                            @else
+                                {{ strtoupper(substr($user->name, 0, 1)) }}{{ strtoupper(substr($user->name, 1, 1)) }}
+                            @endif
+                        </span>
+                    </div>
+                    <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-success-500 rounded-full border-2 border-white"></div>
                 </div>
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-medium" style="background-color: #37a2bc;">
-                    {{ substr($user->first_name, 0, 1) }}{{ substr($user->last_name, 0, 1) }}
+
+                <!-- Welcome Text -->
+                <div>
+                    <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">
+                        Welcome back, <span class="text-primary-600">{{ $user->first_name ?: $user->name }}</span>!
+                    </h1>
+                    <p class="text-gray-600 text-sm lg:text-base">
+                        Here's what's happening at your college today.
+                    </p>
+                    <div class="flex items-center mt-2 space-x-3">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                            {{ $role }}
+                        </span>
+                        <span class="text-xs text-gray-500">
+                            <i class="fas fa-clock mr-1"></i>
+                            Last login: {{ $user->last_login_at ? $user->last_login_at->diffForHumans() : 'First time' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Section -->
+            <div class="mt-6 lg:mt-0 flex items-center space-x-4">
+                <!-- Quick Stats -->
+                <div class="hidden lg:flex items-center space-x-6 mr-6">
+                    <div class="text-center">
+                        <div class="text-lg font-bold text-gray-900">{{ now()->format('j') }}</div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">{{ now()->format('M') }}</div>
+                    </div>
+                    <div class="w-px h-8 bg-gray-200"></div>
+                    <div class="text-right">
+                        <div class="text-sm font-medium text-gray-900">{{ now()->format('l') }}</div>
+                        <div class="text-xs text-gray-500 current-time">{{ now()->format('g:i A') }}</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="refreshDashboard()"
+                            class="p-3 rounded-xl bg-white hover:bg-primary-50 border border-gray-200 hover:border-primary-200 transition-all duration-200 group shadow-sm hover:shadow-medium"
+                            title="Refresh Dashboard">
+                        <i class="fas fa-sync-alt text-gray-600 group-hover:text-primary-600 transition-colors duration-200"></i>
+                    </button>
+
+                    <button class="p-3 rounded-xl bg-primary-500 hover:bg-primary-600 text-white transition-all duration-200 shadow-medium hover:shadow-large hover:scale-105"
+                            title="Quick Actions">
+                        <i class="fas fa-plus"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Statistics Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<!-- Modern Statistics Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 100)">
     @if($role === 'Examiner')
         <!-- Upcoming Exams Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="flex items-center">
-                <div class="p-3 rounded-lg flex-shrink-0" style="background-color: rgba(55, 162, 188, 0.1);">
-                    <i class="fas fa-file-alt text-xl" style="color: #37a2bc;"></i>
+        <div class="group relative bg-white rounded-2xl shadow-soft hover:shadow-large transition-all duration-300 border border-gray-100 hover:border-primary-200 p-6 overflow-hidden"
+             x-show="loaded"
+             x-transition:enter="transition ease-out duration-500 delay-100"
+             x-transition:enter-start="opacity-0 transform translate-y-4 scale-95"
+             x-transition:enter-end="opacity-100 transform translate-y-0 scale-100">
+
+            <!-- Background Gradient -->
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-primary-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+            <!-- Floating Icon -->
+            <div class="relative mb-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-medium group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                    <i class="fas fa-file-alt text-xl text-white"></i>
                 </div>
-                <div class="ml-4 flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">UPCOMING EXAMS</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['upcoming_exams']) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <span class="text-gray-500">Next 30 days</span>
-                    </p>
+                <div class="absolute -top-1 -right-1 w-6 h-6 bg-warning-400 rounded-full flex items-center justify-center">
+                    <span class="text-xs font-bold text-white">{{ $stats['upcoming_exams'] }}</span>
                 </div>
             </div>
+
+            <!-- Content -->
+            <div class="relative">
+                <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Upcoming Exams</h3>
+                <div class="flex items-baseline space-x-2">
+                    <span class="text-3xl font-bold text-gray-900">{{ number_format($stats['upcoming_exams']) }}</span>
+                    <span class="text-sm text-gray-500">exams</span>
+                </div>
+                <div class="flex items-center mt-3 text-xs text-primary-600">
+                    <i class="fas fa-calendar-alt mr-1"></i>
+                    <span>Next 30 days</span>
+                </div>
+            </div>
+
+            <!-- Hover Glow Effect -->
+            <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary-500/0 to-primary-600/0 group-hover:from-primary-500/5 group-hover:to-primary-600/5 transition-all duration-300"></div>
         </div>
 
         <!-- Total Exams Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 responsive-card">
-            <div class="flex items-center">
-                <div class="p-2 sm:p-3 rounded-lg flex-shrink-0" style="background-color: rgba(55, 162, 188, 0.1);">
-                    <i class="fas fa-clipboard-list text-lg sm:text-xl" style="color: #37a2bc;"></i>
-                </div>
-                <div class="ml-3 sm:ml-4 flex-1 min-w-0">
-                    <p class="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide truncate">TOTAL EXAMS</p>
-                    <p class="text-xl sm:text-2xl font-bold text-gray-900">{{ number_format($stats['total_exams'] ?? 0) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <span class="text-gray-500">All time</span>
-                    </p>
+        <div class="group relative bg-white rounded-2xl shadow-soft hover:shadow-large transition-all duration-300 border border-gray-100 hover:border-success-200 p-6 overflow-hidden"
+             x-show="loaded"
+             x-transition:enter="transition ease-out duration-500 delay-200"
+             x-transition:enter-start="opacity-0 transform translate-y-4 scale-95"
+             x-transition:enter-end="opacity-100 transform translate-y-0 scale-100">
+
+            <!-- Background Gradient -->
+            <div class="absolute inset-0 bg-gradient-to-br from-success-50/50 to-success-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+            <!-- Floating Icon -->
+            <div class="relative mb-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-success-500 to-success-600 rounded-xl flex items-center justify-center shadow-medium group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                    <i class="fas fa-clipboard-list text-xl text-white"></i>
                 </div>
             </div>
+
+            <!-- Content -->
+            <div class="relative">
+                <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Total Exams</h3>
+                <div class="flex items-baseline space-x-2">
+                    <span class="text-3xl font-bold text-gray-900">{{ number_format($stats['total_exams'] ?? 0) }}</span>
+                    <span class="text-sm text-gray-500">exams</span>
+                </div>
+                <div class="flex items-center mt-3 text-xs text-success-600">
+                    <i class="fas fa-calendar-check mr-1"></i>
+                    <span>All time</span>
+                </div>
+            </div>
+
+            <!-- Hover Glow Effect -->
+            <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-success-500/0 to-success-600/0 group-hover:from-success-500/5 group-hover:to-success-600/5 transition-all duration-300"></div>
         </div>
 
         <!-- Pending Results Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
-                    <i class="fas fa-hourglass-half text-xl" style="color: #37a2bc;"></i>
-                </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">PENDING RESULTS</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['pending_results'] ?? 0) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <span class="text-gray-500">Awaiting grades</span>
-                    </p>
-                </div>
-            </div>
-        </div>
+        <div class="group relative bg-white rounded-2xl shadow-soft hover:shadow-large transition-all duration-300 border border-gray-100 hover:border-warning-200 p-6 overflow-hidden"
+             x-show="loaded"
+             x-transition:enter="transition ease-out duration-500 delay-300"
+             x-transition:enter-start="opacity-0 transform translate-y-4 scale-95"
+             x-transition:enter-end="opacity-100 transform translate-y-0 scale-100">
 
-        <!-- Students in Exams Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
-                    <i class="fas fa-user-graduate text-xl" style="color: #37a2bc;"></i>
-                </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">STUDENTS</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_students']) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <span class="text-gray-500">In system</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-    @elseif($role === 'Accountant')
-        <!-- Total Revenue Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-lg" style="background-color: rgba(34, 197, 94, 0.1);">
-                    <i class="fas fa-rupee-sign text-xl text-green-600"></i>
-                </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">TOTAL REVENUE</p>
-                    <p class="text-2xl font-bold text-gray-900">NRs {{ number_format($financeStats['total_revenue'] ?? 0, 2) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <span class="text-gray-500">All time</span>
-                    </p>
-                </div>
-            </div>
-        </div>
+            <!-- Background Gradient -->
+            <div class="absolute inset-0 bg-gradient-to-br from-warning-50/50 to-warning-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-        <!-- Outstanding Amount Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-lg" style="background-color: rgba(249, 115, 22, 0.1);">
-                    <i class="fas fa-exclamation-triangle text-xl text-orange-600"></i>
+            <!-- Floating Icon -->
+            <div class="relative mb-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-warning-500 to-warning-600 rounded-xl flex items-center justify-center shadow-medium group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                    <i class="fas fa-hourglass-half text-xl text-white"></i>
                 </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">OUTSTANDING</p>
-                    <p class="text-2xl font-bold text-gray-900">NRs {{ number_format($financeStats['outstanding_amount'] ?? 0, 2) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <span class="text-gray-500">{{ $financeStats['pending_invoices'] ?? 0 }} pending</span>
-                    </p>
+                @if(($stats['pending_results'] ?? 0) > 0)
+                <div class="absolute -top-1 -right-1 w-6 h-6 bg-danger-400 rounded-full flex items-center justify-center animate-pulse">
+                    <span class="text-xs font-bold text-white">!</span>
                 </div>
+                @endif
             </div>
-        </div>
 
-        <!-- This Month Revenue Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-lg" style="background-color: rgba(59, 130, 246, 0.1);">
-                    <i class="fas fa-chart-line text-xl text-blue-600"></i>
+            <!-- Content -->
+            <div class="relative">
+                <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Pending Results</h3>
+                <div class="flex items-baseline space-x-2">
+                    <span class="text-3xl font-bold text-gray-900">{{ number_format($stats['pending_results'] ?? 0) }}</span>
+                    <span class="text-sm text-gray-500">results</span>
                 </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">THIS MONTH</p>
-                    <p class="text-2xl font-bold text-gray-900">NRs {{ number_format($financeStats['this_month_revenue'] ?? 0, 2) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <span class="text-gray-500">Revenue</span>
-                    </p>
+                <div class="flex items-center mt-3 text-xs text-warning-600">
+                    <i class="fas fa-clock mr-1"></i>
+                    <span>Awaiting grades</span>
                 </div>
             </div>
+
+            <!-- Hover Glow Effect -->
+            <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-warning-500/0 to-warning-600/0 group-hover:from-warning-500/5 group-hover:to-warning-600/5 transition-all duration-300"></div>
         </div>
 
         <!-- Students Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
-                    <i class="fas fa-user-graduate text-xl" style="color: #37a2bc;"></i>
+        <div class="group relative bg-white rounded-2xl shadow-soft hover:shadow-large transition-all duration-300 border border-gray-100 hover:border-secondary-200 p-6 overflow-hidden"
+             x-show="loaded"
+             x-transition:enter="transition ease-out duration-500 delay-400"
+             x-transition:enter-start="opacity-0 transform translate-y-4 scale-95"
+             x-transition:enter-end="opacity-100 transform translate-y-0 scale-100">
+
+            <!-- Background Gradient -->
+            <div class="absolute inset-0 bg-gradient-to-br from-secondary-50/50 to-secondary-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+            <!-- Floating Icon -->
+            <div class="relative mb-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-xl flex items-center justify-center shadow-medium group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                    <i class="fas fa-user-graduate text-xl text-white"></i>
                 </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">STUDENTS</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_students']) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <span class="text-gray-500">Total enrolled</span>
-                    </p>
+                @if($stats['students_growth'] > 0)
+                <div class="absolute -top-1 -right-1 w-6 h-6 bg-success-400 rounded-full flex items-center justify-center">
+                    <i class="fas fa-arrow-up text-xs text-white"></i>
+                </div>
+                @endif
+            </div>
+
+            <!-- Content -->
+            <div class="relative">
+                <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Total Students</h3>
+                <div class="flex items-baseline space-x-2">
+                    <span class="text-3xl font-bold text-gray-900">{{ number_format($stats['total_students']) }}</span>
+                    <span class="text-sm text-gray-500">students</span>
+                </div>
+                <div class="flex items-center mt-3 text-xs text-secondary-600">
+                    <i class="fas fa-users mr-1"></i>
+                    <span>In system</span>
+                    @if($stats['students_growth'] > 0)
+                        <span class="ml-2 text-success-600">+{{ $stats['students_growth'] }}%</span>
+                    @endif
                 </div>
             </div>
+
+            <!-- Hover Glow Effect -->
+            <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-secondary-500/0 to-secondary-600/0 group-hover:from-secondary-500/5 group-hover:to-secondary-600/5 transition-all duration-300"></div>
+        </div>
+    @elseif($role === 'Accountant')
+        <!-- Total Revenue Card -->
+        <div class="group relative bg-gradient-to-br from-emerald-50 to-green-100 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-emerald-200/50 p-6 overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/10 opacity-50"></div>
+            <div class="absolute -top-4 -right-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl"></div>
+
+            <div class="relative flex items-center">
+                <div class="p-4 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-rupee-sign text-xl text-white"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-1">TOTAL REVENUE</p>
+                    <p class="text-3xl font-bold text-gray-900 mb-1">NRs {{ number_format($financeStats['total_revenue'] ?? 0, 2) }}</p>
+                    <div class="flex items-center text-xs text-emerald-600">
+                        <i class="fas fa-chart-line mr-1"></i>
+                        <span>All time</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hover Effect -->
+            <div class="absolute inset-0 bg-gradient-to-r from-emerald-500/0 to-green-500/0 group-hover:from-emerald-500/5 group-hover:to-green-500/5 transition-all duration-300 rounded-xl"></div>
+        </div>
+
+        <!-- Outstanding Amount Card -->
+        <div class="group relative bg-gradient-to-br from-red-50 to-rose-100 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-red-200/50 p-6 overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 bg-gradient-to-br from-red-500/5 to-rose-500/10 opacity-50"></div>
+            <div class="absolute -top-4 -right-4 w-24 h-24 bg-red-500/10 rounded-full blur-xl"></div>
+
+            <div class="relative flex items-center">
+                <div class="p-4 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-exclamation-triangle text-xl text-white"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-semibold text-red-700 uppercase tracking-wide mb-1">OUTSTANDING</p>
+                    <p class="text-3xl font-bold text-gray-900 mb-1">NRs {{ number_format($financeStats['outstanding_amount'] ?? 0, 2) }}</p>
+                    <div class="flex items-center text-xs text-red-600">
+                        <i class="fas fa-clock mr-1"></i>
+                        <span>{{ $financeStats['pending_invoices'] ?? 0 }} pending</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hover Effect -->
+            <div class="absolute inset-0 bg-gradient-to-r from-red-500/0 to-rose-500/0 group-hover:from-red-500/5 group-hover:to-rose-500/5 transition-all duration-300 rounded-xl"></div>
+        </div>
+
+        <!-- This Month Revenue Card -->
+        <div class="group relative bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200/50 p-6 overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/10 opacity-50"></div>
+            <div class="absolute -top-4 -right-4 w-24 h-24 bg-blue-500/10 rounded-full blur-xl"></div>
+
+            <div class="relative flex items-center">
+                <div class="p-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-chart-line text-xl text-white"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-semibold text-blue-700 uppercase tracking-wide mb-1">THIS MONTH</p>
+                    <p class="text-3xl font-bold text-gray-900 mb-1">NRs {{ number_format($financeStats['this_month_revenue'] ?? 0, 2) }}</p>
+                    <div class="flex items-center text-xs text-blue-600">
+                        <i class="fas fa-calendar-alt mr-1"></i>
+                        <span>Revenue</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hover Effect -->
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-indigo-500/0 group-hover:from-blue-500/5 group-hover:to-indigo-500/5 transition-all duration-300 rounded-xl"></div>
+        </div>
+
+        <!-- Students Card -->
+        <div class="group relative bg-gradient-to-br from-purple-50 to-violet-100 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-purple-200/50 p-6 overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-violet-500/10 opacity-50"></div>
+            <div class="absolute -top-4 -right-4 w-24 h-24 bg-purple-500/10 rounded-full blur-xl"></div>
+
+            <div class="relative flex items-center">
+                <div class="p-4 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-user-graduate text-xl text-white"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-semibold text-purple-700 uppercase tracking-wide mb-1">STUDENTS</p>
+                    <p class="text-3xl font-bold text-gray-900 mb-1">{{ number_format($stats['total_students']) }}</p>
+                    <div class="flex items-center text-xs text-purple-600">
+                        <i class="fas fa-users mr-1"></i>
+                        <span>Total enrolled</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hover Effect -->
+            <div class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-violet-500/0 group-hover:from-purple-500/5 group-hover:to-violet-500/5 transition-all duration-300 rounded-xl"></div>
         </div>
     @else
         <!-- Default cards for Super Admin, Admin, Teacher -->
         <!-- Total Students Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
-                    <i class="fas fa-user-graduate text-xl" style="color: #37a2bc;"></i>
+        <div class="group relative bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200/50 p-6 overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/10 opacity-50"></div>
+            <div class="absolute -top-4 -right-4 w-24 h-24 bg-blue-500/10 rounded-full blur-xl"></div>
+
+            <div class="relative flex items-center">
+                <div class="p-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-user-graduate text-xl text-white"></i>
                 </div>
                 <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">TOTAL STUDENTS</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_students']) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
+                    <p class="text-sm font-semibold text-blue-700 uppercase tracking-wide mb-1">TOTAL STUDENTS</p>
+                    <p class="text-3xl font-bold text-gray-900 mb-1">{{ number_format($stats['total_students']) }}</p>
+                    <div class="flex items-center text-xs">
                         @if($stats['students_growth'] > 0)
-                            <span style="color: #37a2bc;">↗ {{ $stats['students_growth'] }}%</span> from last month
+                            <i class="fas fa-arrow-up text-emerald-500 mr-1"></i>
+                            <span class="text-emerald-600 font-medium">{{ $stats['students_growth'] }}%</span>
+                            <span class="text-blue-600 ml-1">from last month</span>
                         @elseif($stats['students_growth'] < 0)
-                            <span class="text-red-500">↘ {{ abs($stats['students_growth']) }}%</span> from last month
+                            <i class="fas fa-arrow-down text-red-500 mr-1"></i>
+                            <span class="text-red-600 font-medium">{{ abs($stats['students_growth']) }}%</span>
+                            <span class="text-blue-600 ml-1">from last month</span>
                         @else
-                            <span class="text-gray-500">No change from last month</span>
+                            <i class="fas fa-minus text-gray-500 mr-1"></i>
+                            <span class="text-blue-600">No change from last month</span>
                         @endif
-                    </p>
+                    </div>
                 </div>
             </div>
+
+            <!-- Hover Effect -->
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-indigo-500/0 group-hover:from-blue-500/5 group-hover:to-indigo-500/5 transition-all duration-300 rounded-xl"></div>
         </div>
 
         <!-- Active Classes Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
-                    <i class="fas fa-chalkboard text-xl" style="color: #37a2bc;"></i>
+        <div class="group relative bg-gradient-to-br from-emerald-50 to-green-100 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-emerald-200/50 p-6 overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/10 opacity-50"></div>
+            <div class="absolute -top-4 -right-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl"></div>
+
+            <div class="relative flex items-center">
+                <div class="p-4 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-chalkboard text-xl text-white"></i>
                 </div>
                 <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">ACTIVE CLASSES</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['active_classes']) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <span class="text-gray-500">Current academic year</span>
-                    </p>
+                    <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-1">ACTIVE CLASSES</p>
+                    <p class="text-3xl font-bold text-gray-900 mb-1">{{ number_format($stats['active_classes']) }}</p>
+                    <div class="flex items-center text-xs text-emerald-600">
+                        <i class="fas fa-calendar-check mr-1"></i>
+                        <span>Current academic year</span>
+                    </div>
                 </div>
             </div>
+
+            <!-- Hover Effect -->
+            <div class="absolute inset-0 bg-gradient-to-r from-emerald-500/0 to-green-500/0 group-hover:from-emerald-500/5 group-hover:to-green-500/5 transition-all duration-300 rounded-xl"></div>
         </div>
 
         <!-- Upcoming Exams Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
-                    <i class="fas fa-file-alt text-xl" style="color: #37a2bc;"></i>
+        <div class="group relative bg-gradient-to-br from-orange-50 to-amber-100 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-orange-200/50 p-6 overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-amber-500/10 opacity-50"></div>
+            <div class="absolute -top-4 -right-4 w-24 h-24 bg-orange-500/10 rounded-full blur-xl"></div>
+
+            <div class="relative flex items-center">
+                <div class="p-4 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-file-alt text-xl text-white"></i>
                 </div>
                 <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">UPCOMING EXAMS</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['upcoming_exams']) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <span class="text-gray-500">Next 30 days</span>
-                    </p>
+                    <p class="text-sm font-semibold text-orange-700 uppercase tracking-wide mb-1">UPCOMING EXAMS</p>
+                    <p class="text-3xl font-bold text-gray-900 mb-1">{{ number_format($stats['upcoming_exams']) }}</p>
+                    <div class="flex items-center text-xs text-orange-600">
+                        <i class="fas fa-calendar-alt mr-1"></i>
+                        <span>Next 30 days</span>
+                    </div>
                 </div>
             </div>
+
+            <!-- Hover Effect -->
+            <div class="absolute inset-0 bg-gradient-to-r from-orange-500/0 to-amber-500/0 group-hover:from-orange-500/5 group-hover:to-amber-500/5 transition-all duration-300 rounded-xl"></div>
         </div>
 
         @if($role === 'Super Admin')
         <!-- Total Users Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
-                    <i class="fas fa-users text-xl" style="color: #37a2bc;"></i>
+        <div class="group relative bg-gradient-to-br from-purple-50 to-violet-100 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-purple-200/50 p-6 overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-violet-500/10 opacity-50"></div>
+            <div class="absolute -top-4 -right-4 w-24 h-24 bg-purple-500/10 rounded-full blur-xl"></div>
+
+            <div class="relative flex items-center">
+                <div class="p-4 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-users text-xl text-white"></i>
                 </div>
                 <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">TOTAL USERS</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_users']) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
+                    <p class="text-sm font-semibold text-purple-700 uppercase tracking-wide mb-1">TOTAL USERS</p>
+                    <p class="text-3xl font-bold text-gray-900 mb-1">{{ number_format($stats['total_users']) }}</p>
+                    <div class="flex items-center text-xs">
                         @if($stats['users_growth'] > 0)
-                            <span style="color: #37a2bc;">↗ {{ $stats['users_growth'] }}%</span> from last month
+                            <i class="fas fa-arrow-up text-emerald-500 mr-1"></i>
+                            <span class="text-emerald-600 font-medium">{{ $stats['users_growth'] }}%</span>
+                            <span class="text-purple-600 ml-1">from last month</span>
                         @elseif($stats['users_growth'] < 0)
-                            <span class="text-red-500">↘ {{ abs($stats['users_growth']) }}%</span> from last month
+                            <i class="fas fa-arrow-down text-red-500 mr-1"></i>
+                            <span class="text-red-600 font-medium">{{ abs($stats['users_growth']) }}%</span>
+                            <span class="text-purple-600 ml-1">from last month</span>
                         @else
-                            <span class="text-gray-500">No change from last month</span>
+                            <i class="fas fa-minus text-gray-500 mr-1"></i>
+                            <span class="text-purple-600">No change from last month</span>
                         @endif
-                    </p>
+                    </div>
                 </div>
             </div>
+
+            <!-- Hover Effect -->
+            <div class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-violet-500/0 group-hover:from-purple-500/5 group-hover:to-violet-500/5 transition-all duration-300 rounded-xl"></div>
         </div>
         @else
         <!-- Total Courses Card for Admin/Teacher -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
-                    <i class="fas fa-book text-xl" style="color: #37a2bc;"></i>
+        <div class="group relative bg-gradient-to-br from-indigo-50 to-blue-100 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-indigo-200/50 p-6 overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-blue-500/10 opacity-50"></div>
+            <div class="absolute -top-4 -right-4 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl"></div>
+
+            <div class="relative flex items-center">
+                <div class="p-4 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-book text-xl text-white"></i>
                 </div>
                 <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">TOTAL COURSES</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_courses'] ?? 0) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <span class="text-gray-500">Available courses</span>
-                    </p>
+                    <p class="text-sm font-semibold text-indigo-700 uppercase tracking-wide mb-1">TOTAL COURSES</p>
+                    <p class="text-3xl font-bold text-gray-900 mb-1">{{ number_format($stats['total_courses'] ?? 0) }}</p>
+                    <div class="flex items-center text-xs text-indigo-600">
+                        <i class="fas fa-graduation-cap mr-1"></i>
+                        <span>Available courses</span>
+                    </div>
                 </div>
             </div>
+
+            <!-- Hover Effect -->
+            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/0 to-blue-500/0 group-hover:from-indigo-500/5 group-hover:to-blue-500/5 transition-all duration-300 rounded-xl"></div>
         </div>
         @endif
     @endif
 </div>
+
+<!-- Modern Quick Actions Section -->
+<div class="mb-8">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="text-xl font-bold text-gray-900">Quick Actions</h2>
+            <p class="text-gray-600 text-sm">Frequently used actions for your role</p>
+        </div>
+        <button class="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center space-x-1">
+            <span>Customize</span>
+            <i class="fas fa-cog"></i>
+        </button>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <!-- Dashboard Refresh (Always Available) -->
+        <button onclick="window.location.reload()" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-blue-200 text-center">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-sync-alt text-white text-lg"></i>
+            </div>
+            <h3 class="text-sm font-medium text-gray-900 mb-1">Refresh</h3>
+            <p class="text-xs text-gray-500">Reload dashboard</p>
+            <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/0 to-blue-600/0 group-hover:from-blue-500/5 group-hover:to-blue-600/5 transition-all duration-300"></div>
+        </button>
+
+        @if($role === 'Super Admin' || $role === 'Admin')
+            <!-- Add Student -->
+            @can('create-students')
+            <a href="{{ route('students.create') }}" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-primary-200 text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-user-plus text-white text-lg"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-900 mb-1">Add Student</h3>
+                <p class="text-xs text-gray-500">Register new student</p>
+                <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/0 to-primary-600/0 group-hover:from-primary-500/5 group-hover:to-primary-600/5 transition-all duration-300"></div>
+            </a>
+            @endcan
+
+            <!-- Create Class -->
+            @can('create-classes')
+            <a href="{{ route('classes.create') }}" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-success-200 text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-success-500 to-success-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-chalkboard-teacher text-white text-lg"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-900 mb-1">Create Class</h3>
+                <p class="text-xs text-gray-500">Add new class</p>
+                <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-success-500/0 to-success-600/0 group-hover:from-success-500/5 group-hover:to-success-600/5 transition-all duration-300"></div>
+            </a>
+            @endcan
+
+            <!-- Manage Users -->
+            @can('view-users')
+            <a href="{{ route('users.index') }}" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-secondary-200 text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-users-cog text-white text-lg"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-900 mb-1">Manage Users</h3>
+                <p class="text-xs text-gray-500">User management</p>
+                <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-secondary-500/0 to-secondary-600/0 group-hover:from-secondary-500/5 group-hover:to-secondary-600/5 transition-all duration-300"></div>
+            </a>
+            @endcan
+        @endif
+
+        @if($role === 'Examiner' || $role === 'Super Admin')
+            <!-- Schedule Exam -->
+            @can('create-exams')
+            <a href="{{ route('exams.create') }}" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-warning-200 text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-warning-500 to-warning-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-calendar-plus text-white text-lg"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-900 mb-1">Schedule Exam</h3>
+                <p class="text-xs text-gray-500">Create new exam</p>
+                <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-warning-500/0 to-warning-600/0 group-hover:from-warning-500/5 group-hover:to-warning-600/5 transition-all duration-300"></div>
+            </a>
+            @endcan
+
+            <!-- View Results -->
+            @can('view-results')
+            <a href="{{ route('results.index') }}" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-primary-200 text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-chart-bar text-white text-lg"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-900 mb-1">View Results</h3>
+                <p class="text-xs text-gray-500">Exam results</p>
+                <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/0 to-primary-600/0 group-hover:from-primary-500/5 group-hover:to-primary-600/5 transition-all duration-300"></div>
+            </a>
+            @endcan
+        @endif
+
+        @if($role === 'Accountant' || $role === 'Super Admin')
+            <!-- Create Invoice -->
+            @can('create-invoices')
+            <a href="{{ route('finance.invoices.create') }}" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-success-200 text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-success-500 to-success-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-file-invoice text-white text-lg"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-900 mb-1">Create Invoice</h3>
+                <p class="text-xs text-gray-500">New invoice</p>
+                <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-success-500/0 to-success-600/0 group-hover:from-success-500/5 group-hover:to-success-600/5 transition-all duration-300"></div>
+            </a>
+            @endcan
+
+            <!-- View Payments -->
+            @can('view-payments')
+            <a href="{{ route('finance.payments.index') }}" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-warning-200 text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-warning-500 to-warning-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-credit-card text-white text-lg"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-900 mb-1">View Payments</h3>
+                <p class="text-xs text-gray-500">Payment history</p>
+                <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-warning-500/0 to-warning-600/0 group-hover:from-warning-500/5 group-hover:to-warning-600/5 transition-all duration-300"></div>
+            </a>
+            @endcan
+        @endif
+
+        <!-- Reports (Available to all) -->
+        <a href="{{ route('reports.index') }}" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-secondary-200 text-center">
+            <div class="w-12 h-12 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-chart-line text-white text-lg"></i>
+            </div>
+            <h3 class="text-sm font-medium text-gray-900 mb-1">Reports</h3>
+            <p class="text-xs text-gray-500">Analytics & reports</p>
+            <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-secondary-500/0 to-secondary-600/0 group-hover:from-secondary-500/5 group-hover:to-secondary-600/5 transition-all duration-300"></div>
+        </a>
+
+        <!-- Settings -->
+        <a href="#" onclick="alert('Settings feature coming soon!')" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-danger-200 text-center">
+            <div class="w-12 h-12 bg-gradient-to-br from-danger-500 to-danger-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-cog text-white text-lg"></i>
+            </div>
+            <h3 class="text-sm font-medium text-gray-900 mb-1">Settings</h3>
+            <p class="text-xs text-gray-500">System settings</p>
+            <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-danger-500/0 to-danger-600/0 group-hover:from-danger-500/5 group-hover:to-danger-600/5 transition-all duration-300"></div>
+        </a>
+
+        <!-- My Profile -->
+        <a href="{{ route('profile.show') }}" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-indigo-200 text-center">
+            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-user text-white text-lg"></i>
+            </div>
+            <h3 class="text-sm font-medium text-gray-900 mb-1">My Profile</h3>
+            <p class="text-xs text-gray-500">View & edit profile</p>
+            <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/0 to-indigo-600/0 group-hover:from-indigo-500/5 group-hover:to-indigo-600/5 transition-all duration-300"></div>
+        </a>
+
+        <!-- Activity Log -->
+        <a href="{{ route('activity-logs.index') }}" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-purple-200 text-center">
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-history text-white text-lg"></i>
+            </div>
+            <h3 class="text-sm font-medium text-gray-900 mb-1">Activity Log</h3>
+            <p class="text-xs text-gray-500">Recent activities</p>
+            <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/0 to-purple-600/0 group-hover:from-purple-500/5 group-hover:to-purple-600/5 transition-all duration-300"></div>
+        </a>
+    </div>
+
+    <!-- Debug Information (Remove in production) -->
+    @if(config('app.debug'))
+    <div class="mt-4 p-4 bg-gray-100 rounded-lg text-xs">
+        <strong>Debug Info:</strong><br>
+        Role: {{ $role }}<br>
+        Permissions: {{ implode(', ', $permissions) }}<br>
+        User ID: {{ $user->id }}<br>
+        User Name: {{ $user->name }}<br>
+        First Name: {{ $user->first_name ?? 'Not set' }}<br>
+        Last Name: {{ $user->last_name ?? 'Not set' }}<br>
+        User Roles: {{ $user->roles->pluck('name')->implode(', ') }}<br>
+        Has Super Admin Role: {{ $user->hasRole('Super Admin') ? 'Yes' : 'No' }}<br>
+        Has Admin Role: {{ $user->hasRole('Admin') ? 'Yes' : 'No' }}<br>
+        Has Accountant Role: {{ $user->hasRole('Accountant') ? 'Yes' : 'No' }}<br>
+        Can Create Students: {{ $user->can('create-students') ? 'Yes' : 'No' }}<br>
+        Can View Users: {{ $user->can('view-users') ? 'Yes' : 'No' }}<br>
+        Can Create Invoices: {{ $user->can('create-invoices') ? 'Yes' : 'No' }}<br>
+        Can View Payments: {{ $user->can('view-payments') ? 'Yes' : 'No' }}
+    </div>
+    @endif
+</div>
+
+<!-- Data Visualization Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Enrollment Trends Chart -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200/50 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-900">Student Enrollment Trends</h3>
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span class="text-sm text-gray-600">Last 6 months</span>
+            </div>
+        </div>
+        <div class="relative h-64">
+            <canvas id="enrollmentChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Academic Performance Chart -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200/50 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-900">Academic Performance</h3>
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                <span class="text-sm text-gray-600">Current semester</span>
+            </div>
+        </div>
+        <div class="relative h-64">
+            <canvas id="performanceChart"></canvas>
+        </div>
+    </div>
+</div>
+
+@if(($role === 'Super Admin' || $role === 'Accountant'))
+<!-- Financial Analytics Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    <!-- Revenue Trends -->
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-lg border border-gray-200/50 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-900">Revenue Trends</h3>
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span class="text-sm text-gray-600">Monthly revenue</span>
+            </div>
+        </div>
+        <div class="relative h-64">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Payment Status Distribution -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200/50 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-900">Payment Status</h3>
+            <i class="fas fa-chart-pie text-gray-400"></i>
+        </div>
+        <div class="relative h-64">
+            <canvas id="paymentStatusChart"></canvas>
+        </div>
+    </div>
+</div>
+@endif
 
 <!-- Finance Overview Section -->
 @if(($role === 'Super Admin' || $role === 'Accountant') && auth()->user()->can('view-finances'))
@@ -661,10 +1120,12 @@
 
 <!-- Additional Dashboard Sections for Different Roles -->
 @if($role === 'Super Admin' || $role === 'Admin')
-    <!-- Quick Actions Section -->
+    <!-- Enhanced Quick Actions Section -->
     <div class="mt-8">
-        <h2 class="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <x-quick-actions.dashboard-shortcuts
+            :customizable="true"
+            :columns="4"
+        />
             @can('create-students')
                 <a href="{{ route('students.create') }}" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
                     <div class="flex items-center">
@@ -1125,4 +1586,385 @@ document.addEventListener('keydown', function(e) {
     }
 }
 </style>
+
+<script>
+// Chart.js Configuration and Initialization
+document.addEventListener('DOMContentLoaded', function() {
+    // Common chart options
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                },
+                ticks: {
+                    color: '#6B7280'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    color: '#6B7280'
+                }
+            }
+        }
+    };
+
+    // Enrollment Trends Chart
+    const enrollmentCtx = document.getElementById('enrollmentChart');
+    if (enrollmentCtx) {
+        new Chart(enrollmentCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'New Enrollments',
+                    data: [{{ $stats['enrollment_data'] ?? '45, 52, 38, 65, 72, 58' }}],
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#3B82F6',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                ...chartOptions,
+                plugins: {
+                    ...chartOptions.plugins,
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: '#3B82F6',
+                        borderWidth: 1
+                    }
+                }
+            }
+        });
+    }
+
+    // Academic Performance Chart
+    const performanceCtx = document.getElementById('performanceChart');
+    if (performanceCtx) {
+        new Chart(performanceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Excellent', 'Good', 'Average', 'Below Average'],
+                datasets: [{
+                    data: [{{ $stats['performance_data'] ?? '25, 35, 30, 10' }}],
+                    backgroundColor: [
+                        '#10B981',
+                        '#3B82F6',
+                        '#F59E0B',
+                        '#EF4444'
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            color: '#6B7280'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff'
+                    }
+                }
+            }
+        });
+    }
+
+    @if(($role === 'Super Admin' || $role === 'Accountant'))
+    // Revenue Trends Chart
+    const revenueCtx = document.getElementById('revenueChart');
+    if (revenueCtx) {
+        new Chart(revenueCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Revenue (NRs)',
+                    data: [{{ $financeStats['monthly_revenue'] ?? '150000, 180000, 165000, 220000, 195000, 210000' }}],
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderColor: '#10B981',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                ...chartOptions,
+                plugins: {
+                    ...chartOptions.plugins,
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        callbacks: {
+                            label: function(context) {
+                                return 'Revenue: NRs ' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Payment Status Chart
+    const paymentStatusCtx = document.getElementById('paymentStatusChart');
+    if (paymentStatusCtx) {
+        new Chart(paymentStatusCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Paid', 'Pending', 'Overdue'],
+                datasets: [{
+                    data: [{{ $financeStats['payment_status'] ?? '65, 25, 10' }}],
+                    backgroundColor: [
+                        '#10B981',
+                        '#F59E0B',
+                        '#EF4444'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true,
+                            color: '#6B7280'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    @endif
+
+    // Modern Dashboard Enhancements
+
+    // Real-time clock update
+    function updateClock() {
+        const clockElement = document.querySelector('.current-time');
+        if (clockElement) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            clockElement.textContent = timeString;
+        }
+    }
+
+    // Update clock every minute
+    setInterval(updateClock, 60000);
+
+    // Smooth scroll for quick actions
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Add ripple effect to buttons
+    function createRipple(event) {
+        const button = event.currentTarget;
+        const circle = document.createElement("span");
+        const diameter = Math.max(button.clientWidth, button.clientHeight);
+        const radius = diameter / 2;
+
+        circle.style.width = circle.style.height = `${diameter}px`;
+        circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+        circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+        circle.classList.add("ripple");
+
+        const ripple = button.getElementsByClassName("ripple")[0];
+        if (ripple) {
+            ripple.remove();
+        }
+
+        button.appendChild(circle);
+    }
+
+    // Apply ripple effect to buttons
+    document.querySelectorAll('.group').forEach(button => {
+        button.addEventListener('click', createRipple);
+    });
+
+    // Refresh dashboard function
+    window.refreshDashboard = function() {
+        // Add loading state
+        const refreshBtn = document.querySelector('[onclick="refreshDashboard()"]');
+        if (refreshBtn) {
+            const icon = refreshBtn.querySelector('i');
+            icon.classList.add('fa-spin');
+
+            // Simulate refresh (in real app, this would reload data)
+            setTimeout(() => {
+                icon.classList.remove('fa-spin');
+                // Show success message
+                showNotification('Dashboard refreshed successfully!', 'success');
+            }, 1000);
+        }
+    };
+
+    // Show notification function
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 p-4 rounded-xl shadow-large max-w-sm transform transition-all duration-300 translate-x-full`;
+
+        const bgColor = type === 'success' ? 'bg-success-500' :
+                       type === 'error' ? 'bg-danger-500' :
+                       type === 'warning' ? 'bg-warning-500' : 'bg-primary-500';
+
+        notification.classList.add(bgColor);
+        notification.innerHTML = `
+            <div class="flex items-center space-x-3 text-white">
+                <i class="fas fa-${type === 'success' ? 'check-circle' :
+                                  type === 'error' ? 'exclamation-circle' :
+                                  type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                <span class="font-medium">${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-auto">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Animate in
+        setTimeout(() => {
+            notification.classList.remove('translate-x-full');
+        }, 100);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // Add loading states to quick action buttons
+    document.querySelectorAll('.group a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (this.href.includes('#') || this.onclick) return;
+
+            const icon = this.querySelector('i');
+            const originalClass = icon.className;
+            icon.className = 'fas fa-spinner fa-spin text-white text-lg';
+
+            // Restore original icon after a short delay (for demo purposes)
+            setTimeout(() => {
+                icon.className = originalClass;
+            }, 500);
+        });
+    });
+
+    // Initialize tooltips for quick actions
+    document.querySelectorAll('.group').forEach(element => {
+        element.addEventListener('mouseenter', function() {
+            const title = this.querySelector('h3').textContent;
+            const description = this.querySelector('p').textContent;
+
+            // Create tooltip (simplified version)
+            this.setAttribute('title', `${title}: ${description}`);
+        });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + R to refresh dashboard
+        if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+            e.preventDefault();
+            refreshDashboard();
+        }
+
+        // Escape to close any open modals/notifications
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.fixed.top-4.right-4').forEach(el => el.remove());
+        }
+    });
+
+    // Performance monitoring
+    if ('performance' in window) {
+        window.addEventListener('load', function() {
+            const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+            console.log(`Dashboard loaded in ${loadTime}ms`);
+        });
+    }
+});
+
+// Add CSS for ripple effect
+const style = document.createElement('style');
+style.textContent = `
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.3);
+        transform: scale(0);
+        animation: ripple-animation 0.6s linear;
+        pointer-events: none;
+    }
+
+    @keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
 @endsection

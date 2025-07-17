@@ -18,16 +18,139 @@
     <!-- Alpine.js (from CDN) -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    <!-- Chart.js (from CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Animation System -->
+    <link rel="stylesheet" href="{{ asset('css/animations.css') }}">
+
+    <!-- Modern Dashboard Styles -->
+    <link rel="stylesheet" href="{{ asset('css/dashboard-modern.css') }}">
+
     <!-- Tailwind CSS (from CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
                         'sans': ['Inter', 'system-ui', 'sans-serif'],
                         'display': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
                     },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a'
+                        },
+                        secondary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        },
+                        success: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d'
+                        },
+                        warning: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f'
+                        },
+                        danger: {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            200: '#fecaca',
+                            300: '#fca5a5',
+                            400: '#f87171',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            800: '#991b1b',
+                            900: '#7f1d1d'
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+                        'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 20px -5px rgba(0, 0, 0, 0.04)',
+                        'large': '0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+                        'glow': '0 0 20px rgba(59, 130, 246, 0.3)',
+                        'glow-lg': '0 0 30px rgba(59, 130, 246, 0.4)'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                        'scale-in': 'scaleIn 0.2s ease-out',
+                        'bounce-subtle': 'bounceSubtle 0.6s ease-in-out',
+                        'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'shimmer': 'shimmer 2s linear infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        slideDown: {
+                            '0%': { transform: 'translateY(-10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.95)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        },
+                        bounceSubtle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' }
+                        },
+                        pulseSoft: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.8' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        shimmer: {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(100%)' }
+                        }
+                    }
                     colors: {
                         primary: {
                             50: '#f0f9ff',
@@ -217,9 +340,17 @@
             }
         }
     </style>
+
+    <!-- Dark Mode Initialization -->
+    <script>
+        // Initialize dark mode before page renders to prevent flash
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 </head>
-<body class="font-sans antialiased bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
-    <div class="min-h-screen relative bg-gray-50">
+<body class="font-sans antialiased bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen transition-colors duration-200">
+    <div class="min-h-screen relative bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
         <!-- Background Pattern -->
         <div class="fixed inset-0 z-0 opacity-30 hidden lg:block">
             <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-purple-50/50"></div>
@@ -1456,5 +1587,17 @@
         }
     }
     </style>
+
+    <!-- Animation System JavaScript -->
+    <script src="{{ asset('js/animations.js') }}"></script>
+
+    <!-- Keyboard Shortcuts System -->
+    <script src="{{ asset('js/keyboard-shortcuts.js') }}"></script>
+
+    <!-- Performance Optimizer -->
+    <script src="{{ asset('js/performance-optimizer.js') }}"></script>
+
+    <!-- Toast Notification Container -->
+    <x-notifications.toast-container position="top-right" />
 </body>
 </html>

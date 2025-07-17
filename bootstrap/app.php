@@ -7,6 +7,10 @@ use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use App\Http\Middleware\LogUserActivity;
+use App\Http\Middleware\ApiRateLimit;
+use App\Http\Middleware\ApiVersion;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SanitizeInput;
 
 
 
@@ -20,12 +24,18 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
             LogUserActivity::class,
+            SecurityHeaders::class,
+            SanitizeInput::class,
         ]);
 
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'api.rate_limit' => ApiRateLimit::class,
+            'api.version' => ApiVersion::class,
+            'security.headers' => SecurityHeaders::class,
+            'sanitize.input' => SanitizeInput::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

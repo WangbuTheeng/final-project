@@ -7,9 +7,11 @@
         "dev": "vite"
     },
     "devDependencies": {
+        "@inertiajs/vue3": "^1.0.0",
         "@popperjs/core": "^2.11.6",
         "@tailwindcss/postcss": "^4.1.8",
         "@tailwindcss/vite": "^4.0.0",
+        "@vitejs/plugin-vue": "^5.0.0",
         "alpinejs": "^3.14.9",
         "autoprefixer": "^10.4.21",
         "axios": "^1.8.2",
@@ -18,6 +20,10 @@
         "laravel-vite-plugin": "^1.2.0",
         "sass": "^1.56.1",
         "tailwindcss": "^4.0.0",
-        "vite": "^6.2.4"
+        "vite": "^6.2.4",
+        "vue": "^3.4.0"
+    },
+    "dependencies": {
+        "@inertiajs/inertia": "^0.11.1"
     }
 }

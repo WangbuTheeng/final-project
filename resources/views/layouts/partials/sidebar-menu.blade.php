@@ -1,47 +1,86 @@
-<!-- College CMS Header - Only show on desktop, mobile has header in sidebar container -->
-<div class="hidden lg:block p-4 sm:p-6 text-white" style="background-color: #37a2bc;">
-    <div class="text-center mb-3 sm:mb-4">
-        <h2 class="text-lg sm:text-xl font-bold">College CMS</h2>
-        <div class="w-12 sm:w-16 h-0.5 bg-white mx-auto mt-2 opacity-50"></div>
-    </div>
-    <div class="flex items-center space-x-2 sm:space-x-3">
-        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-            <span class="font-bold text-base sm:text-lg" style="color: #37a2bc;">{{ substr(auth()->user()->name, 0, 1) }}</span>
+<!-- Modern College CMS Header - Desktop -->
+<div class="hidden lg:block p-6 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 relative overflow-hidden">
+    <!-- Animated Background Elements -->
+    <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"></div>
+    <div class="absolute -top-6 -right-6 w-32 h-32 bg-white/5 rounded-full blur-2xl animate-pulse-soft"></div>
+    <div class="absolute -bottom-6 -left-6 w-40 h-40 bg-white/5 rounded-full blur-2xl animate-float"></div>
+
+    <!-- Floating Particles -->
+    <div class="absolute top-4 right-8 w-2 h-2 bg-white/30 rounded-full animate-bounce-subtle"></div>
+    <div class="absolute top-12 right-16 w-1 h-1 bg-white/40 rounded-full animate-pulse-soft"></div>
+    <div class="absolute bottom-8 right-6 w-1.5 h-1.5 bg-white/20 rounded-full animate-float"></div>
+
+    <div class="relative z-10">
+        <!-- Brand Section -->
+        <div class="text-center mb-6">
+            <div class="relative inline-block">
+                <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-large group hover:scale-110 transition-all duration-300">
+                    <i class="fas fa-graduation-cap text-white text-2xl group-hover:rotate-12 transition-transform duration-300"></i>
+                    <div class="absolute -inset-1 bg-gradient-to-r from-white/20 to-white/10 rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2 tracking-wide">College CMS</h2>
+            <div class="w-20 h-0.5 bg-gradient-to-r from-transparent via-white/60 to-transparent mx-auto"></div>
         </div>
-        <div class="min-w-0 flex-1">
-            <h3 class="font-semibold text-base sm:text-lg truncate">{{ auth()->user()->name }}</h3>
-            <p class="text-white text-xs sm:text-sm opacity-90 truncate">
-                @if(!auth()->user()->roles()->exists())
-                    NO ROLE ASSIGNED
-                @elseif(auth()->user()->hasRole('Super Admin'))
-                    SUPER ADMIN
-                @elseif(auth()->user()->hasRole('Admin'))
-                    ADMIN
-                @elseif(auth()->user()->hasRole('Teacher'))
-                    TEACHER
-                @elseif(auth()->user()->hasRole('Examiner'))
-                    EXAMINER
-                @elseif(auth()->user()->hasRole('Accountant'))
-                    ACCOUNTANT
-                @else
-                    USER
-                @endif
-            </p>
+
+        <!-- User Profile Card -->
+        <div class="glass-effect rounded-2xl p-4 border border-white/20 hover:border-white/30 transition-all duration-300 group">
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <div class="w-14 h-14 bg-gradient-to-br from-white/25 to-white/15 rounded-xl flex items-center justify-center flex-shrink-0 shadow-medium group-hover:scale-105 transition-transform duration-300">
+                        <span class="font-bold text-xl text-white">
+                            {{ strtoupper(substr(auth()->user()->first_name ?? auth()->user()->name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
+                        </span>
+                    </div>
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-success-400 rounded-full border-2 border-white status-online"></div>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <h3 class="font-semibold text-lg text-white truncate mb-1">
+                        {{ auth()->user()->first_name ?? auth()->user()->name }} {{ auth()->user()->last_name ?? '' }}
+                    </h3>
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/20 text-white border border-white/30">
+                            @if(!auth()->user()->roles()->exists())
+                                No Role
+                            @elseif(auth()->user()->hasRole('Super Admin'))
+                                Super Admin
+                            @elseif(auth()->user()->hasRole('Admin'))
+                                Admin
+                            @elseif(auth()->user()->hasRole('Teacher'))
+                                Teacher
+                            @elseif(auth()->user()->hasRole('Examiner'))
+                                Examiner
+                            @elseif(auth()->user()->hasRole('Accountant'))
+                                Accountant
+                            @else
+                                User
+                            @endif
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Mobile User Info -->
-<div class="lg:hidden p-4 border-b border-gray-200 bg-gray-50">
+<!-- Modern Mobile User Info -->
+<div class="lg:hidden p-4 border-b border-gray-100 bg-gradient-to-r from-primary-50 via-white to-primary-50">
     <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span class="font-bold text-sm text-white">{{ substr(auth()->user()->name, 0, 1) }}</span>
+        <div class="relative">
+            <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-medium">
+                <span class="font-bold text-sm text-white">
+                    {{ strtoupper(substr(auth()->user()->first_name ?? auth()->user()->name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
+                </span>
+            </div>
+            <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success-400 rounded-full border-2 border-white"></div>
         </div>
         <div class="min-w-0 flex-1">
-            <h3 class="font-semibold text-sm text-gray-900 truncate">{{ auth()->user()->name }}</h3>
-            <p class="text-xs text-gray-500 truncate">
+            <h3 class="font-semibold text-sm text-gray-900 truncate">
+                {{ auth()->user()->first_name ?? auth()->user()->name }} {{ auth()->user()->last_name ?? '' }}
+            </h3>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 mt-1">
                 @if(!auth()->user()->roles()->exists())
-                    No Role Assigned
+                    No Role
                 @elseif(auth()->user()->hasRole('Super Admin'))
                     Super Admin
                 @elseif(auth()->user()->hasRole('Admin'))
@@ -50,39 +89,141 @@
                     Teacher
                 @elseif(auth()->user()->hasRole('Examiner'))
                     Examiner
-                @elseif(auth()->user()->hasRole('Accountant'))
                     Accountant
                 @else
                     User
                 @endif
-            </p>
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Global Search Section -->
+<div class="p-4 border-b border-gray-200/50">
+    <div x-data="{
+        searchOpen: false,
+        searchQuery: '',
+        searchResults: [],
+        isLoading: false,
+        async performSearch() {
+            if (this.searchQuery.length < 2) {
+                this.searchResults = [];
+                return;
+            }
+
+            this.isLoading = true;
+            try {
+                const response = await fetch(`/search?q=${encodeURIComponent(this.searchQuery)}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                this.searchResults = data.results || [];
+            } catch (error) {
+                console.error('Search error:', error);
+                this.searchResults = [];
+            } finally {
+                this.isLoading = false;
+            }
+        }
+    }" class="relative">
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400 text-sm"></i>
+            </div>
+            <input
+                x-model="searchQuery"
+                @input.debounce.300ms="performSearch()"
+                @focus="searchOpen = true"
+                @keydown.escape="searchOpen = false; searchQuery = ''"
+                type="text"
+                placeholder="Search students, teachers, courses..."
+                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            >
+            <div x-show="isLoading" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                <div class="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+            </div>
+        </div>
+
+        <!-- Search Results Dropdown -->
+        <div
+            x-show="searchOpen && (searchResults.length > 0 || searchQuery.length > 0)"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 transform scale-95"
+            x-transition:enter-end="opacity-100 transform scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 transform scale-100"
+            x-transition:leave-end="opacity-0 transform scale-95"
+            @click.away="searchOpen = false"
+            class="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-200 z-50 max-h-80 overflow-y-auto"
+            style="display: none;"
+        >
+            <template x-if="searchResults.length > 0">
+                <div class="p-2">
+                    <template x-for="result in searchResults" :key="result.id">
+                        <a :href="result.url" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors duration-150 group">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mr-3" :class="result.type === 'student' ? 'bg-blue-100 text-blue-600' : result.type === 'teacher' ? 'bg-green-100 text-green-600' : 'bg-purple-100 text-purple-600'">
+                                <i :class="result.type === 'student' ? 'fas fa-user-graduate' : result.type === 'teacher' ? 'fas fa-chalkboard-teacher' : 'fas fa-book'" class="text-sm"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate" x-text="result.title"></p>
+                                <p class="text-xs text-gray-500 truncate" x-text="result.subtitle"></p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-arrow-right text-gray-400 text-xs group-hover:text-gray-600"></i>
+                            </div>
+                        </a>
+                    </template>
+                </div>
+            </template>
+
+            <template x-if="searchQuery.length > 0 && searchResults.length === 0 && !isLoading">
+                <div class="p-4 text-center text-gray-500">
+                    <i class="fas fa-search text-2xl mb-2 opacity-50"></i>
+                    <p class="text-sm">No results found</p>
+                </div>
+            </template>
         </div>
     </div>
 </div>
 
 <!-- Navigation Menu -->
-<div class="py-3 sm:py-4">
-    <ul class="space-y-1">
+<div class="py-4 px-3">
+    <ul class="space-y-2">
         @if(auth()->user()->roles()->exists())
         <li>
             <!-- Dashboard - visible to all users -->
-            <a href="{{ route('dashboard') }}" class="ripple-container mobile-touch {{ request()->routeIs('dashboard') ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-gray-700 hover:bg-gray-50' }} group flex items-center px-4 py-3 text-sm font-medium transition-all duration-150 ease-in-out {{ request()->routeIs('dashboard') ? '' : 'hover:text-gray-900' }} rounded-r-lg mx-2">
-                <i class="fas fa-tachometer-alt mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('dashboard') ? 'text-blue-600' : 'text-gray-400' }} {{ request()->routeIs('dashboard') ? '' : 'group-hover:text-gray-600' }}"></i>
+            <a href="{{ route('dashboard') }}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('dashboard') ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25' : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:text-gray-900' }}">
+                <div class="flex items-center justify-center w-8 h-8 rounded-lg mr-3 {{ request()->routeIs('dashboard') ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-white' }} transition-all duration-200">
+                    <i class="fas fa-tachometer-alt text-sm {{ request()->routeIs('dashboard') ? 'text-white' : 'text-gray-500 group-hover:text-blue-600' }}"></i>
+                </div>
                 <span class="truncate">Dashboard</span>
+                @if(request()->routeIs('dashboard'))
+                    <div class="ml-auto w-2 h-2 bg-white rounded-full"></div>
+                @endif
             </a>
         </li>
 
         <!-- Academic Structure -->
         @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Teacher'))
         <li>
-            <div x-data="{ open: {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'true' : 'false' }} }" class="space-y-1">
+            <div x-data="{ open: {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'true' : 'false' }} }" class="space-y-2">
                 <button
                     @click="open = !open"
-                    class="ripple-button mobile-touch {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-4 py-3 text-sm font-medium transition-all duration-150 ease-in-out rounded-r-lg mx-2"
+                    class="group w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25' : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:text-gray-900' }}"
                 >
-                    <i class="fas fa-university mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                    <div class="flex items-center justify-center w-8 h-8 rounded-lg mr-3 {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-white' }} transition-all duration-200">
+                        <i class="fas fa-university text-sm {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'text-white' : 'text-gray-500 group-hover:text-emerald-600' }}"></i>
+                    </div>
                     <span class="flex-1 text-left truncate">Academic Structure</span>
-                    <i class="fas transition-transform duration-200 text-sm {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'text-blue-600' : 'text-gray-400' }}" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                    <div class="flex items-center">
+                        @if(request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*'))
+                            <div class="w-2 h-2 bg-white rounded-full mr-2"></div>
+                        @endif
+                        <i class="fas transition-transform duration-200 text-sm {{ request()->routeIs('academic-years.*', 'faculties.*', 'courses.*', 'classes.*', 'departments.*', 'subjects.*', 'college-settings.*', 'grading-systems.*') ? 'text-white' : 'text-gray-400 group-hover:text-emerald-600' }}" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                    </div>
                 </button>
                 <div x-show="open"
                      x-transition:enter="transition ease-out duration-100"

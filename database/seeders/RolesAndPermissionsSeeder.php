@@ -34,7 +34,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-grades', 'create-grades', 'edit-grades', 'delete-grades', 'manage-grades',
             // Financial Management
             'view-finances', 'manage-fees', 'create-invoices', 'manage-invoices',
-            'create-payments', 'verify-payments', 'manage-payments', 'manage-salaries',
+            'create-payments', 'verify-payments', 'manage-payments', 'view-payments', 'manage-salaries',
             'view-financial-reports', 'manage-expenses', 'approve-expenses',
             // Teaching Management
             'view-classes', 'create-classes', 'edit-classes', 'assign-homework',
@@ -99,7 +99,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Accountant role permissions - Only financial management + limited dashboard
         $accountantRole->givePermissionTo([
             'view-finances', 'manage-fees', 'create-invoices', 'manage-invoices',
-            'create-payments', 'verify-payments', 'manage-payments', 'manage-salaries',
+            'create-payments', 'verify-payments', 'manage-payments', 'view-payments', 'manage-salaries',
             'view-financial-reports', 'manage-expenses', 'approve-expenses',
             'view-students', // Needed for financial operations
             'access-accountant-dashboard',

@@ -46,155 +46,152 @@
         </div>
     @endif
 
-    <!-- Create Student Form -->
-    <form action="{{ route('students.store') }}" method="POST" class="space-y-6">
-        @csrf
-        
-        <!-- Personal Information -->
-        <div class="bg-white shadow-sm rounded-lg border border-gray-200">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-medium text-gray-900">Personal Information</h3>
+    <!-- Modern Form Container -->
+    <x-forms.container
+        title="Student Registration"
+        subtitle="Fill in the student details below"
+        icon="fas fa-user-graduate"
+        action="{{ route('students.store') }}"
+        method="POST"
+    >
+        <!-- Personal Information Section -->
+        <div class="space-y-6">
+            <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-user mr-3 text-blue-500"></i>
+                    Personal Information
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300 mt-1">Basic personal details of the student</p>
             </div>
-            <div class="p-6">
-                <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8">
-                    <div>
-                        <label for="first_name" class="block text-sm font-medium text-gray-700">First Name *</label>
-                        <div class="mt-1">
-                            <input type="text" name="first_name" id="first_name" value="{{ old('first_name') }}" required
-                                   class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md @error('first_name') border-red-500 @enderror">
-                        </div>
-                        @error('first_name')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
 
-                    <div>
-                        <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name *</label>
-                        <div class="mt-1">
-                            <input type="text" name="last_name" id="last_name" value="{{ old('last_name') }}" required
-                                   class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md @error('last_name') border-red-500 @enderror">
-                        </div>
-                        @error('last_name')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- First Name -->
+                <x-forms.input
+                    name="first_name"
+                    label="First Name"
+                    icon="fas fa-user"
+                    :required="true"
+                    placeholder="Enter first name"
+                    help="Student's legal first name"
+                />
 
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email Address *</label>
-                        <div class="mt-1">
-                            <input type="email" name="email" id="email" value="{{ old('email') }}" required
-                                   class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md @error('email') border-red-500 @enderror">
-                        </div>
-                        @error('email')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                <!-- Last Name -->
+                <x-forms.input
+                    name="last_name"
+                    label="Last Name"
+                    icon="fas fa-user"
+                    :required="true"
+                    placeholder="Enter last name"
+                    help="Student's legal last name"
+                />
 
-                    <div>
-                        <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-                        <div class="mt-1">
-                            <input type="text" name="phone" id="phone" value="{{ old('phone') }}"
-                                   class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md @error('phone') border-red-500 @enderror">
-                        </div>
-                        @error('phone')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                <!-- Email Address -->
+                <x-forms.input
+                    name="email"
+                    type="email"
+                    label="Email Address"
+                    icon="fas fa-envelope"
+                    :required="true"
+                    placeholder="Enter email address"
+                    help="This will be used for login and communication"
+                />
 
-                    <div>
-                        <label for="date_of_birth" class="block text-sm font-medium text-gray-700">Date of Birth *</label>
-                        <div class="mt-1">
-                            <input type="date" name="date_of_birth" id="date_of_birth" value="{{ old('date_of_birth') }}" required
-                                   class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md @error('date_of_birth') border-red-500 @enderror">
-                        </div>
-                        @error('date_of_birth')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                <!-- Phone Number -->
+                <x-forms.input
+                    name="phone"
+                    type="tel"
+                    label="Phone Number"
+                    icon="fas fa-phone"
+                    placeholder="Enter phone number"
+                    help="Contact number for the student"
+                />
 
-                    <div>
-                        <label for="gender" class="block text-sm font-medium text-gray-700">Gender *</label>
-                        <div class="mt-1">
-                            <select name="gender" id="gender" required
-                                    class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md @error('gender') border-red-500 @enderror">
-                                <option value="">Select Gender</option>
-                                <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
-                                <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
-                                <option value="other" {{ old('gender') == 'other' ? 'selected' : '' }}>Other</option>
-                            </select>
-                        </div>
-                        @error('gender')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                <!-- Date of Birth -->
+                <x-forms.input
+                    name="date_of_birth"
+                    type="date"
+                    label="Date of Birth"
+                    icon="fas fa-calendar"
+                    :required="true"
+                    help="Student's date of birth"
+                />
 
-                    <div class="sm:col-span-2">
-                        <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
-                        <div class="mt-1">
-                            <textarea name="address" id="address" rows="3"
-                                      class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md @error('address') border-red-500 @enderror">{{ old('address') }}</textarea>
-                        </div>
-                        @error('address')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                <!-- Gender -->
+                <x-forms.select
+                    name="gender"
+                    label="Gender"
+                    icon="fas fa-venus-mars"
+                    :required="true"
+                    placeholder="Select gender"
+                    :options="[
+                        ['value' => 'male', 'text' => 'Male'],
+                        ['value' => 'female', 'text' => 'Female'],
+                        ['value' => 'other', 'text' => 'Other']
+                    ]"
+                    help="Student's gender identity"
+                />
+            </div>
+
+            <!-- Address (Full Width) -->
+            <x-forms.textarea
+                name="address"
+                label="Address"
+                :rows="3"
+                placeholder="Enter full address"
+                help="Student's residential address"
+                :auto-resize="true"
+            />
                 </div>
             </div>
         </div>
 
-        <!-- Academic Information -->
-        <div class="bg-white shadow-sm rounded-lg border border-gray-200">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-medium text-gray-900">Academic Information</h3>
+        <!-- Academic Information Section -->
+        <div class="space-y-6">
+            <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-graduation-cap mr-3 text-emerald-500"></i>
+                    Academic Information
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300 mt-1">Academic details and enrollment information</p>
             </div>
-            <div class="p-6">
-                <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Admission Number</label>
-                        <div class="mt-1">
-                            <div class="px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm text-gray-600">
-                                <i class="fas fa-info-circle mr-2"></i>
-                                Will be generated automatically upon creation
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Admission Number Info -->
+                <div class="lg:col-span-2">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-info-circle text-blue-500 mr-3"></i>
+                            <div>
+                                <h4 class="text-sm font-semibold text-blue-800 dark:text-blue-200">Admission Number</h4>
+                                <p class="text-sm text-blue-700 dark:text-blue-300">Will be generated automatically upon creation</p>
+                                <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">Format: YYDDDNNNN (e.g., 24CSC0001)</p>
                             </div>
                         </div>
-                        <p class="mt-1 text-xs text-gray-500">Format: YYDDDNNNN (e.g., 24CSC0001)</p>
                     </div>
+                </div>
 
-                    <div>
-                        <label for="faculty_id" class="block text-sm font-medium text-gray-700">Faculty *</label>
-                        <div class="mt-1">
-                            <select name="faculty_id" id="faculty_id" required
-                                    class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md @error('faculty_id') border-red-500 @enderror">
-                                <option value="">Select Faculty</option>
-                                @foreach($faculties as $faculty)
-                                    <option value="{{ $faculty->id }}" {{ old('faculty_id') == $faculty->id ? 'selected' : '' }}>
-                                        {{ $faculty->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        @error('faculty_id')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                <!-- Faculty -->
+                <x-forms.select
+                    name="faculty_id"
+                    label="Faculty"
+                    icon="fas fa-university"
+                    :required="true"
+                    placeholder="Select Faculty"
+                    :searchable="true"
+                    :options="$faculties->map(fn($faculty) => ['value' => $faculty->id, 'text' => $faculty->name])->toArray()"
+                    help="Choose the faculty for this student"
+                />
 
-                    <div>
-                        <label for="department_id" class="block text-sm font-medium text-gray-700">Department</label>
-                        <div class="mt-1">
-                            <select name="department_id" id="department_id"
-                                    class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md @error('department_id') border-red-500 @enderror">
-                                <option value="">Select Department (Optional)</option>
-                                @foreach($departments as $department)
-                                    <option value="{{ $department->id }}" data-faculty="{{ $department->faculty_id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
-                                        {{ $department->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        @error('department_id')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                <!-- Department -->
+                <x-forms.select
+                    name="department_id"
+                    label="Department"
+                    icon="fas fa-building"
+                    placeholder="Select Department (Optional)"
+                    :searchable="true"
+                    :options="$departments->map(fn($dept) => ['value' => $dept->id, 'text' => $dept->name])->toArray()"
+                    help="Choose the department (optional)"
+                />
 
                     <div>
                         <label for="academic_year_id" class="block text-sm font-medium text-gray-700">Admission Year *</label>
@@ -324,7 +321,38 @@
                 Create Student
             </button>
         </div>
-    </form>
+
+        <!-- Form Actions -->
+        <x-slot name="actions">
+            <div class="flex items-center justify-between">
+                <a href="{{ route('students.index') }}"
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </a>
+
+                <div class="flex space-x-3">
+                    <x-forms.button
+                        type="button"
+                        variant="secondary"
+                        icon="fas fa-save"
+                        onclick="document.querySelector('form').submit()"
+                    >
+                        Save as Draft
+                    </x-forms.button>
+
+                    <x-forms.button
+                        type="submit"
+                        variant="primary"
+                        icon="fas fa-user-plus"
+                        size="lg"
+                    >
+                        Create Student
+                    </x-forms.button>
+                </div>
+            </div>
+        </x-slot>
+    </x-forms.container>
 </div>
 
 @push('scripts')

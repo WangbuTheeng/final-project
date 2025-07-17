@@ -151,10 +151,7 @@
         <div class="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
             <!-- Notifications -->
             <div class="relative hidden sm:block">
-                <button class="p-2 sm:p-3 text-gray-400 hover:text-brand hover:bg-brand/5 focus:outline-none focus:ring-2 focus:ring-brand/20 rounded-lg sm:rounded-xl transition-all duration-200 group">
-                    <i class="fas fa-bell text-sm sm:text-base lg:text-lg group-hover:animate-bounce-gentle"></i>
-                    <span class="absolute top-1 sm:top-2 right-1 sm:right-2 block h-2 w-2 sm:h-2.5 sm:w-2.5 bg-gradient-to-r from-red-400 to-red-500 rounded-full ring-1 sm:ring-2 ring-white shadow-sm animate-pulse"></span>
-                </button>
+                <x-notifications.center position="left" />
             </div>
 
             <!-- Settings -->
@@ -242,6 +239,22 @@
                             <i class="fas fa-bell mr-3 text-gray-400 group-hover:text-brand"></i>
                             Notifications
                         </a>
+
+                        <!-- Dark Mode Toggle -->
+                        <div x-data="darkMode()" class="px-4 py-3">
+                            <button @click="toggle()" class="flex items-center justify-between w-full text-sm text-gray-700 hover:bg-brand/5 hover:text-brand transition-all duration-200 group rounded-lg p-2">
+                                <div class="flex items-center">
+                                    <i :class="isDark ? 'fas fa-sun' : 'fas fa-moon'" class="mr-3 text-gray-400 group-hover:text-brand transition-colors duration-200"></i>
+                                    <span x-text="isDark ? 'Light Mode' : 'Dark Mode'"></span>
+                                </div>
+                                <div class="relative inline-flex items-center">
+                                    <div class="w-10 h-5 bg-gray-200 rounded-full shadow-inner transition-colors duration-200" :class="isDark ? 'bg-blue-500' : 'bg-gray-200'">
+                                        <div class="w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-200" :class="isDark ? 'translate-x-5' : 'translate-x-0.5'" style="margin-top: 2px;"></div>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+
                         <div class="border-t border-gray-100 my-1"></div>
                         @else
                         <!-- No Role Message in dropdown -->
@@ -351,6 +364,39 @@ document.addEventListener('keydown', function(e) {
         if (searchInput && document.activeElement === searchInput) {
             searchInput.blur();
         }
+    }
+});
+
+// Dark Mode functionality
+function darkMode() {
+    return {
+        isDark: localStorage.getItem('darkMode') === 'true' || false,
+
+        init() {
+            this.updateTheme();
+        },
+
+        toggle() {
+            this.isDark = !this.isDark;
+            localStorage.setItem('darkMode', this.isDark);
+            this.updateTheme();
+        },
+
+        updateTheme() {
+            if (this.isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+    }
+}
+
+// Initialize dark mode on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    if (isDark) {
+        document.documentElement.classList.add('dark');
     }
 });
 </script>

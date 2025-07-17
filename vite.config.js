@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/postcss';
 import autoprefixer from 'autoprefixer';
 
@@ -13,6 +14,14 @@ export default defineConfig({
             ],
             refresh: true,
         }),
+        vue({
+            template: {
+                transformAssetUrls: {
+                    base: null,
+                    includeAbsolute: false,
+                },
+            },
+        }),
     ],
     css: {
         postcss: {
@@ -20,6 +29,11 @@ export default defineConfig({
                 tailwindcss,
                 autoprefixer,
             ],
+        },
+    },
+    resolve: {
+        alias: {
+            vue: 'vue/dist/vue.esm-bundler.js',
         },
     },
 });

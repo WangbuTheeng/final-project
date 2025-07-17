@@ -13,6 +13,8 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ClassSectionController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ExamController;
@@ -95,6 +97,74 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
+    // Notification routes
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [App\Http\Controllers\NotificationController::class, 'index'])->name('index');
+        Route::get('/recent', [App\Http\Controllers\NotificationController::class, 'getRecent'])->name('recent');
+        Route::get('/unread-count', [App\Http\Controllers\NotificationController::class, 'getUnreadCount'])->name('unread-count');
+        Route::get('/statistics', [App\Http\Controllers\NotificationController::class, 'getStatistics'])->name('statistics');
+        Route::post('/{notification}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('mark-as-read');
+        Route::post('/mark-multiple-read', [App\Http\Controllers\NotificationController::class, 'markMultipleAsRead'])->name('mark-multiple-read');
+        Route::post('/mark-all-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+        Route::delete('/{notification}', [App\Http\Controllers\NotificationController::class, 'destroy'])->name('destroy');
+        Route::delete('/bulk-delete', [App\Http\Controllers\NotificationController::class, 'destroyMultiple'])->name('destroy-multiple');
+
+        // Test route (only in local environment)
+        Route::post('/test', [App\Http\Controllers\NotificationController::class, 'test'])->name('test');
+
+        // Placeholder for notification settings (to be implemented)
+        Route::get('/settings', function() {
+            return view('placeholder', [
+                'title' => 'Notification Settings',
+                'message' => 'Notification settings feature coming soon'
+            ]);
+        })->name('settings');
+    });
+
+    // Activity routes
+    Route::prefix('activities')->name('activities.')->group(function () {
+        Route::get('/', [App\Http\Controllers\ActivityController::class, 'index'])->name('index');
+        Route::get('/recent', [App\Http\Controllers\ActivityController::class, 'getRecent'])->name('recent');
+        Route::get('/timeline', [App\Http\Controllers\ActivityController::class, 'getTimeline'])->name('timeline');
+        Route::get('/statistics', [App\Http\Controllers\ActivityController::class, 'getStatistics'])->name('statistics');
+        Route::get('/user/{user?}', [App\Http\Controllers\ActivityController::class, 'getUserActivities'])->name('user');
+        Route::get('/user/{user}/statistics', [App\Http\Controllers\ActivityController::class, 'getUserStatistics'])->name('user.statistics');
+        Route::get('/export', [App\Http\Controllers\ActivityController::class, 'export'])->name('export');
+        Route::post('/cleanup', [App\Http\Controllers\ActivityController::class, 'cleanup'])->name('cleanup')->middleware('can:manage-system');
+    });
+
+    // Placeholder routes for quick actions (to be implemented)
+    Route::get('/courses', function() { return view('placeholder', ['title' => 'Courses', 'message' => 'Course management coming soon']); })->name('courses.index');
+    Route::get('/courses/create', function() { return view('placeholder', ['title' => 'Create Course', 'message' => 'Course creation coming soon']); })->name('courses.create');
+    Route::get('/enrollments', function() { return view('placeholder', ['title' => 'Enrollments', 'message' => 'Enrollment management coming soon']); })->name('enrollments.index');
+    Route::get('/settings', function() { return view('placeholder', ['title' => 'Settings', 'message' => 'System settings coming soon']); })->name('settings.index');
+    Route::get('/import', function() { return view('placeholder', ['title' => 'Bulk Import', 'message' => 'Data import system coming soon']); })->name('import.index');
+
+    // Marks management placeholder
+    Route::get('/marks', function() { return view('placeholder', ['title' => 'Marks Management', 'message' => 'Marks management coming soon']); })->name('marks.index');
+
+    // Performance monitoring routes (admin only)
+    Route::middleware(['can:manage-system'])->prefix('performance')->name('performance.')->group(function () {
+        Route::get('/', [App\Http\Controllers\PerformanceController::class, 'index'])->name('index');
+        Route::get('/realtime-metrics', [App\Http\Controllers\PerformanceController::class, 'getRealtimeMetrics'])->name('realtime-metrics');
+        Route::get('/cache-stats', [App\Http\Controllers\PerformanceController::class, 'getCacheStats'])->name('cache-stats');
+        Route::get('/database-analysis', [App\Http\Controllers\PerformanceController::class, 'analyzeDatabase'])->name('database-analysis');
+        Route::get('/report', [App\Http\Controllers\PerformanceController::class, 'generateReport'])->name('report');
+        Route::post('/optimize', [App\Http\Controllers\PerformanceController::class, 'optimize'])->name('optimize');
+        Route::post('/clear-cache', [App\Http\Controllers\PerformanceController::class, 'clearCache'])->name('clear-cache');
+        Route::post('/metrics', [App\Http\Controllers\PerformanceController::class, 'storeMetrics'])->name('store-metrics');
+    });
+
+    // Security monitoring routes (admin only)
+    Route::middleware(['can:manage-system'])->prefix('security')->name('security.')->group(function () {
+        Route::get('/', [App\Http\Controllers\SecurityController::class, 'index'])->name('index');
+        Route::post('/scan', [App\Http\Controllers\SecurityController::class, 'runSecurityScan'])->name('scan');
+        Route::post('/block-ip', [App\Http\Controllers\SecurityController::class, 'blockIP'])->name('block-ip');
+        Route::post('/unblock-ip', [App\Http\Controllers\SecurityController::class, 'unblockIP'])->name('unblock-ip');
+        Route::post('/force-logout-all', [App\Http\Controllers\SecurityController::class, 'forceLogoutAll'])->name('force-logout-all');
+        Route::get('/report', [App\Http\Controllers\SecurityController::class, 'generateReport'])->name('report');
+    });
+
     // Profile Routes
     Route::get('profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::get('profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
@@ -205,6 +275,11 @@ Route::middleware(['auth'])->group(function () {
     // Student Management Routes
     Route::middleware(['permission:manage-students|view-students'])->group(function () {
         Route::resource('students', StudentController::class);
+    });
+
+    // Teacher Management Routes
+    Route::middleware(['permission:manage-teachers|view-teachers'])->group(function () {
+        Route::resource('teachers', TeacherController::class);
     });
 
     // AJAX Routes for Students (less restrictive middleware)

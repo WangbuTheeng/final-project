@@ -634,25 +634,7 @@
     </div>
 
     <!-- Debug Information (Remove in production) -->
-    @if(config('app.debug'))
-    <div class="mt-4 p-4 bg-gray-100 rounded-lg text-xs">
-        <strong>Debug Info:</strong><br>
-        Role: {{ $role }}<br>
-        Permissions: {{ implode(', ', $permissions) }}<br>
-        User ID: {{ $user->id }}<br>
-        User Name: {{ $user->name }}<br>
-        First Name: {{ $user->first_name ?? 'Not set' }}<br>
-        Last Name: {{ $user->last_name ?? 'Not set' }}<br>
-        User Roles: {{ $user->roles->pluck('name')->implode(', ') }}<br>
-        Has Super Admin Role: {{ $user->hasRole('Super Admin') ? 'Yes' : 'No' }}<br>
-        Has Admin Role: {{ $user->hasRole('Admin') ? 'Yes' : 'No' }}<br>
-        Has Accountant Role: {{ $user->hasRole('Accountant') ? 'Yes' : 'No' }}<br>
-        Can Create Students: {{ $user->can('create-students') ? 'Yes' : 'No' }}<br>
-        Can View Users: {{ $user->can('view-users') ? 'Yes' : 'No' }}<br>
-        Can Create Invoices: {{ $user->can('create-invoices') ? 'Yes' : 'No' }}<br>
-        Can View Payments: {{ $user->can('view-payments') ? 'Yes' : 'No' }}
-    </div>
-    @endif
+   
 </div>
 
 <!-- Data Visualization Section -->

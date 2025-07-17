@@ -257,7 +257,7 @@
                 @include('layouts.partials.top-navigation')
 
                 <!-- Main content area -->
-                <main class="p-4 sm:p-6 lg:p-8 animate-fade-in-up min-h-screen bg-gray-50">
+                <main class="p-4 sm:p-6 lg:p-8 animate-fade-in-up min-h-screen bg-gray-50 pt-20">
                     <!-- Success Messages -->
                     @if(session('success'))
                     <div x-data="{ show: true }"

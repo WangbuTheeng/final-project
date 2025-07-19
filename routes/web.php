@@ -92,8 +92,14 @@ Auth::routes();
 // Original home route - redirects to dashboard for backward compatibility
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
-// Dashboard route
+// Dashboard routes
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard/modern', function(App\Services\DashboardService $dashboardService) {
+    $user = Auth::user();
+    $dashboardData = $dashboardService->getDashboardData($user);
+    return view('dashboard-modern', compact('dashboardData'));
+})->name('dashboard.modern');
+Route::get('/api/dashboard/data', [DashboardController::class, 'data'])->name('dashboard.data');
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
@@ -406,7 +412,7 @@ Route::middleware(['auth'])->group(function () {
     });
     
     // Finance Routes
-    Route::middleware(['permission:view-finances'])->prefix('finance')->name('finance.')->group(function () {
+    Route::middleware(['role_or_permission:Super Admin|view-finances'])->prefix('finance')->name('finance.')->group(function () {
         // Dashboard
         Route::get('/', [FinanceController::class, 'dashboard'])->name('dashboard');
 
@@ -498,10 +504,17 @@ Route::get('/debug/api-test', function() {
     return view('debug.api-test');
 })->middleware('auth');
 
-
-
-
-
+// Test route for dashboard chart data
+Route::get('/test-dashboard-data', function() {
+    $controller = new \App\Http\Controllers\DashboardController();
+    $reflection = new ReflectionClass($controller);
+    $method = $reflection->getMethod('getChartData');
+    $method->setAccessible(true);
+    
+    $chartData = $method->invoke($controller);
+    
+    return response()->json($chartData);
+})->middleware('auth');
 
 
 // AJAX API routes for enrollment (moved from api.php to avoid CSRF issues)

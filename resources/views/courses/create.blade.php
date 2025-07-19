@@ -100,47 +100,26 @@
                 </div>
             </div>
 
-            <!-- Faculty Selection (Primary) -->
-            <div>
-                <label for="faculty_id" class="block text-sm font-medium text-gray-700 mb-2">
-                    Faculty <span class="text-red-500">*</span>
-                </label>
-                <select name="faculty_id" 
-                        id="faculty_id"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('faculty_id') border-red-300 @enderror"
-                        required>
-                    <option value="">Select a faculty</option>
-                    @foreach($faculties as $faculty)
-                        <option value="{{ $faculty->id }}" {{ old('faculty_id') == $faculty->id ? 'selected' : '' }}>
-                            {{ $faculty->name }} ({{ $faculty->code }})
-                        </option>
-                    @endforeach
-                </select>
-                @error('faculty_id')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
-                <p class="mt-1 text-sm text-gray-500">Primary faculty responsible for this course</p>
-            </div>
-
-            <!-- Department Selection (Optional) -->
+            <!-- Department Selection (Required) -->
             <div>
                 <label for="department_id" class="block text-sm font-medium text-gray-700 mb-2">
-                    Department <span class="text-gray-400">(Optional)</span>
+                    Department <span class="text-red-500">*</span>
                 </label>
-                <select name="department_id" 
+                <select name="department_id"
                         id="department_id"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('department_id') border-red-300 @enderror">
-                    <option value="">No department (optional)</option>
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('department_id') border-red-300 @enderror"
+                        required>
+                    <option value="">Select a department</option>
                     @foreach($departments as $department)
                         <option value="{{ $department->id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
-                            {{ $department->faculty->name }} - {{ $department->name }} ({{ $department->code }})
+                            {{ $department->faculty ? $department->faculty->name : 'No Faculty' }} - {{ $department->name }} ({{ $department->code }})
                         </option>
                     @endforeach
                 </select>
                 @error('department_id')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
-                <p class="mt-1 text-sm text-gray-500">Optional department for additional organization</p>
+                <p class="mt-1 text-sm text-gray-500">Department determines the faculty for this course</p>
             </div>
 
             <!-- Description -->
@@ -158,43 +137,11 @@
                 @enderror
             </div>
 
-            <!-- Organization Type Selection -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Course Organization <span class="text-red-500">*</span>
-                </label>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="flex items-center">
-                        <input type="radio"
-                               name="organization_type"
-                               id="organization_yearly"
-                               value="yearly"
-                               {{ old('organization_type', 'yearly') === 'yearly' ? 'checked' : '' }}
-                               class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300">
-                        <label for="organization_yearly" class="ml-2 block text-sm text-gray-900">
-                            Yearly Based (1-4 Years)
-                        </label>
-                    </div>
-                    <div class="flex items-center">
-                        <input type="radio"
-                               name="organization_type"
-                               id="organization_semester"
-                               value="semester"
-                               {{ old('organization_type') === 'semester' ? 'checked' : '' }}
-                               class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300">
-                        <label for="organization_semester" class="ml-2 block text-sm text-gray-900">
-                            Semester Based (1-8 Semesters)
-                        </label>
-                    </div>
-                </div>
-                @error('organization_type')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
-                <p class="mt-1 text-sm text-gray-500">Choose how this course is organized</p>
-            </div>
+            <!-- Hidden field for organization type - default to semester for TU -->
+            <input type="hidden" name="organization_type" value="semester">
 
             <!-- Course Details -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Credit Units -->
                 <div>
                     <label for="credit_units" class="block text-sm font-medium text-gray-700 mb-2">
@@ -211,49 +158,7 @@
                     @error('credit_units')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
-                </div>
-
-
-
-                <!-- Year (for yearly organization) -->
-                <div id="year_field" class="yearly-field">
-                    <label for="year" class="block text-sm font-medium text-gray-700 mb-2">
-                        Year <span class="text-red-500">*</span>
-                    </label>
-                    <select name="year"
-                            id="year"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('year') border-red-300 @enderror">
-                        <option value="">Select year</option>
-                        @foreach($yearlyOptions as $year)
-                            <option value="{{ $year }}" {{ old('year') == $year ? 'selected' : '' }}>
-                                {{ $year }}{{ $year == 1 ? 'st' : ($year == 2 ? 'nd' : ($year == 3 ? 'rd' : 'th')) }} Year
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('year')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-
-                <!-- Semester Number (for semester organization) -->
-                <div id="semester_period_field" class="semester-field" style="display: none;">
-                    <label for="semester_period" class="block text-sm font-medium text-gray-700 mb-2">
-                        Semester Number <span class="text-red-500">*</span>
-                    </label>
-                    <select name="semester_period"
-                            id="semester_period"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('semester_period') border-red-300 @enderror">
-                        <option value="">Select semester number</option>
-                        @foreach($semesterOptions as $sem)
-                            <option value="{{ $sem }}" {{ old('semester_period') == $sem ? 'selected' : '' }}>
-                                Semester {{ $sem }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('semester_period')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <p class="mt-1 text-sm text-gray-500">Typically 3 credit units for most TU courses</p>
                 </div>
 
                 <!-- Course Type -->
@@ -261,7 +166,7 @@
                     <label for="course_type" class="block text-sm font-medium text-gray-700 mb-2">
                         Course Type <span class="text-red-500">*</span>
                     </label>
-                    <select name="course_type" 
+                    <select name="course_type"
                             id="course_type"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('course_type') border-red-300 @enderror"
                             required>
@@ -275,8 +180,13 @@
                     @error('course_type')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
+                    <p class="mt-1 text-sm text-gray-500">Core, Elective, or General Studies</p>
                 </div>
             </div>
+
+            <!-- Hidden fields for TU compatibility -->
+            <input type="hidden" name="semester_period" value="1">
+            <input type="hidden" name="year" value="">
 
 
 
@@ -318,46 +228,7 @@
         e.target.value = e.target.value.toUpperCase();
     });
 
-    // Handle organization type change
-    function toggleOrganizationFields() {
-        const organizationType = document.querySelector('input[name="organization_type"]:checked').value;
-        const yearField = document.getElementById('year_field');
-        const semesterPeriodField = document.getElementById('semester_period_field'); // Correctly reference semester_period_field
 
-        if (organizationType === 'yearly') {
-            // Show only Year field for yearly organization
-            yearField.style.display = 'block';
-            semesterPeriodField.style.display = 'none'; // Hide semester_period_field
-
-            // Make year field required, semester_period not required
-            document.getElementById('year').required = true;
-            document.getElementById('semester_period').required = false;
-
-            // Clear semester_period field
-            document.getElementById('semester_period').value = '';
-        } else { // organizationType === 'semester'
-            // Show only Semester Period field for semester organization
-            yearField.style.display = 'none';
-            semesterPeriodField.style.display = 'block'; // Show semester_period_field
-
-            // Make semester_period field required, year not required
-            document.getElementById('year').required = false;
-            document.getElementById('semester_period').required = true;
-
-            // Clear year field
-            document.getElementById('year').value = '';
-        }
-    }
-
-    // Initialize organization fields on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        toggleOrganizationFields();
-    });
-
-    // Add event listeners to organization type radio buttons
-    document.querySelectorAll('input[name="organization_type"]').forEach(radio => {
-        radio.addEventListener('change', toggleOrganizationFields);
-    });
 
     // Filter departments by selected faculty
     document.getElementById('faculty_id').addEventListener('change', function() {

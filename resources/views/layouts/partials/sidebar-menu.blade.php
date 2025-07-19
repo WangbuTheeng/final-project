@@ -431,7 +431,7 @@
         @endif
 
         <!-- Finance Management -->
-        @if(auth()->user()->can('view-finances') && !auth()->user()->hasRole('Admin'))
+        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Accountant') || auth()->user()->can('view-finances'))
         <li>
             <div x-data="{ open: {{ request()->routeIs('finance.*') ? 'true' : 'false' }} }" class="space-y-1">
                 <button

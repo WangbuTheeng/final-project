@@ -191,20 +191,37 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-8 w-8">
-                                            <div class="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
-                                                <span class="text-xs font-medium text-primary-700">
-                                                    {{ $course->faculty->code }}
-                                                </span>
+                                    @if($course->faculty)
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-8 w-8">
+                                                <div class="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
+                                                    <span class="text-xs font-medium text-primary-700">
+                                                        {{ $course->faculty->code }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="ml-3">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    {{ $course->faculty->name }}
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="ml-3">
-                                            <div class="text-sm font-medium text-gray-900">
-                                                {{ $course->faculty->name }}
+                                    @else
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-8 w-8">
+                                                <div class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                                    <span class="text-xs font-medium text-gray-500">
+                                                        N/A
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="ml-3">
+                                                <div class="text-sm font-medium text-gray-500">
+                                                    No Faculty
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     @if($course->department)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\DashboardService;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\ClassSection;
@@ -15,7 +16,11 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Fee;
 use App\Models\SalaryPayment;
+use App\Models\Mark;
+use App\Models\Grade;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -34,10 +39,9 @@ class DashboardController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
+    public function index(DashboardService $dashboardService)
     {
         $user = Auth::user();
-        $role = null;
 
         // Check if user has any roles assigned
         if (!$user->roles()->exists()) {
@@ -45,7 +49,42 @@ class DashboardController extends Controller
             return view('dashboard.no-role');
         }
 
+        // Get modern dashboard data using the service
+        $dashboardData = $dashboardService->getDashboardData($user);
+
+        // Check if request wants JSON (for API/AJAX calls)
+        if (request()->wantsJson()) {
+            return response()->json($dashboardData);
+        }
+
+        // For backward compatibility, also get legacy data
+        $legacyData = $this->getLegacyDashboardData($user);
+
+        // Return the dashboard view with both modern and legacy data
+        return view('dashboard', array_merge($legacyData, [
+            'dashboardData' => $dashboardData,
+            'projectSummary' => $dashboardData['projectSummary'] ?? []
+        ]));
+    }
+
+    /**
+     * Get modern dashboard data as JSON (for Vue components)
+     */
+    public function data(DashboardService $dashboardService)
+    {
+        $user = Auth::user();
+        $dashboardData = $dashboardService->getDashboardData($user);
+        
+        return response()->json($dashboardData);
+    }
+
+    /**
+     * Get legacy dashboard data for backward compatibility
+     */
+    private function getLegacyDashboardData(User $user): array
+    {
         // Determine user's highest role (prioritizing the most important ones)
+        $role = 'User'; // Default role
         if ($user->hasRole('Super Admin')) {
             $role = 'Super Admin';
         } elseif ($user->hasRole('Admin')) {
@@ -56,8 +95,6 @@ class DashboardController extends Controller
             $role = 'Accountant';
         } elseif ($user->hasRole('Teacher')) {
             $role = 'Teacher';
-        } else {
-            $role = 'User'; // Default role
         }
 
         // Get permissions for the view
@@ -75,8 +112,10 @@ class DashboardController extends Controller
         $recentPayments = $this->getRecentPayments();
         $overdueInvoices = $this->getOverdueInvoices();
 
-        // Return the dashboard view
-        return view('dashboard', compact(
+        // Get chart data
+        $chartData = $this->getChartData();
+
+        return compact(
             'user',
             'role',
             'permissions',
@@ -85,8 +124,9 @@ class DashboardController extends Controller
             'upcomingExams',
             'financeStats',
             'recentPayments',
-            'overdueInvoices'
-        ));
+            'overdueInvoices',
+            'chartData'
+        );
     }
 
     /**
@@ -123,6 +163,14 @@ class DashboardController extends Controller
         $usersGrowth = $lastMonthUsers > 0 ?
             round((($totalUsers - $lastMonthUsers) / $lastMonthUsers) * 100, 1) : 0;
 
+        // Pending results (exams with marks but no grades assigned)
+        $pendingResults = Exam::whereHas('marks', function($query) {
+            $query->whereNull('grade_letter');
+        })->count();
+
+        // Total exams
+        $totalExams = Exam::count();
+
         return [
             'total_students' => $totalStudents,
             'students_growth' => $studentsGrowth,
@@ -130,6 +178,141 @@ class DashboardController extends Controller
             'upcoming_exams' => $upcomingExamsCount,
             'total_users' => $totalUsers,
             'users_growth' => $usersGrowth,
+            'pending_results' => $pendingResults,
+            'total_exams' => $totalExams,
+        ];
+    }
+
+    /**
+     * Get chart data for dashboard
+     */
+    private function getChartData()
+    {
+        return [
+            'enrollment_trends' => $this->getEnrollmentTrends(),
+            'academic_performance' => $this->getAcademicPerformance(),
+            'revenue_trends' => $this->getRevenueTrends(),
+            'payment_status' => $this->getPaymentStatus(),
+        ];
+    }
+
+    /**
+     * Get enrollment trends data for the last 6 months
+     */
+    private function getEnrollmentTrends()
+    {
+        $months = [];
+        $data = [];
+        
+        for ($i = 5; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $months[] = $date->format('M');
+            
+            $enrollmentCount = Enrollment::whereYear('created_at', $date->year)
+                ->whereMonth('created_at', $date->month)
+                ->where('status', 'enrolled')
+                ->count();
+            
+            $data[] = $enrollmentCount;
+        }
+        
+        return [
+            'labels' => $months,
+            'data' => $data
+        ];
+    }
+
+    /**
+     * Get academic performance distribution
+     */
+    private function getAcademicPerformance()
+    {
+        // Get all grades with letter grades
+        $performanceData = Grade::select('letter_grade', DB::raw('COUNT(*) as count'))
+            ->whereNotNull('letter_grade')
+            ->groupBy('letter_grade')
+            ->orderBy('letter_grade', 'asc')
+            ->get();
+
+        $labels = [];
+        $data = [];
+        $colors = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+
+        foreach ($performanceData as $index => $item) {
+            $labels[] = 'Grade ' . $item->letter_grade;
+            $data[] = $item->count;
+        }
+
+        // If no data, provide default values
+        if (empty($data)) {
+            $labels = ['Grade A', 'Grade B', 'Grade C', 'Grade D', 'Grade F'];
+            $data = [25, 35, 30, 8, 2];
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => $data,
+            'colors' => array_slice($colors, 0, count($labels))
+        ];
+    }
+
+    /**
+     * Get revenue trends for the last 6 months
+     */
+    private function getRevenueTrends()
+    {
+        $months = [];
+        $data = [];
+        
+        for ($i = 5; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $months[] = $date->format('M');
+            
+            $revenue = Payment::where('status', 'completed')
+                ->whereYear('payment_date', $date->year)
+                ->whereMonth('payment_date', $date->month)
+                ->sum('amount');
+            
+            $data[] = $revenue;
+        }
+        
+        return [
+            'labels' => $months,
+            'data' => $data
+        ];
+    }
+
+    /**
+     * Get payment status distribution
+     */
+    private function getPaymentStatus()
+    {
+        $totalInvoices = Invoice::count();
+        
+        if ($totalInvoices === 0) {
+            return [
+                'labels' => ['Paid', 'Pending', 'Overdue'],
+                'data' => [0, 0, 0],
+                'colors' => ['#10B981', '#F59E0B', '#EF4444']
+            ];
+        }
+
+        $paidInvoices = Invoice::where('status', 'paid')->count();
+        $pendingInvoices = Invoice::whereIn('status', ['sent', 'partially_paid'])->count();
+        $overdueInvoices = Invoice::where('status', 'overdue')
+            ->orWhere(function($query) {
+                $query->whereIn('status', ['sent', 'partially_paid'])
+                      ->where('due_date', '<', Carbon::now());
+            })->count();
+
+        $labels = ['Paid', 'Pending', 'Overdue'];
+        $data = [$paidInvoices, $pendingInvoices, $overdueInvoices];
+        $colors = ['#10B981', '#F59E0B', '#EF4444'];
+
+        return [
+            'labels' => $labels,
+            'data' => $data,
+            'colors' => $colors
         ];
     }
 

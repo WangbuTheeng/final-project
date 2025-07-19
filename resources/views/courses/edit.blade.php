@@ -106,47 +106,26 @@
                 </div>
             </div>
 
-            <!-- Faculty Selection (Primary) -->
-            <div>
-                <label for="faculty_id" class="block text-sm font-medium text-gray-700 mb-2">
-                    Faculty <span class="text-red-500">*</span>
-                </label>
-                <select name="faculty_id" 
-                        id="faculty_id"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('faculty_id') border-red-300 @enderror"
-                        required>
-                    <option value="">Select a faculty</option>
-                    @foreach($faculties as $faculty)
-                        <option value="{{ $faculty->id }}" {{ old('faculty_id', $course->faculty_id) == $faculty->id ? 'selected' : '' }}>
-                            {{ $faculty->name }} ({{ $faculty->code }})
-                        </option>
-                    @endforeach
-                </select>
-                @error('faculty_id')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
-                <p class="mt-1 text-sm text-gray-500">Primary faculty responsible for this course</p>
-            </div>
-
-            <!-- Department Selection (Optional) -->
+            <!-- Department Selection (Required) -->
             <div>
                 <label for="department_id" class="block text-sm font-medium text-gray-700 mb-2">
-                    Department <span class="text-gray-400">(Optional)</span>
+                    Department <span class="text-red-500">*</span>
                 </label>
-                <select name="department_id" 
+                <select name="department_id"
                         id="department_id"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('department_id') border-red-300 @enderror">
-                    <option value="">No department (optional)</option>
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('department_id') border-red-300 @enderror"
+                        required>
+                    <option value="">Select a department</option>
                     @foreach($departments as $department)
                         <option value="{{ $department->id }}" {{ old('department_id', $course->department_id) == $department->id ? 'selected' : '' }}>
-                            {{ $department->faculty->name }} - {{ $department->name }} ({{ $department->code }})
+                            {{ $department->faculty ? $department->faculty->name : 'No Faculty' }} - {{ $department->name }} ({{ $department->code }})
                         </option>
                     @endforeach
                 </select>
                 @error('department_id')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
-                <p class="mt-1 text-sm text-gray-500">Optional department for additional organization</p>
+                <p class="mt-1 text-sm text-gray-500">Department determines the faculty for this course</p>
             </div>
 
             <!-- Description -->

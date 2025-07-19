@@ -72,19 +72,35 @@
                     <!-- Faculty Information (Primary) -->
                     <div>
                         <label class="block text-sm font-medium text-gray-500">Faculty</label>
-                        <div class="mt-1 flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10">
-                                <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
-                                    <span class="text-sm font-medium text-primary-700">
-                                        {{ $course->faculty->code }}
-                                    </span>
+                        @if($course->faculty)
+                            <div class="mt-1 flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+                                        <span class="text-sm font-medium text-primary-700">
+                                            {{ $course->faculty->code }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900">{{ $course->faculty->name }}</p>
+                                    <p class="text-sm text-gray-500">Primary Faculty</p>
                                 </div>
                             </div>
-                            <div class="ml-3">
-                                <p class="text-sm font-medium text-gray-900">{{ $course->faculty->name }}</p>
-                                <p class="text-sm text-gray-500">Primary Faculty</p>
+                        @else
+                            <div class="mt-1 flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                        <span class="text-sm font-medium text-gray-500">
+                                            N/A
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-500">No Faculty Assigned</p>
+                                    <p class="text-sm text-gray-400">Course needs department with faculty</p>
+                                </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
 
                     <!-- Department Information (Optional) -->

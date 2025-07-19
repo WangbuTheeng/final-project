@@ -1,6 +1,8 @@
+// Import design tokens first
+@import '../css/tokens.css';
+
 // Fonts
-@import url('https://fonts.bunny.net/css?family=Nunito');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 // Variables
 @import 'variables';
@@ -10,13 +12,5 @@
 @tailwind components;
 @tailwind utilities;
 
-// Custom styles
-.bg-primary-50 { background-color: #eef2ff; }
-.bg-primary-100 { background-color: #e0e7ff; }
-.text-primary-500 { color: #6366f1; }
-.text-primary-600 { color: #4f46e5; }
-.text-primary-700 { color: #4338ca; }
-.hover\:bg-primary-700:hover { background-color: #4338ca; }
-.bg-primary-600 { background-color: #4f46e5; }
-.focus\:ring-primary-500:focus { --tw-ring-color: #6366f1; }
-.focus\:border-primary-500:focus { border-color: #6366f1; }
+// Remove old custom styles - they're now in tokens.css and app.css
+

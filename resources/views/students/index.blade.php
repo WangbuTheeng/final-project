@@ -384,7 +384,7 @@
                 <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
                     <div class="flex items-center justify-between">
                         <div class="flex-1 flex justify-between sm:hidden">
-                            {{ $students->appends(request()->query())->simplePaginate() }}
+                            {{ $students->appends(request()->query())->links() }}
                         </div>
                         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                             <div>

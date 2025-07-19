@@ -221,51 +221,22 @@ class Student extends Model
 
 
     /**
-     * Check if student can enroll in a course
+     * Check if student can enroll in a class using the new validation service
      */
-    public function canEnrollInCourse(ClassSection $class, $academicYearId, $semester) // Changed $course to ClassSection $class
+    public function canEnrollInClass(ClassSection $class, int $academicYearId): \App\Services\EnrollmentValidationResult
     {
-        $reasons = [];
+        $validator = new \App\Services\EnrollmentValidator($this, $class, $academicYearId);
+        return $validator->validate();
+    }
 
-        // Check if already enrolled in this specific class for the semester (including soft-deleted)
-        $existingEnrollment = $this->enrollments()
-            ->withTrashed() // Include soft-deleted records
-            ->where('class_id', $class->id) // Check against the specific class ID
-            ->where('academic_year_id', $academicYearId)
-            ->where('semester', $semester)
-            ->exists();
-
-        if ($existingEnrollment) {
-            $reasons[] = 'Student is already enrolled in this specific class for the selected semester.';
-        }
-
-        // Note: Course level checking removed as student levels are no longer tracked
-
-        // Check prerequisites (only if course has prerequisites defined)
-        // Use $class->course->prerequisites instead of $course->prerequisites
-        if (isset($class->course->prerequisites) && !empty($class->course->prerequisites)) {
-            $completedCourses = $this->completedEnrollments()
-                ->with('class.course')
-                ->get()
-                ->pluck('class.course.id')
-                ->toArray();
-
-            $missingPrerequisites = [];
-            foreach ($class->course->prerequisites as $prerequisiteId) {
-                if (!in_array($prerequisiteId, $completedCourses)) {
-                    $prerequisiteCourse = Course::find($prerequisiteId);
-                    if ($prerequisiteCourse) {
-                        $missingPrerequisites[] = $prerequisiteCourse->code . ' - ' . $prerequisiteCourse->title;
-                    }
-                }
-            }
-
-            if (!empty($missingPrerequisites)) {
-                $reasons[] = 'Missing prerequisites: ' . implode(', ', $missingPrerequisites) . '.';
-            }
-        }
-
-        return [empty($reasons), $reasons]; // Return [true/false, reasons_array]
+    /**
+     * Legacy method for backward compatibility
+     * @deprecated Use canEnrollInClass() instead
+     */
+    public function canEnrollInCourse(ClassSection $class, $academicYearId, $semester = null)
+    {
+        $result = $this->canEnrollInClass($class, $academicYearId);
+        return [$result->isValid(), $result->getErrors()];
     }
 
     /**
@@ -297,39 +268,52 @@ class Student extends Model
     }
 
     /**
-     * Update CGPA based on all completed courses
+     * Update CGPA based on all completed courses using optimized single query
      */
-    public function updateCGPA()
+    public function updateCGPA(): void
     {
-        $completedEnrollments = $this->completedEnrollments()
-            ->with('class.course')
-            ->get();
-
-        if ($completedEnrollments->isEmpty()) {
-            $this->update([
-                'cgpa' => 0.00,
-                'total_credits_earned' => 0
-            ]);
-            return;
-        }
-
-        $totalPoints = 0;
-        $totalCredits = 0;
-
-        foreach ($completedEnrollments as $enrollment) {
-            $creditUnits = $enrollment->class->course->credit_units;
-            $gradePoint = $this->getGradePoint($enrollment->final_grade);
+        // Single optimized query to calculate CGPA
+        $result = \DB::table('enrollments')
+            ->join('classes', 'enrollments.class_id', '=', 'classes.id')
+            ->join('courses', 'classes.course_id', '=', 'courses.id')
+            ->where('enrollments.student_id', $this->id)
+            ->where('enrollments.status', 'completed')
+            ->whereNotNull('enrollments.final_grade')
+            ->select([
+                \DB::raw('SUM(courses.credit_units * CASE 
+                    WHEN enrollments.final_grade = "A" THEN 5.0
+                    WHEN enrollments.final_grade = "B" THEN 4.0
+                    WHEN enrollments.final_grade = "C" THEN 3.0
+                    WHEN enrollments.final_grade = "D" THEN 2.0
+                    WHEN enrollments.final_grade = "E" THEN 1.0
+                    ELSE 0.0
+                END) as total_points'),
+                \DB::raw('SUM(courses.credit_units) as total_credits')
+            ])
+            ->first();
             
-            $totalPoints += ($gradePoint * $creditUnits);
-            $totalCredits += $creditUnits;
-        }
-
-        $cgpa = $totalCredits > 0 ? round($totalPoints / $totalCredits, 2) : 0.00;
-        
+        $cgpa = $result->total_credits > 0 
+            ? round($result->total_points / $result->total_credits, 2) 
+            : 0.00;
+            
         $this->update([
             'cgpa' => $cgpa,
-            'total_credits_earned' => $totalCredits
+            'total_credits_earned' => $result->total_credits ?? 0
         ]);
+        
+        // Clear related caches
+        \Cache::forget("student.{$this->id}.cgpa");
+        \Cache::tags(['student:' . $this->id])->flush();
+    }
+    
+    /**
+     * Get cached CGPA for performance
+     */
+    public function getCachedCGPA(): float
+    {
+        return \Cache::remember("student.{$this->id}.cgpa", 3600, function () {
+            return $this->cgpa ?? 0.00;
+        });
     }
 
     /**

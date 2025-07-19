@@ -16,7 +16,6 @@ class Enrollment extends Model
         'student_id',
         'class_id',
         'academic_year_id',
-        'semester',
         'status',
         'enrollment_date',
         'drop_date',
@@ -53,7 +52,6 @@ class Enrollment extends Model
                 'student_id',
                 'class_id',
                 'academic_year_id',
-                'semester',
                 'status',
                 'enrollment_date',
                 'drop_date',
@@ -103,11 +101,21 @@ class Enrollment extends Model
     }
 
     /**
-     * Scope to get enrollments by semester
+     * Get semester through class relationship
+     */
+    public function getSemesterAttribute()
+    {
+        return $this->class->semester ?? null;
+    }
+
+    /**
+     * Scope to get enrollments by semester (through class relationship)
      */
     public function scopeBySemester($query, $semester)
     {
-        return $query->where('semester', $semester);
+        return $query->whereHas('class', function ($q) use ($semester) {
+            $q->where('semester', $semester);
+        });
     }
 
     /**
@@ -202,7 +210,7 @@ class Enrollment extends Model
         ]);
 
         // Update class enrollment count
-        $this->class->decrement('current_enrollment');
+        $this->class->decrement('enrolled_count');
 
         return true;
     }

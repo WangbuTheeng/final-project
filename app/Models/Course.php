@@ -15,7 +15,6 @@ class Course extends Model
         'title',
         'code',
         'description',
-        'faculty_id',
         'department_id',
         'credit_units',
         'organization_type',
@@ -41,7 +40,6 @@ class Course extends Model
                 'title',
                 'code',
                 'description',
-                'faculty_id',
                 'department_id',
                 'credit_units',
                 'organization_type',
@@ -57,11 +55,18 @@ class Course extends Model
     }
 
     /**
-     * Get the faculty this course belongs to
+     * Get the faculty this course belongs to through department
      */
     public function faculty()
     {
-        return $this->belongsTo(Faculty::class);
+        return $this->hasOneThrough(
+            Faculty::class,
+            Department::class,
+            'id',           // Foreign key on departments table
+            'id',           // Foreign key on faculties table
+            'department_id', // Local key on courses table
+            'faculty_id'    // Local key on departments table
+        );
     }
 
     /**
@@ -135,11 +140,13 @@ class Course extends Model
     }
 
     /**
-     * Scope to filter by faculty
+     * Scope to filter by faculty through department
      */
     public function scopeByFaculty($query, $facultyId)
     {
-        return $query->where('faculty_id', $facultyId);
+        return $query->whereHas('department', function ($q) use ($facultyId) {
+            $q->where('faculty_id', $facultyId);
+        });
     }
 
     /**

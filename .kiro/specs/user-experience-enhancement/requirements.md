@@ -6,7 +6,31 @@ The User Experience Enhancement feature aims to transform the existing College M
 
 ## Requirements
 
-### Requirement 1: Modern Dashboard and Navigation
+### Requirement 1: Critical Relationship Model Optimization (HIGHEST PRIORITY)
+
+**User Story:** As a system administrator, I want optimized database relationships and performance improvements, so that the system operates efficiently and maintains data integrity.
+
+#### Acceptance Criteria
+
+1. WHEN courses are accessed THEN the system SHALL use simplified Faculty-Department relationships without redundancy
+2. WHEN enrollments are queried THEN the system SHALL access semester information through ClassSection relationship only
+3. WHEN user roles are checked THEN the system SHALL use enhanced role management with polymorphic access
+4. WHEN CGPA is calculated THEN the system SHALL use single optimized database queries instead of N+1 queries
+5. WHEN enrollment validation occurs THEN the system SHALL use dedicated validation classes with minimal database queries
+
+### Requirement 2: Database Performance Optimization (HIGHEST PRIORITY)
+
+**User Story:** As a system user, I want fast response times and efficient data access, so that I can work without delays or system slowdowns.
+
+#### Acceptance Criteria
+
+1. WHEN frequently queried data is accessed THEN the system SHALL use proper database indexes for optimal performance
+2. WHEN related data is loaded THEN the system SHALL implement eager loading to prevent N+1 query problems
+3. WHEN static data is requested THEN the system SHALL serve cached results with Redis implementation
+4. WHEN large datasets are displayed THEN the system SHALL implement pagination and virtual scrolling
+5. WHEN dashboard statistics are calculated THEN the system SHALL cache results for 5 minutes to reduce database load
+
+### Requirement 3: Modern Dashboard and Navigation
 
 **User Story:** As a system user, I want an intuitive and visually appealing dashboard that provides quick access to relevant information and actions, so that I can efficiently navigate and use the system.
 
@@ -14,7 +38,7 @@ The User Experience Enhancement feature aims to transform the existing College M
 
 1. WHEN a user logs in THEN the system SHALL display a role-specific dashboard with personalized widgets and quick actions
 2. WHEN a user navigates the system THEN the system SHALL provide a responsive sidebar navigation with collapsible menu groups
-3. WHEN a user accesses the dashboard THEN the system SHALL display real-time statistics cards relevant to their role
+3. WHEN a user accesses the dashboard THEN the system SHALL display real-time statistics cards with gradient backgrounds and hover effects
 4. WHEN a user interacts with navigation elements THEN the system SHALL provide visual feedback and smooth transitions
 5. WHEN a user views the dashboard on mobile devices THEN the system SHALL adapt the layout for optimal mobile experience
 

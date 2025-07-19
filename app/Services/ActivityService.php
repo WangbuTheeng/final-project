@@ -23,10 +23,11 @@ class ActivityService
     {
         $user = $user ?? Auth::user();
         
+        $email = $user->email ?? 'unknown';
         $descriptions = [
             'login' => "User {$user->name} logged in",
             'logout' => "User {$user->name} logged out",
-            'failed_login' => "Failed login attempt for {$user->email ?? 'unknown'}",
+            'failed_login' => "Failed login attempt for {$email}",
             'password_reset' => "Password reset requested for {$user->email}",
             'password_changed' => "Password changed for {$user->name}",
         ];

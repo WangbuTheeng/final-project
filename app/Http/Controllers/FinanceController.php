@@ -26,6 +26,24 @@ class FinanceController extends Controller
         $this->middleware('auth');
     }
 
+    /**
+     * Check if user can bypass authorization (Super Admin)
+     */
+    private function canBypassAuth(): bool
+    {
+        return auth()->user()->hasRole('Super Admin');
+    }
+
+    /**
+     * Authorize with Super Admin bypass
+     */
+    private function authorizeWithBypass(string $permission): void
+    {
+        if (!$this->canBypassAuth()) {
+            $this->authorize($permission);
+        }
+    }
+
     // ==================== DASHBOARD ====================
 
     /**
@@ -33,7 +51,7 @@ class FinanceController extends Controller
      */
     public function dashboard()
     {
-        $this->authorize('view-finances');
+        $this->authorizeWithBypass('view-finances');
 
         $currentYear = now()->year;
         $currentMonth = now()->month;

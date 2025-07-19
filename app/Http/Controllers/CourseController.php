@@ -89,12 +89,9 @@ class CourseController extends Controller
 
         $faculties = Faculty::active()->orderBy('name')->get();
         $departments = Department::active()->with('faculty')->orderBy('name')->get();
-        $yearlyOptions = Course::getYearlyOptions(); // 1-4 years
-        $semesterOptions = Course::getSemesterOptions(); // 1-8 semesters
-        $organizationTypes = ['yearly', 'semester'];
         $courseTypes = ['core', 'elective', 'general'];
 
-        return view('courses.create', compact('faculties', 'departments', 'yearlyOptions', 'semesterOptions', 'organizationTypes', 'courseTypes'));
+        return view('courses.create', compact('faculties', 'departments', 'courseTypes'));
     }
 
     /**
@@ -108,21 +105,11 @@ class CourseController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:20', 'unique:courses'],
             'description' => ['nullable', 'string'],
-            'faculty_id' => ['required', 'exists:faculties,id'],
-            'department_id' => ['nullable', 'exists:departments,id'],
+            'department_id' => ['required', 'exists:departments,id'],
             'credit_units' => ['required', 'integer', 'min:1', 'max:10'],
-            'organization_type' => ['required', 'in:yearly,semester'],
             'course_type' => ['required', 'in:core,elective,general'],
             'is_active' => ['boolean'],
         ];
-
-        // Add conditional validation based on organization type
-        if ($request->organization_type === 'yearly') {
-            $validationRules['year'] = ['required', 'integer', 'in:1,2,3,4'];
-            // For yearly organization, we don't require semester field
-        } else {
-            $validationRules['semester_period'] = ['required', 'integer', 'in:1,2,3,4,5,6,7,8'];
-        }
 
         $request->validate($validationRules);
 
@@ -131,26 +118,19 @@ class CourseController extends Controller
                 'title' => $request->title,
                 'code' => strtoupper($request->code),
                 'description' => $request->description,
-                'faculty_id' => $request->faculty_id,
                 'department_id' => $request->department_id,
                 'credit_units' => $request->credit_units,
-                'organization_type' => $request->organization_type,
+                'organization_type' => 'semester', // Default to semester for TU
                 'course_type' => $request->course_type,
+                'semester_period' => 1, // Default value, can be updated later when assigning to programs
+                'year' => null, // Not used for TU semester system
                 'is_active' => $request->has('is_active') ? $request->is_active : true,
             ];
-
-            // Add organization-specific fields
-            if ($request->organization_type === 'yearly') {
-                $courseData['year'] = $request->year;
-                // For yearly organization, we don't store semester
-            } else {
-                $courseData['semester_period'] = $request->semester_period;
-            }
 
             Course::create($courseData);
 
             return redirect()->route('courses.index')
-                ->with('success', 'Course created successfully.');
+                ->with('success', 'Course created successfully. You can now assign this course to specific program semesters.');
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Error creating course: ' . $e->getMessage())
@@ -206,8 +186,7 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'code' => 'required|string|max:20|unique:courses,code,' . $course->id,
             'description' => 'nullable|string',
-            'faculty_id' => 'required|exists:faculties,id',
-            'department_id' => 'nullable|exists:departments,id',
+            'department_id' => 'required|exists:departments,id',
             'credit_units' => 'required|integer|min:1|max:10',
             'organization_type' => 'required|in:yearly,semester',
             'course_type' => 'required|in:core,elective,general',
@@ -230,7 +209,6 @@ class CourseController extends Controller
                 'title' => $request->title,
                 'code' => strtoupper($request->code),
                 'description' => $request->description,
-                'faculty_id' => $request->faculty_id,
                 'department_id' => $request->department_id,
                 'credit_units' => $request->credit_units,
                 'organization_type' => $request->organization_type,

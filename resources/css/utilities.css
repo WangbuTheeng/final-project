@@ -1,0 +1,128 @@
+/* TU College Management System - Utility Classes */
+
+/* Button Variants */
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 focus-ring disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-xs {
+  @apply px-2 py-1 text-xs;
+}
+
+.btn-sm {
+  @apply px-3 py-1.5 text-sm;
+}
+
+.btn-lg {
+  @apply px-6 py-3 text-base;
+}
+
+.btn-xl {
+  @apply px-8 py-4 text-lg;
+}
+
+/* Status Badges */
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-success {
+  @apply bg-success-50 text-success-600 dark:bg-success-600/10 dark:text-success-400;
+}
+
+.badge-error {
+  @apply bg-error-50 text-error-600 dark:bg-error-600/10 dark:text-error-400;
+}
+
+.badge-warning {
+  @apply bg-warning-50 text-warning-600 dark:bg-warning-600/10 dark:text-warning-400;
+}
+
+.badge-info {
+  @apply bg-info-50 text-info-600 dark:bg-info-600/10 dark:text-info-400;
+}
+
+.badge-gray {
+  @apply bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300;
+}
+
+/* Form Elements */
+.form-group {
+  @apply space-y-1;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-gray-700 dark:text-gray-300;
+}
+
+.form-error {
+  @apply text-sm text-error-600 dark:text-error-400;
+}
+
+.form-help {
+  @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+/* Layout Helpers */
+.container-fluid {
+  @apply w-full px-4 sm:px-6 lg:px-8;
+}
+
+.section-header {
+  @apply border-b border-gray-200 dark:border-gray-700 pb-4 mb-6;
+}
+
+.page-header {
+  @apply mb-8;
+}
+
+.page-title {
+  @apply text-2xl font-bold text-gray-900 dark:text-gray-100;
+}
+
+.page-subtitle {
+  @apply mt-1 text-sm text-gray-500 dark:text-gray-400;
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.3s ease-in-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break {
+    page-break-after: always;
+  }
+  
+  .print-avoid-break {
+    page-break-inside: avoid;
+  }
+}

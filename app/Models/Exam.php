@@ -269,6 +269,9 @@ class Exam extends Model
      */
     public function getPassPercentage()
     {
+        if ($this->total_marks == 0) {
+            return 0;
+        }
         return ($this->pass_mark / $this->total_marks) * 100;
     }
 

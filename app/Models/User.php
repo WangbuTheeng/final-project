@@ -112,27 +112,66 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is a student
+     * Enhanced role checking with Spatie roles support
+     */
+    public function hasRole(string $role): bool
+    {
+        // Check both direct role and Spatie roles
+        return $this->role === $role || $this->roles->contains('name', $role);
+    }
+    
+    public function hasAnyRole(array $roles): bool
+    {
+        return collect($roles)->contains(fn($role) => $this->hasRole($role));
+    }
+    
+    /**
+     * Polymorphic access to role-specific data
+     */
+    public function profile()
+    {
+        return match($this->role) {
+            'student' => $this->student,
+            'teacher' => $this->teacher,
+            default => null
+        };
+    }
+    
+    /**
+     * Enhanced accessors using new role checking
+     */
+    public function getIsStudentAttribute(): bool
+    {
+        return $this->hasRole('student');
+    }
+    
+    public function getIsTeacherAttribute(): bool
+    {
+        return $this->hasRole('teacher');
+    }
+    
+    public function getIsAdminAttribute(): bool
+    {
+        return $this->hasAnyRole(['admin', 'super_admin']);
+    }
+
+    /**
+     * Legacy methods for backward compatibility
+     * @deprecated Use hasRole() or attribute accessors instead
      */
     public function isStudent()
     {
-        return $this->role === 'student';
+        return $this->is_student;
     }
 
-    /**
-     * Check if user is an admin
-     */
     public function isAdmin()
     {
-        return in_array($this->role, ['admin', 'super_admin']);
+        return $this->is_admin;
     }
 
-    /**
-     * Check if user is a teacher
-     */
     public function isTeacher()
     {
-        return $this->role === 'teacher';
+        return $this->is_teacher;
     }
 
     /**

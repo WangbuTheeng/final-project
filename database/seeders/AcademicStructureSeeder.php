@@ -33,33 +33,60 @@ class AcademicStructureSeeder extends Seeder
             ]
         ]);
 
-        // Create Faculties
+        // Create Tribhuvan University Faculties
         $faculties = [
             [
+                'name' => 'Faculty of Humanities and Social Sciences',
+                'code' => 'FoHSS',
+                'description' => 'Humanities, Social Sciences, and Computer Applications (BCA, BA, etc.)',
+                'location' => 'Kirtipur Campus',
+                'phone' => '+977-1-4331564',
+                'email' => 'fohss@tu.edu.np',
+                'is_active' => true
+            ],
+            [
+                'name' => 'Faculty of Management',
+                'code' => 'FoM',
+                'description' => 'Business and Management programs (BBA, BBM, BIM, etc.)',
+                'location' => 'Kirtipur Campus',
+                'phone' => '+977-1-4331565',
+                'email' => 'fom@tu.edu.np',
+                'is_active' => true
+            ],
+            [
                 'name' => 'Faculty of Engineering',
-                'code' => 'ENG',
-                'description' => 'Engineering and Technology programs',
-                'location' => 'Engineering Building',
-                'phone' => '+1-555-0101',
-                'email' => 'engineering@university.edu',
+                'code' => 'FoE',
+                'description' => 'Engineering programs (BE Computer, Civil, Electronics, etc.)',
+                'location' => 'Pulchowk Campus',
+                'phone' => '+977-1-5525555',
+                'email' => 'foe@tu.edu.np',
                 'is_active' => true
             ],
             [
-                'name' => 'Faculty of Sciences',
-                'code' => 'SCI',
-                'description' => 'Natural and Applied Sciences',
-                'location' => 'Science Complex',
-                'phone' => '+1-555-0102',
-                'email' => 'sciences@university.edu',
+                'name' => 'Institute of Science and Technology',
+                'code' => 'IoST',
+                'description' => 'Science and Technology programs (BIT, BSc CSIT, etc.)',
+                'location' => 'Kirtipur Campus',
+                'phone' => '+977-1-4331566',
+                'email' => 'iost@tu.edu.np',
                 'is_active' => true
             ],
             [
-                'name' => 'Faculty of Arts',
-                'code' => 'ART',
-                'description' => 'Liberal Arts and Humanities',
-                'location' => 'Arts Building',
-                'phone' => '+1-555-0103',
-                'email' => 'arts@university.edu',
+                'name' => 'Faculty of Education',
+                'code' => 'FoEd',
+                'description' => 'Education and Teacher Training programs',
+                'location' => 'Kirtipur Campus',
+                'phone' => '+977-1-4331567',
+                'email' => 'foed@tu.edu.np',
+                'is_active' => true
+            ],
+            [
+                'name' => 'Faculty of Law',
+                'code' => 'FoL',
+                'description' => 'Law and Legal Studies programs',
+                'location' => 'Kirtipur Campus',
+                'phone' => '+977-1-4331568',
+                'email' => 'fol@tu.edu.np',
                 'is_active' => true
             ]
         ];
@@ -69,28 +96,85 @@ class AcademicStructureSeeder extends Seeder
         }
 
         // Get created faculties
-        $engineering = Faculty::where('code', 'ENG')->first();
-        $sciences = Faculty::where('code', 'SCI')->first();
-        $arts = Faculty::where('code', 'ART')->first();
+        $fohss = Faculty::where('code', 'FoHSS')->first();
+        $fom = Faculty::where('code', 'FoM')->first();
+        $foe = Faculty::where('code', 'FoE')->first();
+        $iost = Faculty::where('code', 'IoST')->first();
+        $foed = Faculty::where('code', 'FoEd')->first();
+        $fol = Faculty::where('code', 'FoL')->first();
 
-        // Create some optional departments
+        // Create TU departments
         $departments = [
+            // FoHSS Departments
             [
-                'name' => 'Computer Science',
-                'code' => 'CSC',
-                'description' => 'Computer Science and Software Engineering',
-                'faculty_id' => $engineering->id,
-                'location' => 'CS Building',
+                'name' => 'Computer Applications',
+                'code' => 'CA',
+                'description' => 'Bachelor in Computer Applications (BCA)',
+                'faculty_id' => $fohss->id,
+                'location' => 'FoHSS Building',
                 'duration_years' => 4,
                 'degree_type' => 'bachelor',
                 'is_active' => true
             ],
             [
-                'name' => 'Mathematics',
-                'code' => 'MTH',
-                'description' => 'Pure and Applied Mathematics',
-                'faculty_id' => $sciences->id,
-                'location' => 'Math Building',
+                'name' => 'English',
+                'code' => 'ENG',
+                'description' => 'English Language and Literature',
+                'faculty_id' => $fohss->id,
+                'location' => 'FoHSS Building',
+                'duration_years' => 4,
+                'degree_type' => 'bachelor',
+                'is_active' => true
+            ],
+            // FoM Departments
+            [
+                'name' => 'Business Administration',
+                'code' => 'BA',
+                'description' => 'Bachelor of Business Administration (BBA)',
+                'faculty_id' => $fom->id,
+                'location' => 'Management Building',
+                'duration_years' => 4,
+                'degree_type' => 'bachelor',
+                'is_active' => true
+            ],
+            [
+                'name' => 'Business Management',
+                'code' => 'BM',
+                'description' => 'Bachelor of Business Management (BBM)',
+                'faculty_id' => $fom->id,
+                'location' => 'Management Building',
+                'duration_years' => 4,
+                'degree_type' => 'bachelor',
+                'is_active' => true
+            ],
+            // IoST Departments
+            [
+                'name' => 'Information Technology',
+                'code' => 'IT',
+                'description' => 'Bachelor in Information Technology (BIT)',
+                'faculty_id' => $iost->id,
+                'location' => 'Science Building',
+                'duration_years' => 4,
+                'degree_type' => 'bachelor',
+                'is_active' => true
+            ],
+            [
+                'name' => 'Computer Science and Information Technology',
+                'code' => 'CSIT',
+                'description' => 'BSc Computer Science and Information Technology',
+                'faculty_id' => $iost->id,
+                'location' => 'Science Building',
+                'duration_years' => 4,
+                'degree_type' => 'bachelor',
+                'is_active' => true
+            ],
+            // FoE Departments
+            [
+                'name' => 'Computer Engineering',
+                'code' => 'CE',
+                'description' => 'Bachelor in Computer Engineering',
+                'faculty_id' => $foe->id,
+                'location' => 'Pulchowk Campus',
                 'duration_years' => 4,
                 'degree_type' => 'bachelor',
                 'is_active' => true
@@ -101,98 +185,132 @@ class AcademicStructureSeeder extends Seeder
             Department::firstOrCreate(['code' => $deptData['code']], $deptData);
         }
 
-        $csDept = Department::where('code', 'CSC')->first();
-        $mathDept = Department::where('code', 'MTH')->first();
+        $caDept = Department::where('code', 'CA')->first();
+        $baDept = Department::where('code', 'BA')->first();
+        $itDept = Department::where('code', 'IT')->first();
+        $ceDept = Department::where('code', 'CE')->first();
 
-        // Create Courses directly under Faculties (new structure)
+        // Create TU Courses (semester-based as per TU system)
         $courses = [
-            // Engineering Faculty Courses
+            // BCA Courses (FoHSS)
             [
-                'title' => 'Introduction to Programming',
+                'title' => 'Computer Fundamentals and Applications',
+                'code' => 'CACS101',
+                'description' => 'Introduction to computer systems and basic applications',
+                'department_id' => $caDept->id,
+                'credit_units' => 3,
+                'organization_type' => 'semester',
+                'semester_period' => 1,
+                'course_type' => 'core',
+                'is_active' => true
+            ],
+            [
+                'title' => 'Society and Technology',
+                'code' => 'CACS102',
+                'description' => 'Impact of technology on society',
+                'department_id' => $caDept->id,
+                'credit_units' => 3,
+                'organization_type' => 'semester',
+                'semester_period' => 1,
+                'course_type' => 'core',
+                'is_active' => true
+            ],
+            [
+                'title' => 'English I',
+                'code' => 'CAEN103',
+                'description' => 'Basic English communication skills',
+                'department_id' => $caDept->id,
+                'credit_units' => 3,
+                'organization_type' => 'semester',
+                'semester_period' => 1,
+                'course_type' => 'core',
+                'is_active' => true
+            ],
+            [
+                'title' => 'Mathematics I',
+                'code' => 'CAMT104',
+                'description' => 'Basic mathematics for computer applications',
+                'department_id' => $caDept->id,
+                'credit_units' => 3,
+                'organization_type' => 'semester',
+                'semester_period' => 1,
+                'course_type' => 'core',
+                'is_active' => true
+            ],
+            [
+                'title' => 'Digital Logic',
+                'code' => 'CADL105',
+                'description' => 'Digital logic circuits and Boolean algebra',
+                'department_id' => $caDept->id,
+                'credit_units' => 3,
+                'organization_type' => 'semester',
+                'semester_period' => 1,
+                'course_type' => 'core',
+                'is_active' => true
+            ],
+            // BCA Semester 2 Courses
+            [
+                'title' => 'C Programming',
+                'code' => 'CACP201',
+                'description' => 'Programming in C language',
+
+                'department_id' => $caDept->id,
+                'credit_units' => 3,
+                'organization_type' => 'semester',
+                'semester_period' => 2,
+                'course_type' => 'core',
+                'is_active' => true
+            ],
+            [
+                'title' => 'Financial Accounting',
+                'code' => 'CAFA202',
+                'description' => 'Basic principles of accounting',
+                'faculty_id' => $fohss->id,
+                'department_id' => $caDept->id,
+                'credit_units' => 3,
+                'organization_type' => 'semester',
+                'semester_period' => 2,
+                'course_type' => 'core',
+                'is_active' => true
+            ],
+
+            // BBA Courses (FoM)
+            [
+                'title' => 'Principles of Management',
+                'code' => 'MGT101',
+                'description' => 'Introduction to management principles',
+                'faculty_id' => $fom->id,
+                'department_id' => $baDept->id,
+                'credit_units' => 3,
+                'organization_type' => 'semester',
+                'semester_period' => 1,
+                'course_type' => 'core',
+                'is_active' => true
+            ],
+            [
+                'title' => 'Business English',
                 'code' => 'ENG101',
-                'description' => 'Basic programming concepts and problem solving',
-                'faculty_id' => $engineering->id,
-                'department_id' => $csDept->id, // Optional department
+                'description' => 'English for business communication',
+                'faculty_id' => $fom->id,
+                'department_id' => $baDept->id,
                 'credit_units' => 3,
-                'organization_type' => 'yearly', // Changed to yearly
-                'year' => 1, // Added year
+                'organization_type' => 'semester',
+                'semester_period' => 1,
                 'course_type' => 'core',
                 'is_active' => true
             ],
+
+            // BIT Courses (IoST)
             [
-                'title' => 'Data Structures and Algorithms',
-                'code' => 'ENG201',
-                'description' => 'Advanced programming with data structures',
-                'faculty_id' => $engineering->id,
-                'department_id' => $csDept->id,
-                'credit_units' => 4,
-                'organization_type' => 'yearly', // Changed to yearly
-                'year' => 2, // Added year
-                'course_type' => 'core',
-                'is_active' => true
-            ],
-            [
-                'title' => 'Engineering Mathematics',
-                'code' => 'ENG102',
-                'description' => 'Mathematical foundations for engineering',
-                'faculty_id' => $engineering->id,
-                'department_id' => null, // No department - directly under faculty
+                'title' => 'Programming in C',
+                'code' => 'BIT101',
+                'description' => 'Introduction to programming using C',
+                'faculty_id' => $iost->id,
+                'department_id' => $itDept->id,
                 'credit_units' => 3,
-                'organization_type' => 'yearly', // Changed to yearly
-                'year' => 1, // Added year
+                'organization_type' => 'semester',
+                'semester_period' => 1,
                 'course_type' => 'core',
-                'is_active' => true
-            ],
-            
-            // Sciences Faculty Courses
-            [
-                'title' => 'Calculus I',
-                'code' => 'SCI101',
-                'description' => 'Differential and integral calculus',
-                'faculty_id' => $sciences->id,
-                'department_id' => $mathDept->id,
-                'credit_units' => 4,
-                'organization_type' => 'semester', // Changed to semester
-                'semester_period' => 1, // Added semester_period
-                'course_type' => 'core',
-                'is_active' => true
-            ],
-            [
-                'title' => 'General Physics',
-                'code' => 'SCI102',
-                'description' => 'Introduction to physics principles',
-                'faculty_id' => $sciences->id,
-                'department_id' => null, // No department
-                'credit_units' => 3,
-                'organization_type' => 'semester', // Changed to semester
-                'semester_period' => 2, // Added semester_period
-                'course_type' => 'core',
-                'is_active' => true
-            ],
-            
-            // Arts Faculty Courses
-            [
-                'title' => 'English Composition',
-                'code' => 'ART101',
-                'description' => 'Academic writing and communication',
-                'faculty_id' => $arts->id,
-                'department_id' => null,
-                'credit_units' => 3,
-                'organization_type' => 'yearly', // Changed to yearly
-                'year' => 1, // Added year
-                'course_type' => 'general',
-                'is_active' => true
-            ],
-            [
-                'title' => 'Philosophy of Science',
-                'code' => 'ART201',
-                'description' => 'Philosophical foundations of scientific thought',
-                'faculty_id' => $arts->id,
-                'department_id' => null,
-                'credit_units' => 2,
-                'organization_type' => 'semester', // Changed to semester
-                'semester_period' => 3, // Added semester_period
-                'course_type' => 'elective',
                 'is_active' => true
             ]
         ];
@@ -243,14 +361,14 @@ class AcademicStructureSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('Academic structure seeded successfully!');
+        $this->command->info('Tribhuvan University academic structure seeded successfully!');
         $this->command->info('Created:');
-        $this->command->info('- ' . Faculty::count() . ' Faculties');
-        $this->command->info('- ' . Department::count() . ' Departments (optional)');
-        $this->command->info('- ' . Course::count() . ' Courses');
+        $this->command->info('- ' . Faculty::count() . ' TU Faculties (FoHSS, FoM, FoE, IoST, etc.)');
+        $this->command->info('- ' . Department::count() . ' Departments (BCA, BBA, BIT, etc.)');
+        $this->command->info('- ' . Course::count() . ' TU Courses (semester-based)');
         $this->command->info('- ' . ClassSection::count() . ' Classes');
         $this->command->info('');
-        $this->command->info('Structure: Faculty → Course → Class');
-        $this->command->info('Departments are optional organizational units.');
+        $this->command->info('TU Structure: Faculty → Department → Course → Class');
+        $this->command->info('All courses follow TU\'s 8-semester system.');
     }
 }

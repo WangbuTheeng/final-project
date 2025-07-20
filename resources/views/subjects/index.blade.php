@@ -1,6 +1,49 @@
 @extends('layouts.dashboard')
 
 @section('content')
+<style>
+.responsive-table {
+    max-width: 100%;
+    overflow: visible;
+}
+
+.responsive-table table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.responsive-table td {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    vertical-align: top;
+}
+
+/* Ensure text doesn't overflow */
+.text-truncate-custom {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Mobile card view for very small screens */
+@media (max-width: 640px) {
+    .table-view {
+        display: none;
+    }
+    .card-view {
+        display: block;
+    }
+}
+
+@media (min-width: 641px) {
+    .table-view {
+        display: block;
+    }
+    .card-view {
+        display: none;
+    }
+}
+</style>
 <div class="space-y-6">
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -8,7 +51,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Subjects</h1>
             <p class="mt-1 text-sm text-gray-500">Manage subjects/topics within classes</p>
         </div>
-        @can('manage-courses')
+        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
         <div class="mt-4 sm:mt-0">
             <a href="{{ route('subjects.create') }}"
                class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -16,7 +59,7 @@
                 Add Subject
             </a>
         </div>
-        @endcan
+        @endif
     </div>
 
     <!-- Hierarchy Info -->
@@ -128,146 +171,132 @@
         </div>
 
         @if($subjects->count() > 0)
-            <div class="overflow-x-auto responsive-table">
-                <table class="min-w-full divide-y divide-gray-200">
+            <!-- Table View (Desktop/Tablet) -->
+            <div class="responsive-table table-view">
+                <table class="w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Subject
+                            <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">
+                                Subject Info
                             </th>
-                            <th scope="col" class="hidden md:table-cell px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Class → Course → Faculty
+                            <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
+                                Class & Course
                             </th>
-                            <th scope="col" class="hidden lg:table-cell px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Instructor
-                            </th>
-                            <th scope="col" class="hidden xl:table-cell px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
                                 Details
                             </th>
-                            <th scope="col" class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
                                 Status
                             </th>
-                            <th scope="col" class="relative px-3 sm:px-6 py-2 sm:py-3">
-                                <span class="sr-only">Actions</span>
+                            <th scope="col" class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                                Actions
                             </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($subjects as $subject)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-3 sm:px-6 py-3 sm:py-4">
-                                    <div>
-                                        <div class="flex items-center">
-                                            <span class="inline-flex items-center justify-center h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-primary-100 text-primary-800 text-xs font-medium mr-2 sm:mr-3 flex-shrink-0">
-                                                {{ $subject->order_sequence }}
-                                            </span>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="text-sm font-medium text-gray-900 truncate">
-                                                    {{ $subject->name }}
-                                                </div>
-                                                <div class="text-xs sm:text-sm text-gray-500 truncate">
-                                                    {{ $subject->code }}
-                                                </div>
-                                                <!-- Mobile: Show class info here -->
-                                                <div class="md:hidden text-xs text-gray-400 mt-1 truncate">
-                                                    {{ $subject->class->name }} • {{ $subject->class->course->title }}
-                                                </div>
+                                <!-- Subject Info Column -->
+                                <td class="px-2 py-3">
+                                    <div class="flex items-start space-x-2">
+                                        <span class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-primary-100 text-primary-800 text-xs font-medium flex-shrink-0 mt-0.5">
+                                            {{ $subject->order_sequence }}
+                                        </span>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="text-sm font-medium text-gray-900 leading-tight">
+                                                {{ Str::limit($subject->name, 35) }}
                                             </div>
+                                            <div class="text-xs text-gray-500 font-mono">
+                                                {{ $subject->code }}
+                                            </div>
+                                            @if($subject->description)
+                                                <div class="text-xs text-gray-400 mt-1 leading-tight">
+                                                    {{ Str::limit($subject->description, 40) }}
+                                                </div>
+                                            @endif
+                                            @if($subject->instructor)
+                                                <div class="text-xs text-blue-600 mt-1">
+                                                    <i class="fas fa-user text-xs mr-1"></i>{{ Str::limit($subject->instructor->name, 20) }}
+                                                </div>
+                                            @endif
                                         </div>
-                                        @if($subject->description)
-                                            <div class="text-xs sm:text-sm text-gray-500 truncate max-w-xs mt-1 hidden sm:block">
-                                                {{ Str::limit($subject->description, 50) }}
-                                            </div>
-                                        @endif
                                     </div>
                                 </td>
-                                <td class="hidden md:table-cell px-3 sm:px-6 py-3 sm:py-4">
-                                    <div class="text-sm text-gray-900">
-                                        <div class="font-medium truncate">{{ $subject->class->name }}</div>
-                                        <div class="text-gray-500 truncate">{{ $subject->class->course->title }}</div>
-                                        <div class="text-gray-400 text-xs truncate">{{ $subject->class->course->faculty->name }}</div>
+                                <!-- Class & Course Column -->
+                                <td class="px-2 py-3">
+                                    <div class="text-sm">
+                                        <div class="font-medium text-gray-900 leading-tight">
+                                            {{ Str::limit($subject->class->name, 20) }}
+                                        </div>
+                                        <div class="text-gray-600 text-xs leading-tight">
+                                            {{ Str::limit($subject->class->course->title, 25) }}
+                                        </div>
+                                        <div class="text-gray-400 text-xs leading-tight">
+                                            {{ Str::limit($subject->class->course->faculty->name ?? 'No Faculty', 20) }}
+                                        </div>
                                     </div>
                                 </td>
-                                <td class="hidden lg:table-cell px-3 sm:px-6 py-3 sm:py-4 text-sm text-gray-900">
-                                    @if($subject->instructor)
+                                <!-- Details Column -->
+                                <td class="px-2 py-3">
+                                    <div class="space-y-1 text-xs">
                                         <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-6 w-6 sm:h-8 sm:w-8">
-                                                <div class="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-gray-300 flex items-center justify-center">
-                                                    <span class="text-xs font-medium text-gray-700">
-                                                        {{ substr($subject->instructor->name, 0, 2) }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="ml-2 sm:ml-3 min-w-0">
-                                                <div class="text-sm font-medium text-gray-900 truncate">
-                                                    {{ $subject->instructor->name }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <span class="text-gray-400 italic text-xs sm:text-sm">No instructor</span>
-                                    @endif
-                                </td>
-                                <td class="hidden xl:table-cell px-3 sm:px-6 py-3 sm:py-4 text-sm text-gray-500">
-                                    <div class="space-y-1">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-signal text-gray-400 mr-1 sm:mr-2 text-xs"></i>
-                                            <span class="capitalize text-xs sm:text-sm">{{ $subject->difficulty_level }}</span>
+                                            <i class="fas fa-signal text-gray-400 mr-1 text-xs w-3"></i>
+                                            <span class="capitalize text-gray-600">{{ $subject->difficulty_level }}</span>
                                         </div>
                                         <div class="flex items-center">
-                                            <i class="fas fa-tag text-gray-400 mr-1 sm:mr-2 text-xs"></i>
-                                            <span class="capitalize text-xs sm:text-sm">{{ $subject->subject_type }}</span>
+                                            <i class="fas fa-tag text-gray-400 mr-1 text-xs w-3"></i>
+                                            <span class="capitalize text-gray-600">{{ $subject->subject_type }}</span>
                                         </div>
                                         @if($subject->duration_hours)
                                             <div class="flex items-center">
-                                                <i class="fas fa-clock text-gray-400 mr-1 sm:mr-2 text-xs"></i>
-                                                <span class="text-xs sm:text-sm">{{ $subject->formatted_duration }}</span>
+                                                <i class="fas fa-clock text-gray-400 mr-1 text-xs w-3"></i>
+                                                <span class="text-gray-600">{{ $subject->duration_hours }}h</span>
+                                            </div>
+                                        @endif
+                                        @if($subject->credit_weight)
+                                            <div class="flex items-center">
+                                                <i class="fas fa-star text-gray-400 mr-1 text-xs w-3"></i>
+                                                <span class="text-gray-600">{{ $subject->credit_weight }}%</span>
                                             </div>
                                         @endif
                                         <div class="flex items-center">
-                                            <i class="fas fa-{{ $subject->is_mandatory ? 'star' : 'star-half-alt' }} text-gray-400 mr-1 sm:mr-2 text-xs"></i>
-                                            <span class="text-xs sm:text-sm">{{ $subject->is_mandatory ? 'Mandatory' : 'Optional' }}</span>
+                                            <i class="fas fa-{{ $subject->is_mandatory ? 'exclamation-circle' : 'circle' }} text-{{ $subject->is_mandatory ? 'red' : 'green' }}-400 mr-1 text-xs w-3"></i>
+                                            <span class="text-{{ $subject->is_mandatory ? 'red' : 'green' }}-600">{{ $subject->is_mandatory ? 'Required' : 'Optional' }}</span>
                                         </div>
                                         @if($subject->total_full_marks > 0)
                                             <div class="flex items-center">
-                                                <i class="fas fa-calculator text-gray-400 mr-1 sm:mr-2 text-xs"></i>
-                                                <span class="text-xs">
-                                                    Total: {{ $subject->total_full_marks }} marks
-                                                    @if($subject->is_practical)
-                                                        <span class="text-green-600 ml-1">(Practical)</span>
-                                                    @endif
-                                                </span>
+                                                <i class="fas fa-calculator text-gray-400 mr-1 text-xs w-3"></i>
+                                                <span class="text-gray-600">{{ $subject->total_full_marks }}pts</span>
                                             </div>
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-3 sm:px-6 py-3 sm:py-4">
+                                <!-- Status Column -->
+                                <td class="px-2 py-3 text-center">
                                     @if($subject->is_active)
-                                        <span class="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            <i class="fas fa-check-circle mr-1 text-xs"></i>
-                                            <span class="hidden sm:inline">Active</span>
-                                            <span class="sm:hidden">✓</span>
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-800" title="Active">
+                                            <i class="fas fa-check text-xs"></i>
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                            <i class="fas fa-times-circle mr-1 text-xs"></i>
-                                            <span class="hidden sm:inline">Inactive</span>
-                                            <span class="sm:hidden">✗</span>
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-800" title="Inactive">
+                                            <i class="fas fa-times text-xs"></i>
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-3 sm:px-6 py-3 sm:py-4 text-right text-sm font-medium">
-                                    <div class="flex items-center justify-end space-x-1 sm:space-x-2">
+
+                                <!-- Actions Column -->
+                                <td class="px-2 py-3">
+                                    <div class="flex items-center justify-center space-x-1">
                                         <a href="{{ route('subjects.show', $subject) }}"
-                                           class="text-primary-600 hover:text-primary-900 transition-colors duration-200 p-1"
+                                           class="inline-flex items-center justify-center w-6 h-6 text-primary-600 hover:text-primary-900 hover:bg-primary-50 rounded transition-colors duration-200"
                                            title="View Details">
-                                            <i class="fas fa-eye text-xs sm:text-sm"></i>
+                                            <i class="fas fa-eye text-xs"></i>
                                         </a>
-                                        @can('manage-courses')
+                                        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                                         <a href="{{ route('subjects.edit', $subject) }}"
-                                           class="text-yellow-600 hover:text-yellow-900 transition-colors duration-200 p-1"
+                                           class="inline-flex items-center justify-center w-6 h-6 text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50 rounded transition-colors duration-200"
                                            title="Edit Subject">
-                                            <i class="fas fa-edit text-xs sm:text-sm"></i>
+                                            <i class="fas fa-edit text-xs"></i>
                                         </a>
                                         <form action="{{ route('subjects.destroy', $subject) }}"
                                               method="POST"
@@ -276,18 +305,102 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                    class="text-red-600 hover:text-red-900 transition-colors duration-200 p-1"
+                                                    class="inline-flex items-center justify-center w-6 h-6 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors duration-200"
                                                     title="Delete Subject">
-                                                <i class="fas fa-trash text-xs sm:text-sm"></i>
+                                                <i class="fas fa-trash text-xs"></i>
                                             </button>
                                         </form>
-                                        @endcan
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Card View (Mobile) -->
+            <div class="card-view space-y-4 p-4">
+                @foreach($subjects as $subject)
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-start space-x-2 flex-1">
+                                <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary-100 text-primary-800 text-xs font-medium flex-shrink-0">
+                                    {{ $subject->order_sequence }}
+                                </span>
+                                <div class="min-w-0 flex-1">
+                                    <h4 class="text-sm font-medium text-gray-900 leading-tight">
+                                        {{ $subject->name }}
+                                    </h4>
+                                    <p class="text-xs text-gray-500 font-mono mt-1">{{ $subject->code }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-1 ml-2">
+                                @if($subject->is_active)
+                                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800">
+                                        <i class="fas fa-check text-xs"></i>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-100 text-red-800">
+                                        <i class="fas fa-times text-xs"></i>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 text-xs mb-3">
+                            <div>
+                                <span class="text-gray-500">Class:</span>
+                                <div class="font-medium text-gray-900">{{ $subject->class->name }}</div>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Course:</span>
+                                <div class="text-gray-700">{{ Str::limit($subject->class->course->title, 20) }}</div>
+                            </div>
+                            @if($subject->instructor)
+                                <div>
+                                    <span class="text-gray-500">Instructor:</span>
+                                    <div class="text-blue-600">{{ Str::limit($subject->instructor->name, 20) }}</div>
+                                </div>
+                            @endif
+                            <div>
+                                <span class="text-gray-500">Type:</span>
+                                <div class="text-gray-700 capitalize">{{ $subject->subject_type }}</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3 text-xs">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-{{ $subject->is_mandatory ? 'red' : 'green' }}-100 text-{{ $subject->is_mandatory ? 'red' : 'green' }}-800">
+                                    {{ $subject->is_mandatory ? 'Required' : 'Optional' }}
+                                </span>
+                                @if($subject->duration_hours)
+                                    <span class="text-gray-500">{{ $subject->duration_hours }}h</span>
+                                @endif
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <a href="{{ route('subjects.show', $subject) }}" class="p-1 text-primary-600 hover:bg-primary-50 rounded">
+                                    <i class="fas fa-eye text-xs"></i>
+                                </a>
+                                @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
+                                <a href="{{ route('subjects.edit', $subject) }}" class="p-1 text-yellow-600 hover:bg-yellow-50 rounded">
+                                    <i class="fas fa-edit text-xs"></i>
+                                </a>
+                                <form action="{{ route('subjects.destroy', $subject) }}"
+                                      method="POST"
+                                      class="inline-block"
+                                      onsubmit="return confirm('Are you sure you want to delete this subject?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1 text-red-600 hover:bg-red-50 rounded">
+                                        <i class="fas fa-trash text-xs"></i>
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
 
             <!-- Pagination -->
@@ -303,13 +416,13 @@
                 </div>
                 <h3 class="mt-2 text-sm font-medium text-gray-900">No subjects found</h3>
                 <p class="mt-1 text-sm text-gray-500">
-                    @can('manage-courses')
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                         Get started by creating a new subject.
                     @else
                         No subjects are available to view.
-                    @endcan
+                    @endif
                 </p>
-                @can('manage-courses')
+                @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                 <div class="mt-6">
                     <a href="{{ route('subjects.create') }}"
                        class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -317,7 +430,7 @@
                         Add Subject
                     </a>
                 </div>
-                @endcan
+                @endif
             </div>
         @endif
     </div>

@@ -248,21 +248,21 @@
                     </a>
                     @endif
 
-                    @if(auth()->user()->can('view-courses') || auth()->user()->hasRole('Teacher'))
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Teacher'))
                     <a href="{{ route('courses.index') }}" class="{{ request()->routeIs('courses.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('courses.*') ? 'style=background-color:#37a2bc;' : '' }}>
                         <i class="fas fa-book mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('courses.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                         Courses
                     </a>
                     @endif
 
-                    @can('view-classes')
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Teacher'))
                     <a href="{{ route('classes.index') }}" class="{{ request()->routeIs('classes.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('classes.*') ? 'style=background-color:#37a2bc;' : '' }}>
-                        <i class="fas fa-chalkboard mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('classes.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        <i class="fas fa-chalkboard-teacher mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('classes.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                         Classes
                     </a>
-                    @endcan
+                    @endif
 
-                    @if(auth()->user()->can('view-subjects') || auth()->user()->hasRole('Teacher'))
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Teacher'))
                     <a href="{{ route('subjects.index') }}" class="{{ request()->routeIs('subjects.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('subjects.*') ? 'style=background-color:#37a2bc;' : '' }}>
                         <i class="fas fa-book-open mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('subjects.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                         Subjects
@@ -314,22 +314,22 @@
                      class="pl-12 space-y-1"
                      {{ request()->routeIs('students.*', 'enrollments.*') ? '' : 'style="display: none;"' }}>
 
-                    @if(auth()->user()->can('view-students') || auth()->user()->hasRole('Teacher'))
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Teacher'))
                     <a href="{{ route('students.index') }}" class="{{ request()->routeIs('students.index') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('students.index') ? 'style=background-color:#37a2bc;' : '' }}>
                         <i class="fas fa-list mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('students.index') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                         All Students
                     </a>
                     @endif
 
-                    @can('manage-students')
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                     <a href="{{ route('students.create') }}" class="{{ request()->routeIs('students.create') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('students.create') ? 'style=background-color:#37a2bc;' : '' }}>
                         <i class="fas fa-user-plus mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('students.create') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                         Add New Student
                     </a>
-                    @endcan
+                    @endif
 
                     
-                    @can('manage-enrollments')
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                     <a href="{{ route('enrollments.index') }}" class="{{ request()->routeIs('enrollments.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('enrollments.*') ? 'style=background-color:#37a2bc;' : '' }}>
                         <i class="fas fa-clipboard-list mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('enrollments.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                         Enrollments
@@ -339,21 +339,21 @@
                         <i class="fas fa-users-cog mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('enrollments.bulk-create') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                         Bulk Enrollment
                     </a>
-                    @endcan
+                    @endif
 
-                    @if(auth()->user()->can('view-students') || auth()->user()->hasRole('Teacher'))
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Teacher'))
                     <a href="#" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out">
                         <i class="fas fa-chart-line mr-3 flex-shrink-0 h-4 w-4 text-gray-400 group-hover:text-gray-600"></i>
                         Student Reports
                     </a>
                     @endif
 
-                    @can('manage-students')
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                     <a href="#" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out">
                         <i class="fas fa-upload mr-3 flex-shrink-0 h-4 w-4 text-gray-400 group-hover:text-gray-600"></i>
                         Bulk Import
                     </a>
-                    @endcan
+                    @endif
                 </div>
             </div>
         </li>
@@ -500,7 +500,7 @@
 
 
         <!-- User Management -->
-        @if(auth()->user()->hasRole('Super Admin'))
+        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
         <li>
             <div x-data="{ open: {{ request()->routeIs('users.*', 'roles.*', 'permissions.*') ? 'true' : 'false' }} }" class="space-y-1">
                 <button
@@ -526,7 +526,7 @@
                         Users
                     </a>
 
-                    @if(auth()->user()->hasRole('Super Admin'))
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                     <a href="{{ route('roles.index') }}" class="{{ request()->routeIs('roles.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('roles.*') ? 'style=background-color:#37a2bc;' : '' }}>
                         <i class="fas fa-user-tag mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('roles.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
                         Roles

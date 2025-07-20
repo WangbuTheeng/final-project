@@ -102,6 +102,22 @@ class AcademicYear extends Model
     }
 
     /**
+     * Get subjects for this academic year through classes
+     */
+    public function subjects()
+    {
+        return $this->hasManyThrough(Subject::class, ClassSection::class, 'academic_year_id', 'class_id');
+    }
+
+    /**
+     * Get courses for this academic year through classes
+     */
+    public function courses()
+    {
+        return $this->hasManyThrough(Course::class, ClassSection::class, 'academic_year_id', 'id', 'id', 'course_id');
+    }
+
+    /**
      * Get students admitted in this academic year
      */
     public function students()

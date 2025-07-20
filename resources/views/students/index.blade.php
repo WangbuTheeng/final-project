@@ -10,7 +10,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Students</h1>
             <p class="mt-1 text-sm text-gray-500">Manage student records and information</p>
         </div>
-        @can('manage-students')
+        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
         <div class="mt-4 sm:mt-0">
             <a href="{{ route('students.create') }}"
                class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -18,7 +18,7 @@
                 Add Student
             </a>
         </div>
-        @endcan
+        @endif
     </div>
 
     <!-- Statistics Cards -->
@@ -318,7 +318,6 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $student->academicYear->name ?? 'N/A' }}
                                 </td>
-                                @can('manage-students')
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex items-center space-x-2">
                                         <a href="{{ route('students.show', $student) }}"
@@ -326,7 +325,7 @@
                                            title="View Details">
                                             <i class="fas fa-eye w-4 h-4"></i>
                                         </a>
-                                        @can('manage-students')
+                                        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                                         <a href="{{ route('students.edit', $student) }}"
                                            class="action-btn inline-flex items-center p-2 border border-transparent rounded-md text-yellow-600 hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
                                            title="Edit">
@@ -344,10 +343,9 @@
                                                 </button>
                                             </form>
                                         @endif
-                                        @endcan
+                                        @endif
                                     </div>
                                 </td>
-                                @endcan
                             </tr>
                         @empty
                             <tr>
@@ -358,19 +356,19 @@
                                         </div>
                                         <h3 class="text-lg font-medium text-gray-900 mb-2">No students found</h3>
                                         <p class="text-gray-500 mb-6">
-                                            @can('manage-students')
+                                            @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                                                 No students match the selected criteria. Try adjusting your filters or add a new student.
                                             @else
                                                 No students match the selected criteria. Try adjusting your filters.
-                                            @endcan
+                                            @endif
                                         </p>
-                                        @can('manage-students')
+                                        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                                         <a href="{{ route('students.create') }}"
                                            class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                             <i class="fas fa-plus mr-2"></i>
                                             Add First Student
                                         </a>
-                                        @endcan
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

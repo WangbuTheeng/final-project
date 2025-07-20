@@ -265,7 +265,7 @@ class AcademicStructureSeeder extends Seeder
                 'title' => 'Financial Accounting',
                 'code' => 'CAFA202',
                 'description' => 'Basic principles of accounting',
-                'faculty_id' => $fohss->id,
+
                 'department_id' => $caDept->id,
                 'credit_units' => 3,
                 'organization_type' => 'semester',
@@ -279,7 +279,7 @@ class AcademicStructureSeeder extends Seeder
                 'title' => 'Principles of Management',
                 'code' => 'MGT101',
                 'description' => 'Introduction to management principles',
-                'faculty_id' => $fom->id,
+
                 'department_id' => $baDept->id,
                 'credit_units' => 3,
                 'organization_type' => 'semester',
@@ -291,7 +291,7 @@ class AcademicStructureSeeder extends Seeder
                 'title' => 'Business English',
                 'code' => 'ENG101',
                 'description' => 'English for business communication',
-                'faculty_id' => $fom->id,
+
                 'department_id' => $baDept->id,
                 'credit_units' => 3,
                 'organization_type' => 'semester',
@@ -305,7 +305,7 @@ class AcademicStructureSeeder extends Seeder
                 'title' => 'Programming in C',
                 'code' => 'BIT101',
                 'description' => 'Introduction to programming using C',
-                'faculty_id' => $iost->id,
+
                 'department_id' => $itDept->id,
                 'credit_units' => 3,
                 'organization_type' => 'semester',
@@ -334,10 +334,10 @@ class AcademicStructureSeeder extends Seeder
 
         foreach ($coursesToCreateClasses as $course) {
             // Determine semester for ClassSection based on Course organization_type
-            $classSemester = 'first'; // Default
+            $classSemester = 1; // Default to semester 1
             if ($course->organization_type === 'semester') {
-                // For semester-based courses, map semester_period to 'first' or 'second'
-                $classSemester = ($course->semester_period >= 1 && $course->semester_period <= 4) ? 'first' : 'second';
+                // For semester-based courses, use the actual semester_period
+                $classSemester = $course->semester_period ?? 1;
             }
 
             ClassSection::firstOrCreate([

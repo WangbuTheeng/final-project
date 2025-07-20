@@ -26,7 +26,10 @@ class StudentController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('view-students');
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to Students.');
+        }
 
         $departments = Department::active()->get();
         $faculties = Faculty::active()->get();
@@ -97,7 +100,10 @@ class StudentController extends Controller
      */
     public function create()
     {
-        $this->authorize('create-students');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Students.');
+        }
 
         $faculties = Faculty::with('departments')->where('is_active', true)->get();
         $departments = Department::with('faculty')->active()->get();
@@ -111,7 +117,10 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('create-students');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Students.');
+        }
 
         $request->validate([
             // User fields
@@ -227,7 +236,10 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        $this->authorize('view-students');
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to view Student details.');
+        }
 
         $student->load(['user', 'department.faculty', 'faculty', 'academicYear']);
 
@@ -253,7 +265,10 @@ class StudentController extends Controller
      */
     public function edit(Student $student)
     {
-        $this->authorize('edit-students');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to edit Students.');
+        }
 
         $student->load('user');
         $faculties = Faculty::with('departments')->where('is_active', true)->get();
@@ -268,7 +283,10 @@ class StudentController extends Controller
      */
     public function update(Request $request, Student $student)
     {
-        $this->authorize('edit-students');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to update Students.');
+        }
 
         $request->validate([
             // User fields
@@ -362,7 +380,10 @@ class StudentController extends Controller
      */
     public function destroy(Student $student)
     {
-        $this->authorize('delete-students');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to delete Students.');
+        }
 
         try {
             DB::beginTransaction();

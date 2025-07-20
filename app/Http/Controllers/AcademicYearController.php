@@ -25,10 +25,15 @@ class AcademicYearController extends Controller
      */
     public function index()
     {
-        // Check if user has permission to manage settings
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to Academic Years.');
+        }
 
-        $academicYears = AcademicYear::orderBy('start_date', 'desc')->paginate(15);
+        $academicYears = AcademicYear::with(['classes.course', 'classes.subjects'])
+            ->withCount(['classes', 'subjects', 'courses'])
+            ->orderBy('start_date', 'desc')
+            ->paginate(15);
         return view('academic-years.index', compact('academicYears'));
     }
 
@@ -39,9 +44,11 @@ class AcademicYearController extends Controller
      */
     public function create()
     {
-        // Check if user has permission to manage settings
-        $this->authorize('manage-settings');
-        
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to Academic Years.');
+        }
+
         return view('academic-years.create');
     }
 
@@ -53,8 +60,10 @@ class AcademicYearController extends Controller
      */
     public function store(Request $request)
     {
-        // Check if user has permission to manage settings
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to Academic Years.');
+        }
 
         $request->validate([
             'name' => ['required', 'string', 'max:50'],
@@ -113,9 +122,14 @@ class AcademicYearController extends Controller
      */
     public function show(AcademicYear $academicYear)
     {
-        // Check if user has permission to manage settings
-        $this->authorize('manage-settings');
-        
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to Academic Years.');
+        }
+
+        $academicYear->load(['classes.course', 'classes.subjects', 'students']);
+        $academicYear->loadCount(['classes', 'subjects', 'courses', 'students']);
+
         return view('academic-years.show', compact('academicYear'));
     }
 
@@ -127,9 +141,11 @@ class AcademicYearController extends Controller
      */
     public function edit(AcademicYear $academicYear)
     {
-        // Check if user has permission to manage settings
-        $this->authorize('manage-settings');
-        
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to Academic Years.');
+        }
+
         return view('academic-years.edit', compact('academicYear'));
     }
 
@@ -142,8 +158,10 @@ class AcademicYearController extends Controller
      */
     public function update(Request $request, AcademicYear $academicYear)
     {
-        // Check if user has permission to manage settings
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to Academic Years.');
+        }
 
         $request->validate([
             'name' => ['required', 'string', 'max:50'],
@@ -202,8 +220,10 @@ class AcademicYearController extends Controller
      */
     public function destroy(AcademicYear $academicYear)
     {
-        // Check if user has permission to manage settings
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to Academic Years.');
+        }
         
         // Don't allow deletion of the current academic year
         if ($academicYear->is_current) {
@@ -228,8 +248,10 @@ class AcademicYearController extends Controller
      */
     public function setCurrent(AcademicYear $academicYear)
     {
-        // Check if user has permission to manage settings
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to Academic Years.');
+        }
 
         try {
             $academicYear->setAsCurrent();
@@ -250,8 +272,10 @@ class AcademicYearController extends Controller
      */
     public function setActive(AcademicYear $academicYear)
     {
-        // Check if user has permission to manage settings
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to Academic Years.');
+        }
 
         try {
             $academicYear->setAsActive();

@@ -13,7 +13,10 @@ class CollegeSettingController extends Controller
      */
     public function index()
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to College Settings.');
+        }
         
         $settings = CollegeSetting::getSettings();
         
@@ -25,7 +28,10 @@ class CollegeSettingController extends Controller
      */
     public function update(Request $request)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to update College Settings.');
+        }
 
         // Debug: Log all request data
         \Log::info('College Settings Request Data:', $request->all());
@@ -136,7 +142,10 @@ class CollegeSettingController extends Controller
      */
     public function deleteFile(Request $request)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to delete College Setting files.');
+        }
 
         $request->validate([
             'field' => ['required', 'in:logo_path,principal_signature_path,exam_controller_signature_path,registrar_signature_path,class_teacher_signature_path,hod_signature_path'],

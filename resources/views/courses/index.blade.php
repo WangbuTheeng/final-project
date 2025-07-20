@@ -8,7 +8,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Courses</h1>
             <p class="mt-1 text-sm text-gray-500">Manage courses across all faculties</p>
         </div>
-        @can('manage-courses')
+        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
         <div class="mt-4 sm:mt-0">
             <a href="{{ route('courses.create') }}"
                class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -16,7 +16,7 @@
                 Add Course
             </a>
         </div>
-        @endcan
+        @endif
     </div>
 
     <!-- Success/Error Messages -->
@@ -295,7 +295,7 @@
                                            title="View Details">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        @can('manage-courses')
+                                        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                                         <a href="{{ route('courses.edit', $course) }}"
                                            class="text-yellow-600 hover:text-yellow-900 transition-colors duration-200"
                                            title="Edit Course">
@@ -313,7 +313,7 @@
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
-                                        @endcan
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -335,13 +335,13 @@
                 </div>
                 <h3 class="mt-2 text-sm font-medium text-gray-900">No courses found</h3>
                 <p class="mt-1 text-sm text-gray-500">
-                    @can('manage-courses')
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                         Get started by creating a new course.
                     @else
                         No courses are available to view.
-                    @endcan
+                    @endif
                 </p>
-                @can('manage-courses')
+                @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                 <div class="mt-6">
                     <a href="{{ route('courses.create') }}"
                        class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -349,7 +349,7 @@
                         Add Course
                     </a>
                 </div>
-                @endcan
+                @endif
             </div>
         @endif
     </div>

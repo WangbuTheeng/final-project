@@ -15,7 +15,10 @@ class GradingSystemController extends Controller
      */
     public function index()
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to Grading Systems.');
+        }
 
         $gradingSystems = GradingSystem::with('gradeScales')
             ->ordered()
@@ -29,7 +32,10 @@ class GradingSystemController extends Controller
      */
     public function create()
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Grading Systems.');
+        }
 
         return view('grading-systems.create');
     }
@@ -39,7 +45,10 @@ class GradingSystemController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Grading Systems.');
+        }
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -97,7 +106,10 @@ class GradingSystemController extends Controller
      */
     public function show(GradingSystem $gradingSystem)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to view Grading System details.');
+        }
 
         $gradingSystem->load('gradeScales');
 
@@ -109,7 +121,10 @@ class GradingSystemController extends Controller
      */
     public function edit(GradingSystem $gradingSystem)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to edit Grading Systems.');
+        }
 
         $gradingSystem->load('gradeScales');
 
@@ -121,7 +136,10 @@ class GradingSystemController extends Controller
      */
     public function update(Request $request, GradingSystem $gradingSystem)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to update Grading Systems.');
+        }
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -181,7 +199,10 @@ class GradingSystemController extends Controller
      */
     public function destroy(GradingSystem $gradingSystem)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to delete Grading Systems.');
+        }
 
         if (!$gradingSystem->canBeDeleted()) {
             return redirect()->back()
@@ -205,7 +226,10 @@ class GradingSystemController extends Controller
      */
     public function setDefault(GradingSystem $gradingSystem)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to manage Grading Systems.');
+        }
 
         try {
             $gradingSystem->setAsDefault();
@@ -224,7 +248,10 @@ class GradingSystemController extends Controller
      */
     public function toggleStatus(GradingSystem $gradingSystem)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to manage Grading Systems.');
+        }
 
         if ($gradingSystem->is_default && $gradingSystem->status === 'active') {
             return redirect()->back()

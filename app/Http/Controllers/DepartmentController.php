@@ -20,7 +20,10 @@ class DepartmentController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to Departments.');
+        }
 
         $query = Department::with(['faculty', 'hod'])->withCount(['courses', 'students']);
 
@@ -48,7 +51,10 @@ class DepartmentController extends Controller
      */
     public function create()
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Departments.');
+        }
 
         $faculties = Faculty::active()->orderBy('name')->get();
 
@@ -65,7 +71,10 @@ class DepartmentController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Departments.');
+        }
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -110,7 +119,10 @@ class DepartmentController extends Controller
      */
     public function show(Department $department)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to view Department details.');
+        }
 
         $department->load(['faculty', 'hod', 'courses', 'students']);
 
@@ -122,7 +134,10 @@ class DepartmentController extends Controller
      */
     public function edit(Department $department)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to edit Departments.');
+        }
 
         $faculties = Faculty::active()->orderBy('name')->get();
 
@@ -139,7 +154,10 @@ class DepartmentController extends Controller
      */
     public function update(Request $request, Department $department)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to update Departments.');
+        }
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -184,7 +202,10 @@ class DepartmentController extends Controller
      */
     public function destroy(Department $department)
     {
-        $this->authorize('manage-settings');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to delete Departments.');
+        }
 
         if (!$department->canBeDeleted()) {
             return redirect()->route('departments.index')

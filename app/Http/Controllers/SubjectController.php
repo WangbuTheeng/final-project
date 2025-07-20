@@ -21,9 +21,12 @@ class SubjectController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('view-subjects');
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to Subjects.');
+        }
 
-        $query = Subject::with(['class.course.faculty', 'instructor'])
+        $query = Subject::with(['class.course.department.faculty', 'instructor'])
             ->withCount(['class']);
 
         // Filter by class
@@ -76,9 +79,12 @@ class SubjectController extends Controller
      */
     public function create(Request $request)
     {
-        $this->authorize('manage-courses');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Subjects.');
+        }
 
-        $classes = ClassSection::with(['course.faculty', 'instructor'])->active()->orderBy('name')->get();
+        $classes = ClassSection::with(['course.department.faculty', 'instructor'])->active()->orderBy('name')->get();
 
         // Get instructors (teachers and admins)
         $instructors = User::whereHas('roles', function($query) {
@@ -106,8 +112,45 @@ class SubjectController extends Controller
      */
     private function getNextOrderSequence($classId)
     {
-        $maxOrder = Subject::where('class_id', $classId)->max('order_sequence');
+        // Use a more robust method to get next sequence
+        $maxOrder = Subject::where('class_id', $classId)
+            ->lockForUpdate()
+            ->max('order_sequence');
         return $maxOrder ? $maxOrder + 1 : 1;
+    }
+
+    /**
+     * Find the next available order sequence, handling conflicts
+     */
+    private function findAvailableOrderSequence($classId, $preferredOrder = null)
+    {
+        if ($preferredOrder) {
+            // Check if preferred order is available
+            $exists = Subject::where('class_id', $classId)
+                ->where('order_sequence', $preferredOrder)
+                ->exists();
+
+            if (!$exists) {
+                return $preferredOrder;
+            }
+        }
+
+        // Find the next available sequence
+        $usedSequences = Subject::where('class_id', $classId)
+            ->pluck('order_sequence')
+            ->sort()
+            ->values()
+            ->toArray();
+
+        $nextSequence = 1;
+        foreach ($usedSequences as $sequence) {
+            if ($nextSequence < $sequence) {
+                break;
+            }
+            $nextSequence = $sequence + 1;
+        }
+
+        return $nextSequence;
     }
 
     /**
@@ -195,7 +238,10 @@ class SubjectController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('manage-courses');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Subjects.');
+        }
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -207,9 +253,8 @@ class SubjectController extends Controller
                 'required',
                 'integer',
                 'min:1',
-                Rule::unique('subjects')->where(function ($query) use ($request) {
-                    return $query->where('class_id', $request->class_id);
-                })
+                'max:100'
+                // Note: We'll handle uniqueness in the store method to allow auto-correction
             ],
             'duration_hours' => ['nullable', 'integer', 'min:1', 'max:1000'],
             'credit_weight' => ['nullable', 'integer', 'min:1', 'max:100'],
@@ -233,13 +278,19 @@ class SubjectController extends Controller
         try {
             DB::beginTransaction();
 
+            // Ensure we have a valid order sequence
+            $orderSequence = $this->findAvailableOrderSequence(
+                $request->class_id,
+                $request->order_sequence
+            );
+
             Subject::create([
                 'name' => $request->name,
                 'code' => strtoupper($request->code),
                 'description' => $request->description,
                 'class_id' => $request->class_id,
                 'instructor_id' => $request->instructor_id,
-                'order_sequence' => $request->order_sequence,
+                'order_sequence' => $orderSequence,
                 'duration_hours' => $request->duration_hours,
                 'credit_weight' => $request->credit_weight,
                 'start_date' => $request->start_date,
@@ -259,8 +310,13 @@ class SubjectController extends Controller
 
             DB::commit();
 
+            $message = 'Subject created successfully.';
+            if ($orderSequence != $request->order_sequence) {
+                $message .= " Order sequence was automatically adjusted to {$orderSequence} to avoid conflicts.";
+            }
+
             return redirect()->route('subjects.index')
-                ->with('success', 'Subject created successfully.');
+                ->with('success', $message);
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -274,9 +330,12 @@ class SubjectController extends Controller
      */
     public function show(Subject $subject)
     {
-        $this->authorize('view-subjects');
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to view Subject details.');
+        }
 
-        $subject->load(['class.course.faculty', 'class.academicYear', 'instructor']);
+        $subject->load(['class.course.department.faculty', 'class.academicYear', 'instructor']);
 
         // Get other subjects in the same class
         $classSubjects = Subject::where('class_id', $subject->class_id)
@@ -292,9 +351,12 @@ class SubjectController extends Controller
      */
     public function edit(Subject $subject)
     {
-        $this->authorize('manage-courses');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to edit Subjects.');
+        }
 
-        $classes = ClassSection::with(['course.faculty', 'instructor'])->active()->orderBy('name')->get();
+        $classes = ClassSection::with(['course.department.faculty', 'instructor'])->active()->orderBy('name')->get();
         
         // Get instructors (teachers and admins)
         $instructors = User::whereHas('roles', function($query) {
@@ -312,7 +374,10 @@ class SubjectController extends Controller
      */
     public function update(Request $request, Subject $subject)
     {
-        $this->authorize('manage-courses');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to update Subjects.');
+        }
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -391,7 +456,10 @@ class SubjectController extends Controller
      */
     public function destroy(Subject $subject)
     {
-        $this->authorize('manage-courses');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to delete Subjects.');
+        }
 
         if (!$subject->canBeDeleted()) {
             return back()->with('error', 'This subject cannot be deleted as it has associated data.');

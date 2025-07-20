@@ -22,7 +22,10 @@ class ClassSectionController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('view-classes');
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to Classes.');
+        }
 
         $query = ClassSection::with(['course.department', 'academicYear', 'instructor'])
             ->withCount('enrollments');
@@ -89,7 +92,10 @@ class ClassSectionController extends Controller
      */
     public function create()
     {
-        $this->authorize('manage-classes');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Classes.');
+        }
 
         $courses = Course::active()->with('department')->orderBy('code')->get();
         $academicYears = AcademicYear::where('is_active', true)->orderBy('start_date', 'desc')->get();
@@ -118,7 +124,10 @@ class ClassSectionController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('manage-classes');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Classes.');
+        }
 
         // Determine if the course is semester-based or yearly-based before validation
         $course = Course::find($request->course_id);
@@ -198,10 +207,21 @@ class ClassSectionController extends Controller
      */
     public function show(ClassSection $class)
     {
-        $this->authorize('view-classes');
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to view Class details.');
+        }
 
         // Load relationships with null safety
-        $class->load(['course.department', 'academicYear', 'instructor', 'enrollments.student.user']);
+        $class->load([
+            'course.department.faculty',
+            'academicYear',
+            'instructor',
+            'enrollments.student.user',
+            'subjects' => function($query) {
+                $query->orderBy('order_sequence');
+            }
+        ]);
 
         // Check if critical relationships exist
         if (!$class->course) {
@@ -228,7 +248,10 @@ class ClassSectionController extends Controller
      */
     public function edit(ClassSection $class)
     {
-        $this->authorize('manage-classes');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to edit Classes.');
+        }
 
         $courses = Course::active()->with('department')->orderBy('code')->get();
         $academicYears = AcademicYear::where('is_active', true)->orderBy('start_date', 'desc')->get();
@@ -246,7 +269,10 @@ class ClassSectionController extends Controller
      */
     public function update(Request $request, ClassSection $class)
     {
-        $this->authorize('manage-classes');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to update Classes.');
+        }
 
         // Determine if the course is semester-based or yearly-based before validation
         $course = Course::find($request->course_id);
@@ -327,7 +353,10 @@ class ClassSectionController extends Controller
      */
     public function destroy(ClassSection $class)
     {
-        $this->authorize('manage-classes');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to delete Classes.');
+        }
 
         if (!$class->canBeDeleted()) {
             return redirect()->route('classes.index')
@@ -350,7 +379,10 @@ class ClassSectionController extends Controller
      */
     public function assignInstructor(Request $request, ClassSection $class)
     {
-        $this->authorize('manage-classes');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to assign instructors to Classes.');
+        }
 
         $request->validate([
             'instructor_id' => ['required', 'exists:users,id'],

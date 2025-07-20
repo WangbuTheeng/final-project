@@ -19,9 +19,9 @@ class FacultyController extends Controller
      */
     public function index(Request $request)
     {
-        // Allow both manage-faculties and view-faculties permissions
-        if (!auth()->user()->can('manage-faculties') && !auth()->user()->can('view-faculties')) {
-            abort(403, 'Unauthorized');
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to Faculties.');
         }
 
         $query = Faculty::with(['dean', 'departments'])->withCount('departments');
@@ -47,7 +47,10 @@ class FacultyController extends Controller
      */
     public function create()
     {
-        $this->authorize('manage-faculties');
+        // Check if user has Super Admin or Admin role (only they can create faculties)
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Faculties.');
+        }
 
         // Get users who can be deans (teachers, admins, etc.)
         $potentialDeans = User::whereHas('roles', function($query) {
@@ -62,7 +65,10 @@ class FacultyController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('manage-faculties');
+        // Check if user has Super Admin or Admin role (only they can create faculties)
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Faculties.');
+        }
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -101,9 +107,9 @@ class FacultyController extends Controller
      */
     public function show(Faculty $faculty)
     {
-        // Allow both manage-faculties and view-faculties permissions
-        if (!auth()->user()->can('manage-faculties') && !auth()->user()->can('view-faculties')) {
-            abort(403, 'Unauthorized');
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to view Faculty details.');
         }
 
         $faculty->load(['dean', 'departments.hod']);
@@ -116,7 +122,10 @@ class FacultyController extends Controller
      */
     public function edit(Faculty $faculty)
     {
-        $this->authorize('manage-faculties');
+        // Check if user has Super Admin or Admin role (only they can edit faculties)
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to edit Faculties.');
+        }
 
         // Get users who can be deans
         $potentialDeans = User::whereHas('roles', function($query) {
@@ -131,7 +140,10 @@ class FacultyController extends Controller
      */
     public function update(Request $request, Faculty $faculty)
     {
-        $this->authorize('manage-faculties');
+        // Check if user has Super Admin or Admin role (only they can update faculties)
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to update Faculties.');
+        }
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -170,7 +182,10 @@ class FacultyController extends Controller
      */
     public function destroy(Faculty $faculty)
     {
-        $this->authorize('manage-faculties');
+        // Check if user has Super Admin or Admin role (only they can delete faculties)
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to delete Faculties.');
+        }
 
         if (!$faculty->canBeDeleted()) {
             return redirect()->route('faculties.index')

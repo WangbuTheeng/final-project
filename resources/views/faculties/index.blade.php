@@ -1,6 +1,42 @@
 @extends('layouts.dashboard')
 
 @section('content')
+<style>
+.compact-table {
+    max-width: 100%;
+    overflow: visible;
+}
+
+.compact-table table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.compact-table td {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    vertical-align: top;
+}
+
+/* Mobile card view */
+@media (max-width: 640px) {
+    .table-view {
+        display: none;
+    }
+    .card-view {
+        display: block;
+    }
+}
+
+@media (min-width: 641px) {
+    .table-view {
+        display: block;
+    }
+    .card-view {
+        display: none;
+    }
+}
+</style>
 <div class="space-y-6">
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -8,7 +44,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Faculties</h1>
             <p class="mt-1 text-sm text-gray-500">Manage all faculties in the institution</p>
         </div>
-        @can('manage-faculties')
+        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
         <div class="mt-4 sm:mt-0">
             <a href="{{ route('faculties.create') }}"
                class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -16,7 +52,7 @@
                 Add Faculty
             </a>
         </div>
-        @endcan
+        @endif
     </div>
 
     <!-- Success/Error Messages -->
@@ -53,119 +89,119 @@
         </div>
 
         @if($faculties->count() > 0)
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+            <!-- Table View (Desktop/Tablet) -->
+            <div class="compact-table table-view">
+                <table class="w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Faculty
+                            <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">
+                                Faculty Info
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Code
+                            <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
+                                Dean & Departments
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Dean
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Departments
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
                                 Contact
                             </th>
-                            <th scope="col" class="relative px-6 py-3">
-                                <span class="sr-only">Actions</span>
+                            <th scope="col" class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+                                Status
+                            </th>
+                            <th scope="col" class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                                Actions
                             </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($faculties as $faculty)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <!-- Faculty Info Column -->
+                                <td class="px-2 py-3">
                                     <div>
-                                        <div class="text-sm font-medium text-gray-900">
-                                            {{ $faculty->name }}
+                                        <div class="text-sm font-medium text-gray-900 leading-tight">
+                                            {{ Str::limit($faculty->name, 40) }}
+                                        </div>
+                                        <div class="text-xs text-blue-600 font-mono mt-1">
+                                            {{ $faculty->code }}
                                         </div>
                                         @if($faculty->description)
-                                            <div class="text-sm text-gray-500 truncate max-w-xs">
+                                            <div class="text-xs text-gray-500 mt-1 leading-tight">
                                                 {{ Str::limit($faculty->description, 50) }}
                                             </div>
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        {{ $faculty->code }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    @if($faculty->dean)
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-8 w-8">
-                                                <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
+
+                                <!-- Dean & Departments Column -->
+                                <td class="px-2 py-3">
+                                    <div class="space-y-2">
+                                        @if($faculty->dean)
+                                            <div class="flex items-center space-x-2">
+                                                <div class="flex-shrink-0 h-5 w-5 rounded-full bg-gray-300 flex items-center justify-center">
                                                     <span class="text-xs font-medium text-gray-700">
-                                                        {{ substr($faculty->dean->name, 0, 2) }}
+                                                        {{ substr($faculty->dean->name, 0, 1) }}
                                                     </span>
                                                 </div>
-                                            </div>
-                                            <div class="ml-3">
-                                                <div class="text-sm font-medium text-gray-900">
-                                                    {{ $faculty->dean->name }}
+                                                <div class="text-xs text-gray-900 leading-tight">
+                                                    {{ Str::limit($faculty->dean->name, 20) }}
                                                 </div>
                                             </div>
+                                        @else
+                                            <div class="text-xs text-gray-400 italic">No dean</div>
+                                        @endif
+                                        <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            <i class="fas fa-building text-xs mr-1"></i>
+                                            {{ $faculty->departments_count }} dept{{ $faculty->departments_count != 1 ? 's' : '' }}
                                         </div>
-                                    @else
-                                        <span class="text-gray-400 italic">No dean assigned</span>
-                                    @endif
+                                    </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        {{ $faculty->departments_count }} departments
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($faculty->is_active)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            <i class="fas fa-check-circle mr-1"></i>
-                                            Active
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                            <i class="fas fa-times-circle mr-1"></i>
-                                            Inactive
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <div class="space-y-1">
+
+                                <!-- Contact Column -->
+                                <td class="px-2 py-3">
+                                    <div class="space-y-1 text-xs">
                                         @if($faculty->email)
                                             <div class="flex items-center">
-                                                <i class="fas fa-envelope text-gray-400 mr-2"></i>
-                                                <span class="truncate max-w-xs">{{ $faculty->email }}</span>
+                                                <i class="fas fa-envelope text-gray-400 mr-1 w-3"></i>
+                                                <span class="text-gray-600 truncate">{{ Str::limit($faculty->email, 20) }}</span>
                                             </div>
                                         @endif
                                         @if($faculty->phone)
                                             <div class="flex items-center">
-                                                <i class="fas fa-phone text-gray-400 mr-2"></i>
-                                                <span>{{ $faculty->phone }}</span>
+                                                <i class="fas fa-phone text-gray-400 mr-1 w-3"></i>
+                                                <span class="text-gray-600">{{ $faculty->phone }}</span>
                                             </div>
+                                        @endif
+                                        @if(!$faculty->email && !$faculty->phone)
+                                            <span class="text-gray-400 italic">No contact</span>
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex items-center justify-end space-x-2">
+
+                                <!-- Status Column -->
+                                <td class="px-2 py-3 text-center">
+                                    @if($faculty->is_active)
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-800" title="Active">
+                                            <i class="fas fa-check text-xs"></i>
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-800" title="Inactive">
+                                            <i class="fas fa-times text-xs"></i>
+                                        </span>
+                                    @endif
+                                </td>
+
+                                <!-- Actions Column -->
+                                <td class="px-2 py-3">
+                                    <div class="flex items-center justify-center space-x-1">
                                         <a href="{{ route('faculties.show', $faculty) }}"
-                                           class="text-primary-600 hover:text-primary-900 transition-colors duration-200"
+                                           class="inline-flex items-center justify-center w-6 h-6 text-primary-600 hover:text-primary-900 hover:bg-primary-50 rounded transition-colors duration-200"
                                            title="View Details">
-                                            <i class="fas fa-eye"></i>
+                                            <i class="fas fa-eye text-xs"></i>
                                         </a>
-                                        @can('manage-faculties')
+                                        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                                         <a href="{{ route('faculties.edit', $faculty) }}"
-                                           class="text-yellow-600 hover:text-yellow-900 transition-colors duration-200"
+                                           class="inline-flex items-center justify-center w-6 h-6 text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50 rounded transition-colors duration-200"
                                            title="Edit Faculty">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="fas fa-edit text-xs"></i>
                                         </a>
                                         <form action="{{ route('faculties.destroy', $faculty) }}"
                                               method="POST"
@@ -174,18 +210,92 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                    class="text-red-600 hover:text-red-900 transition-colors duration-200"
+                                                    class="inline-flex items-center justify-center w-6 h-6 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors duration-200"
                                                     title="Delete Faculty">
-                                                <i class="fas fa-trash"></i>
+                                                <i class="fas fa-trash text-xs"></i>
                                             </button>
                                         </form>
-                                        @endcan
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Card View (Mobile) -->
+            <div class="card-view space-y-4 p-4">
+                @foreach($faculties as $faculty)
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1">
+                                <h4 class="text-sm font-medium text-gray-900 leading-tight">
+                                    {{ $faculty->name }}
+                                </h4>
+                                <p class="text-xs text-blue-600 font-mono mt-1">{{ $faculty->code }}</p>
+                                @if($faculty->description)
+                                    <p class="text-xs text-gray-500 mt-1">{{ Str::limit($faculty->description, 60) }}</p>
+                                @endif
+                            </div>
+                            <div class="flex items-center space-x-1 ml-2">
+                                @if($faculty->is_active)
+                                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800">
+                                        <i class="fas fa-check text-xs"></i>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-100 text-red-800">
+                                        <i class="fas fa-times text-xs"></i>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 text-xs mb-3">
+                            <div>
+                                <span class="text-gray-500">Dean:</span>
+                                <div class="text-gray-900">{{ $faculty->dean ? Str::limit($faculty->dean->name, 20) : 'Not assigned' }}</div>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Departments:</span>
+                                <div class="text-gray-700">{{ $faculty->departments_count }} department{{ $faculty->departments_count != 1 ? 's' : '' }}</div>
+                            </div>
+                            @if($faculty->email)
+                                <div>
+                                    <span class="text-gray-500">Email:</span>
+                                    <div class="text-blue-600">{{ Str::limit($faculty->email, 25) }}</div>
+                                </div>
+                            @endif
+                            @if($faculty->phone)
+                                <div>
+                                    <span class="text-gray-500">Phone:</span>
+                                    <div class="text-gray-700">{{ $faculty->phone }}</div>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="flex items-center justify-end space-x-1">
+                            <a href="{{ route('faculties.show', $faculty) }}" class="p-1 text-primary-600 hover:bg-primary-50 rounded">
+                                <i class="fas fa-eye text-xs"></i>
+                            </a>
+                            @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
+                            <a href="{{ route('faculties.edit', $faculty) }}" class="p-1 text-yellow-600 hover:bg-yellow-50 rounded">
+                                <i class="fas fa-edit text-xs"></i>
+                            </a>
+                            <form action="{{ route('faculties.destroy', $faculty) }}"
+                                  method="POST"
+                                  class="inline-block"
+                                  onsubmit="return confirm('Are you sure you want to delete this faculty?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="p-1 text-red-600 hover:bg-red-50 rounded">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </form>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
             </div>
 
             <!-- Pagination -->
@@ -201,13 +311,13 @@
                 </div>
                 <h3 class="mt-2 text-sm font-medium text-gray-900">No faculties found</h3>
                 <p class="mt-1 text-sm text-gray-500">
-                    @can('manage-faculties')
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                         Get started by creating a new faculty.
                     @else
                         No faculties are available to view.
-                    @endcan
+                    @endif
                 </p>
-                @can('manage-faculties')
+                @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                 <div class="mt-6">
                     <a href="{{ route('faculties.create') }}"
                        class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -215,7 +325,7 @@
                         Add Faculty
                     </a>
                 </div>
-                @endcan
+                @endif
             </div>
         @endif
     </div>

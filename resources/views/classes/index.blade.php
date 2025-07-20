@@ -1,6 +1,42 @@
 @extends('layouts.dashboard')
 
 @section('content')
+<style>
+.compact-table {
+    max-width: 100%;
+    overflow: visible;
+}
+
+.compact-table table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.compact-table td {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    vertical-align: top;
+}
+
+/* Mobile card view */
+@media (max-width: 640px) {
+    .table-view {
+        display: none;
+    }
+    .card-view {
+        display: block;
+    }
+}
+
+@media (min-width: 641px) {
+    .table-view {
+        display: block;
+    }
+    .card-view {
+        display: none;
+    }
+}
+</style>
 <div class="space-y-6">
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -8,7 +44,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Class Sections</h1>
             <p class="mt-1 text-sm text-gray-500">Manage class sections and their schedules</p>
         </div>
-        @can('manage-classes')
+        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
         <div class="mt-4 sm:mt-0">
             <a href="{{ route('classes.create') }}"
                class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -16,7 +52,7 @@
                 Add Class Section
             </a>
         </div>
-        @endcan
+        @endif
     </div>
 
     <!-- Success/Error Messages -->
@@ -113,166 +149,252 @@
         </div>
 
         @if($classes->count() > 0)
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+            <!-- Table View (Desktop/Tablet) -->
+            <div class="compact-table table-view">
+                <table class="w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Class
+                            <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">
+                                Class & Course
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Course
+                            <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
+                                Instructor & Details
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Instructor
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Details
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
                                 Enrollment
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
                                 Status
                             </th>
-                            <th scope="col" class="relative px-6 py-3">
-                                <span class="sr-only">Actions</span>
+                            <th scope="col" class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                                Actions
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($classes as $class)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">
-                                            {{ $class->name }}
-                                        </div>
-                                        <div class="text-sm text-gray-500">
-                                            {{ $class->academicYear->name }} - Semester {{ $class->semester }}
-                                        </div>
-                                        @if($class->room)
-                                            <div class="text-xs text-gray-400">
-                                                <i class="fas fa-map-marker-alt mr-1"></i>{{ $class->room }}
-                                            </div>
-                                        @endif
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($classes as $class)
+                        <tr class="hover:bg-gray-50">
+                            <!-- Class & Course Column -->
+                            <td class="px-2 py-3">
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900 leading-tight">
+                                        {{ Str::limit($class->name, 30) }}
                                     </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">
-                                            {{ $class->course->title }}
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        {{ $class->academicYear->name }} - Sem {{ $class->semester }}
+                                    </div>
+                                    @if($class->room)
+                                        <div class="text-xs text-gray-400 mt-1">
+                                            <i class="fas fa-map-marker-alt mr-1 w-3"></i>{{ $class->room }}
                                         </div>
-                                        <div class="text-sm text-gray-500">
-                                            {{ $class->course->code }} - {{ $class->course->credit_units }} units
+                                    @endif
+                                    <div class="mt-2 pt-2 border-t border-gray-100">
+                                        <div class="text-sm font-medium text-blue-900 leading-tight">
+                                            {{ Str::limit($class->course->title, 35) }}
+                                        </div>
+                                        <div class="text-xs text-blue-600 mt-1">
+                                            {{ $class->course->code }} • {{ $class->course->credit_units }} units
                                         </div>
                                         @if($class->course->department)
-                                            <div class="text-xs text-gray-400">
-                                                {{ $class->course->department->name }}
+                                            <div class="text-xs text-gray-400 mt-1">
+                                                {{ Str::limit($class->course->department->name, 25) }}
                                             </div>
                                         @endif
                                     </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                </div>
+                            </td>
+
+                            <!-- Instructor & Details Column -->
+                            <td class="px-2 py-3">
+                                <div class="space-y-2">
                                     @if($class->instructor)
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-8 w-8">
-                                                <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                                                    <span class="text-xs font-medium text-gray-600">
-                                                        {{ substr($class->instructor->name, 0, 2) }}
-                                                    </span>
-                                                </div>
+                                        <div class="flex items-center space-x-2">
+                                            <div class="flex-shrink-0 h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center">
+                                                <span class="text-xs font-medium text-gray-600">
+                                                    {{ substr($class->instructor->name, 0, 1) }}
+                                                </span>
                                             </div>
-                                            <div class="ml-3">
-                                                <div class="text-sm font-medium text-gray-900">
-                                                    {{ $class->instructor->name }}
+                                            <div class="min-w-0">
+                                                <div class="text-xs font-medium text-gray-900 leading-tight">
+                                                    {{ Str::limit($class->instructor->name, 20) }}
                                                 </div>
-                                                <div class="text-sm text-gray-500">
-                                                    {{ $class->instructor->email }}
+                                                <div class="text-xs text-gray-500 truncate">
+                                                    {{ Str::limit($class->instructor->email, 25) }}
                                                 </div>
                                             </div>
                                         </div>
                                     @else
-                                        <span class="text-gray-400 italic">No instructor assigned</span>
+                                        <div class="text-xs text-gray-400 italic">No instructor</div>
                                     @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <div class="space-y-1">
+
+                                    <div class="space-y-1 text-xs">
                                         <div class="flex items-center">
-                                            <i class="fas fa-users text-gray-400 mr-2"></i>
-                                            <span>Capacity: {{ $class->capacity }}</span>
+                                            <i class="fas fa-users text-gray-400 mr-1 w-3"></i>
+                                            <span class="text-gray-600">Cap: {{ $class->capacity }}</span>
                                         </div>
                                         @if($class->start_date && $class->end_date)
                                             <div class="flex items-center">
-                                                <i class="fas fa-calendar text-gray-400 mr-2"></i>
-                                                <span>{{ $class->start_date->format('M d') }} - {{ $class->end_date->format('M d, Y') }}</span>
+                                                <i class="fas fa-calendar text-gray-400 mr-1 w-3"></i>
+                                                <span class="text-gray-600">{{ $class->start_date->format('M d') }} - {{ $class->end_date->format('M d') }}</span>
                                             </div>
                                         @endif
                                     </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            {{ $class->enrollments_count }}/{{ $class->capacity }}
-                                        </span>
-                                        @if($class->capacity > 0)
-                                            <div class="ml-2 w-16 bg-gray-200 rounded-full h-2">
-                                                <div class="bg-blue-600 h-2 rounded-full" style="width: {{ min(100, ($class->enrollments_count / $class->capacity) * 100) }}%"></div>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($class->status === 'active')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            <i class="fas fa-check-circle mr-1"></i>
-                                            Active
-                                        </span>
-                                    @elseif($class->status === 'completed')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            <i class="fas fa-flag-checkered mr-1"></i>
-                                            Completed
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                            <i class="fas fa-times-circle mr-1"></i>
-                                            Cancelled
-                                        </span>
+                                </div>
+                            </td>
+                            <!-- Enrollment Column -->
+                            <td class="px-2 py-3 text-center">
+                                <div class="space-y-1">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        {{ $class->enrollments_count }}/{{ $class->capacity }}
+                                    </span>
+                                    @if($class->capacity > 0)
+                                        <div class="w-12 bg-gray-200 rounded-full h-1.5 mx-auto">
+                                            <div class="bg-blue-600 h-1.5 rounded-full" style="width: {{ min(100, ($class->enrollments_count / $class->capacity) * 100) }}%"></div>
+                                        </div>
+                                        <div class="text-xs text-gray-500">
+                                            {{ round(($class->enrollments_count / $class->capacity) * 100) }}%
+                                        </div>
                                     @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex items-center justify-end space-x-2">
-                                        <a href="{{ route('classes.show', $class) }}"
-                                           class="text-primary-600 hover:text-primary-900 transition-colors duration-200"
-                                           title="View Details">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        @can('manage-classes')
-                                        <a href="{{ route('classes.edit', $class) }}"
-                                           class="text-yellow-600 hover:text-yellow-900 transition-colors duration-200"
-                                           title="Edit Class">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form action="{{ route('classes.destroy', $class) }}"
-                                              method="POST"
-                                              class="inline-block"
-                                              onsubmit="return confirm('Are you sure you want to delete this class section? This action cannot be undone.')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                    class="text-red-600 hover:text-red-900 transition-colors duration-200"
-                                                    title="Delete Class">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                        @endcan
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                                </div>
+                            </td>
+
+                            <!-- Status Column -->
+                            <td class="px-2 py-3 text-center">
+                                @if($class->status === 'active')
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-800" title="Active">
+                                        <i class="fas fa-check text-xs"></i>
+                                    </span>
+                                @elseif($class->status === 'completed')
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-800" title="Completed">
+                                        <i class="fas fa-flag text-xs"></i>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-800" title="Cancelled">
+                                        <i class="fas fa-times text-xs"></i>
+                                    </span>
+                                @endif
+                            </td>
+
+                            <!-- Actions Column -->
+                            <td class="px-2 py-3">
+                                <div class="flex items-center justify-center space-x-1">
+                                    <a href="{{ route('classes.show', $class) }}"
+                                       class="inline-flex items-center justify-center w-6 h-6 text-primary-600 hover:text-primary-900 hover:bg-primary-50 rounded transition-colors duration-200"
+                                       title="View Details">
+                                        <i class="fas fa-eye text-xs"></i>
+                                    </a>
+                                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
+                                    <a href="{{ route('classes.edit', $class) }}"
+                                       class="inline-flex items-center justify-center w-6 h-6 text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50 rounded transition-colors duration-200"
+                                       title="Edit Class">
+                                        <i class="fas fa-edit text-xs"></i>
+                                    </a>
+                                    <form action="{{ route('classes.destroy', $class) }}"
+                                          method="POST"
+                                          class="inline-block"
+                                          onsubmit="return confirm('Are you sure you want to delete this class section? This action cannot be undone.')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center w-6 h-6 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors duration-200"
+                                                title="Delete Class">
+                                            <i class="fas fa-trash text-xs"></i>
+                                        </button>
+                                    </form>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Card View (Mobile) -->
+        <div class="card-view space-y-4 p-4">
+            @foreach($classes as $class)
+                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1">
+                            <h4 class="text-sm font-medium text-gray-900 leading-tight">
+                                {{ $class->name }}
+                            </h4>
+                            <p class="text-xs text-gray-500 mt-1">{{ $class->academicYear->name }} - Semester {{ $class->semester }}</p>
+                            @if($class->room)
+                                <p class="text-xs text-gray-400 mt-1">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>{{ $class->room }}
+                                </p>
+                            @endif
+                        </div>
+                        <div class="flex items-center space-x-2 ml-2">
+                            @if($class->status === 'active')
+                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800" title="Active">
+                                    <i class="fas fa-check text-xs"></i>
+                                </span>
+                            @elseif($class->status === 'completed')
+                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-800" title="Completed">
+                                    <i class="fas fa-flag text-xs"></i>
+                                </span>
+                            @else
+                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-100 text-red-800" title="Cancelled">
+                                    <i class="fas fa-times text-xs"></i>
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="mb-3 p-2 bg-blue-50 rounded">
+                        <div class="text-sm font-medium text-blue-900">{{ $class->course->title }}</div>
+                        <div class="text-xs text-blue-600">{{ $class->course->code }} • {{ $class->course->credit_units }} units</div>
+                        @if($class->course->department)
+                            <div class="text-xs text-blue-500 mt-1">{{ $class->course->department->name }}</div>
+                        @endif
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs mb-3">
+                        <div>
+                            <span class="text-gray-500">Instructor:</span>
+                            <div class="text-gray-900">{{ $class->instructor ? Str::limit($class->instructor->name, 20) : 'Not assigned' }}</div>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Capacity:</span>
+                            <div class="text-gray-700">{{ $class->capacity }} students</div>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Enrolled:</span>
+                            <div class="text-blue-600">{{ $class->enrollments_count }}/{{ $class->capacity }} ({{ $class->capacity > 0 ? round(($class->enrollments_count / $class->capacity) * 100) : 0 }}%)</div>
+                        </div>
+                        @if($class->start_date && $class->end_date)
+                            <div>
+                                <span class="text-gray-500">Duration:</span>
+                                <div class="text-gray-700">{{ $class->start_date->format('M d') }} - {{ $class->end_date->format('M d, Y') }}</div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-1">
+                        <a href="{{ route('classes.show', $class) }}" class="p-1 text-primary-600 hover:bg-primary-50 rounded">
+                            <i class="fas fa-eye text-xs"></i>
+                        </a>
+                        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
+                        <a href="{{ route('classes.edit', $class) }}" class="p-1 text-yellow-600 hover:bg-yellow-50 rounded">
+                            <i class="fas fa-edit text-xs"></i>
+                        </a>
+                        <form action="{{ route('classes.destroy', $class) }}"
+                              method="POST"
+                              class="inline-block"
+                              onsubmit="return confirm('Are you sure you want to delete this class section?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="p-1 text-red-600 hover:bg-red-50 rounded">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </form>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+        </div>
 
             <!-- Pagination -->
             @if($classes->hasPages())
@@ -287,13 +409,13 @@
                 </div>
                 <h3 class="mt-2 text-sm font-medium text-gray-900">No class sections found</h3>
                 <p class="mt-1 text-sm text-gray-500">
-                    @can('manage-classes')
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                         Get started by creating a new class section.
                     @else
                         No class sections are available to view.
-                    @endcan
+                    @endif
                 </p>
-                @can('manage-classes')
+                @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                 <div class="mt-6">
                     <a href="{{ route('classes.create') }}"
                        class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -301,7 +423,7 @@
                         Add Class Section
                     </a>
                 </div>
-                @endcan
+                @endif
             </div>
         @endif
     </div>

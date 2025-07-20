@@ -21,7 +21,10 @@ class CourseController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('view-courses');
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to Courses.');
+        }
 
         $query = Course::with(['faculty', 'department'])
             ->withCount('classes');
@@ -85,7 +88,10 @@ class CourseController extends Controller
      */
     public function create()
     {
-        $this->authorize('manage-courses');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Courses.');
+        }
 
         $faculties = Faculty::active()->orderBy('name')->get();
         $departments = Department::active()->with('faculty')->orderBy('name')->get();
@@ -99,7 +105,10 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('manage-courses');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Courses.');
+        }
 
         $validationRules = [
             'title' => ['required', 'string', 'max:255'],
@@ -143,7 +152,10 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        $this->authorize('view-courses');
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to view Course details.');
+        }
 
         $course->load(['faculty', 'department', 'classes.academicYear']);
 
@@ -155,7 +167,10 @@ class CourseController extends Controller
      */
     public function edit(Course $course)
     {
-        $this->authorize('manage-courses');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to edit Courses.');
+        }
 
         $faculties = Faculty::active()->orderBy('name')->get();
         $departments = Department::active()->with('faculty')->orderBy('name')->get();
@@ -173,7 +188,10 @@ class CourseController extends Controller
      */
     public function update(Request $request, Course $course)
     {
-        $this->authorize('manage-courses');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to update Courses.');
+        }
 
         // Log the incoming request for debugging
         Log::info('Course update request received', [
@@ -266,7 +284,10 @@ class CourseController extends Controller
      */
     public function destroy(Course $course)
     {
-        $this->authorize('manage-courses');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to delete Courses.');
+        }
 
         if (!$course->canBeDeleted()) {
             return redirect()->route('courses.index')

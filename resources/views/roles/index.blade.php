@@ -11,13 +11,13 @@
             <p class="mt-1 text-sm text-gray-500">Manage system roles and permissions</p>
         </div>
         <div class="mt-4 sm:mt-0">
-            @can('create-roles')
+            @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
             <a href="{{ route('roles.create') }}"
                class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 <i class="fas fa-plus mr-2"></i>
                 Create New Role
             </a>
-            @endcan
+            @endif
         </div>
     </div>
 
@@ -55,11 +55,11 @@
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight mb-4 sm:mb-0">
                     <i class="fas fa-user-tag text-primary-500 mr-2"></i> {{ __('System Roles') }}
                 </h2>
-                @can('create-roles')
+                @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                 <a href="{{ route('roles.create') }}" class="bg-primary-500 hover:bg-primary-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-150 ease-in-out shadow-soft-md flex items-center">
                     <i class="fas fa-plus mr-2"></i> {{ __('Add New Role') }}
                 </a>
-                @endcan
+                @endif
             </div>
             <div class="overflow-hidden rounded-lg border border-gray-100">
                 <div class="overflow-x-auto">
@@ -116,23 +116,19 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex space-x-2">
-                                            @can('view-roles')
                                             <a href="{{ route('roles.show', $role) }}"
                                                class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-1.5 rounded-md transition-colors duration-150 ease-in-out"
                                                title="View Role">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            @endcan
 
-                                            @can('edit-roles')
+                                            @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                                             <a href="{{ route('roles.edit', $role) }}"
                                                class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-1.5 rounded-md transition-colors duration-150 ease-in-out"
                                                title="Edit Role">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            @endcan
 
-                                            @can('delete-roles')
                                             @if(!in_array($role->name, ['Super Admin', 'Admin']))
                                             <form action="{{ route('roles.destroy', $role) }}" method="POST" class="inline-block">
                                                 @csrf
@@ -149,7 +145,7 @@
                                                 <i class="fas fa-lock"></i>
                                             </span>
                                             @endif
-                                            @endcan
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

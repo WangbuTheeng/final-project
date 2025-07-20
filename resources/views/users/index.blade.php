@@ -11,13 +11,13 @@
             <p class="mt-1 text-sm text-gray-500">Manage system users and their roles</p>
         </div>
         <div class="mt-4 sm:mt-0">
-            @can('create-users')
+            @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
             <a href="{{ route('users.create') }}"
                class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 <i class="fas fa-plus mr-2"></i>
                 Create New User
             </a>
-            @endcan
+            @endif
         </div>
     </div>
 
@@ -242,36 +242,32 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-2">
-                                        @can('view-users')
-                                        <a href="{{ route('users.show', $user) }}" 
-                                           class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-1.5 rounded-md transition-colors duration-150 ease-in-out" 
+                                        <a href="{{ route('users.show', $user) }}"
+                                           class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-1.5 rounded-md transition-colors duration-150 ease-in-out"
                                            title="View User">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        @endcan
-                                        
-                                        @can('edit-users')
-                                        <a href="{{ route('users.edit', $user) }}" 
-                                           class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-1.5 rounded-md transition-colors duration-150 ease-in-out" 
+
+                                        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
+                                        <a href="{{ route('users.edit', $user) }}"
+                                           class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-1.5 rounded-md transition-colors duration-150 ease-in-out"
                                            title="Edit User">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        @endcan
-                                        
-                                        @can('delete-users')
+
                                         @if(auth()->id() != $user->id)
                                         <form action="{{ route('users.destroy', $user) }}" method="POST" class="inline-block">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" 
-                                                    class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-1.5 rounded-md transition-colors duration-150 ease-in-out" 
-                                                    onclick="return confirm('Are you sure you want to delete this user?')" 
+                                            <button type="submit"
+                                                    class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-1.5 rounded-md transition-colors duration-150 ease-in-out"
+                                                    onclick="return confirm('Are you sure you want to delete this user?')"
                                                     title="Delete User">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
                                         @endif
-                                        @endcan
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -295,13 +291,13 @@
                                                 Clear Filters
                                             </a>
                                         @else
-                                            @can('create-users')
+                                            @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                                                 <a href="{{ route('users.create') }}"
                                                    class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                                     <i class="fas fa-plus mr-2"></i>
                                                     Create First User
                                                 </a>
-                                            @endcan
+                                            @endif
                                         @endif
                                     </div>
                                 </td>

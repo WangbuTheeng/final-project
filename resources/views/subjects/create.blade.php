@@ -51,6 +51,36 @@
         </div>
     @endif
 
+    <!-- Subject Preview -->
+    <div id="subject-preview" class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 hidden">
+        <div class="flex items-start space-x-3">
+            <div class="flex-shrink-0">
+                <i class="fas fa-eye text-blue-500 text-lg"></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="text-sm font-medium text-blue-900 mb-2">Subject Preview</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="text-blue-700 font-medium">Name:</span>
+                        <span id="preview-name" class="text-blue-900 ml-1">-</span>
+                    </div>
+                    <div>
+                        <span class="text-blue-700 font-medium">Code:</span>
+                        <span id="preview-code" class="text-blue-900 ml-1 font-mono">-</span>
+                    </div>
+                    <div>
+                        <span class="text-blue-700 font-medium">Class:</span>
+                        <span id="preview-class" class="text-blue-900 ml-1">-</span>
+                    </div>
+                    <div>
+                        <span class="text-blue-700 font-medium">Order:</span>
+                        <span id="preview-order" class="text-blue-900 ml-1">#-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Create Form -->
     <div class="bg-white shadow-sm rounded-lg border border-gray-200">
         <div class="px-6 py-4 border-b border-gray-200">
@@ -159,20 +189,30 @@
                     <label for="order_sequence" class="block text-sm font-medium text-gray-700 mb-2">
                         Order Sequence <span class="text-red-500">*</span>
                     </label>
-                    <input type="number"
-                           name="order_sequence"
-                           id="order_sequence"
-                           value="{{ old('order_sequence', $nextOrderSequence ?? 1) }}"
-                           min="1"
-                           max="100"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('order_sequence') border-red-300 @enderror"
-                           required>
+                    <div class="relative">
+                        <input type="number"
+                               name="order_sequence"
+                               id="order_sequence"
+                               value="{{ old('order_sequence', $nextOrderSequence ?? 1) }}"
+                               min="1"
+                               max="100"
+                               class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('order_sequence') border-red-300 @enderror"
+                               readonly
+                               required>
+                        <button type="button"
+                                id="toggle-manual-order"
+                                class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600"
+                                title="Click to manually edit order sequence">
+                            <i class="fas fa-lock text-sm"></i>
+                        </button>
+                    </div>
                     @error('order_sequence')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                     <div class="mt-1 text-sm text-gray-500">
-                        <p><strong>Must be unique within the class.</strong> Current suggestion: <span id="suggested-order">{{ $nextOrderSequence ?? 1 }}</span></p>
-                        <p class="text-green-600">✅ Auto-updates when you select a class</p>
+                        <p><strong>Auto-managed:</strong> Next available sequence is <span id="suggested-order" class="font-semibold text-green-600">{{ $nextOrderSequence ?? 1 }}</span></p>
+                        <p class="text-blue-600">🔒 Click the lock icon to manually edit if needed</p>
+                        <p id="manual-order-warning" class="text-amber-600 hidden">⚠️ Manual mode: Ensure the number is unique within this class</p>
                     </div>
                 </div>
 
@@ -507,10 +547,45 @@ document.addEventListener('DOMContentLoaded', function() {
     const orderSequenceInput = document.getElementById('order_sequence');
     const generateCodeBtn = document.getElementById('generate-code-btn');
     const suggestedOrderSpan = document.getElementById('suggested-order');
+    const toggleManualOrderBtn = document.getElementById('toggle-manual-order');
+    const manualOrderWarning = document.getElementById('manual-order-warning');
+    const subjectPreview = document.getElementById('subject-preview');
+    const previewName = document.getElementById('preview-name');
+    const previewCode = document.getElementById('preview-code');
+    const previewClass = document.getElementById('preview-class');
+    const previewOrder = document.getElementById('preview-order');
+    let isManualOrderMode = false;
 
     // Auto-uppercase the code field
     codeInput.addEventListener('input', function(e) {
         e.target.value = e.target.value.toUpperCase();
+    });
+
+    // Toggle manual order sequence mode
+    toggleManualOrderBtn.addEventListener('click', function() {
+        isManualOrderMode = !isManualOrderMode;
+
+        if (isManualOrderMode) {
+            orderSequenceInput.readOnly = false;
+            orderSequenceInput.focus();
+            toggleManualOrderBtn.innerHTML = '<i class="fas fa-unlock text-sm"></i>';
+            toggleManualOrderBtn.title = 'Click to return to automatic mode';
+            toggleManualOrderBtn.classList.remove('text-gray-400');
+            toggleManualOrderBtn.classList.add('text-amber-500');
+            manualOrderWarning.classList.remove('hidden');
+        } else {
+            orderSequenceInput.readOnly = true;
+            toggleManualOrderBtn.innerHTML = '<i class="fas fa-lock text-sm"></i>';
+            toggleManualOrderBtn.title = 'Click to manually edit order sequence';
+            toggleManualOrderBtn.classList.remove('text-amber-500');
+            toggleManualOrderBtn.classList.add('text-gray-400');
+            manualOrderWarning.classList.add('hidden');
+
+            // Reset to suggested order
+            if (classSelect.value) {
+                updateOrderSequence(classSelect.value);
+            }
+        }
     });
 
     // Update order sequence when class changes
@@ -518,29 +593,57 @@ document.addEventListener('DOMContentLoaded', function() {
         const classId = this.value;
 
         if (classId) {
+            updateOrderSequence(classId);
+            // Enable generate code button if name is also filled
+            updateGenerateCodeButton();
+        } else {
+            if (!isManualOrderMode) {
+                orderSequenceInput.value = 1;
+                suggestedOrderSpan.textContent = 1;
+            }
+            generateCodeBtn.disabled = true;
+        }
+        updatePreview();
+    });
+
+    // Function to update order sequence
+    function updateOrderSequence(classId) {
+        if (!isManualOrderMode) {
             // Get next order sequence
             fetch(`{{ route('subjects.next-order-sequence') }}?class_id=${classId}`)
                 .then(response => response.json())
                 .then(data => {
                     orderSequenceInput.value = data.order_sequence;
                     suggestedOrderSpan.textContent = data.order_sequence;
+                    updatePreview();
+                })
+                .catch(error => {
+                    console.error('Error fetching order sequence:', error);
+                    // Fallback to manual calculation
+                    orderSequenceInput.value = parseInt(suggestedOrderSpan.textContent) || 1;
+                });
+        } else {
+            // Just update the suggestion display
+            fetch(`{{ route('subjects.next-order-sequence') }}?class_id=${classId}`)
+                .then(response => response.json())
+                .then(data => {
+                    suggestedOrderSpan.textContent = data.order_sequence;
                 })
                 .catch(error => {
                     console.error('Error fetching order sequence:', error);
                 });
-
-            // Enable generate code button if name is also filled
-            updateGenerateCodeButton();
-        } else {
-            orderSequenceInput.value = 1;
-            suggestedOrderSpan.textContent = 1;
-            generateCodeBtn.disabled = true;
         }
-    });
+    }
 
     // Enable generate code button when name changes
     nameInput.addEventListener('input', function() {
         updateGenerateCodeButton();
+        updatePreview();
+    });
+
+    // Update preview when code changes
+    codeInput.addEventListener('input', function() {
+        updatePreview();
     });
 
     // Generate code button click
@@ -581,10 +684,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Update preview function
+    function updatePreview() {
+        const hasName = nameInput.value.trim() !== '';
+        const hasCode = codeInput.value.trim() !== '';
+        const hasClass = classSelect.value !== '';
+        const hasOrder = orderSequenceInput.value !== '';
+
+        if (hasName || hasCode || hasClass) {
+            subjectPreview.classList.remove('hidden');
+
+            previewName.textContent = nameInput.value.trim() || '-';
+            previewCode.textContent = codeInput.value.trim() || '-';
+            previewOrder.textContent = hasOrder ? `#${orderSequenceInput.value}` : '#-';
+
+            if (hasClass) {
+                const selectedOption = classSelect.options[classSelect.selectedIndex];
+                previewClass.textContent = selectedOption.text || '-';
+            } else {
+                previewClass.textContent = '-';
+            }
+        } else {
+            subjectPreview.classList.add('hidden');
+        }
+    }
+
     // Initialize on page load
     if (classSelect.value) {
         classSelect.dispatchEvent(new Event('change'));
     }
+    updatePreview();
 });
 
 // Learning objectives management

@@ -25,8 +25,10 @@ class RoleController extends Controller
      */
     public function index()
     {
-        // Check if user has permission to view roles
-        $this->authorize('view-roles');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to Roles.');
+        }
 
         $roles = Role::with('permissions')->orderBy('name')->paginate(15);
         return view('roles.index', compact('roles'));
@@ -39,8 +41,10 @@ class RoleController extends Controller
      */
     public function create()
     {
-        // Check if user has permission to create roles
-        $this->authorize('create-roles');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Roles.');
+        }
         
         $permissions = Permission::all();
         return view('roles.create', compact('permissions'));
@@ -54,8 +58,10 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        // Check if user has permission to create roles
-        $this->authorize('create-roles');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Roles.');
+        }
         
         $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:roles'],
@@ -77,8 +83,10 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
-        // Check if user has permission to view roles
-        $this->authorize('view-roles');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to view Role details.');
+        }
         
         $rolePermissions = $role->permissions;
         return view('roles.show', compact('role', 'rolePermissions'));
@@ -92,8 +100,10 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        // Check if user has permission to edit roles
-        $this->authorize('edit-roles');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to edit Roles.');
+        }
         
         $permissions = Permission::all();
         $rolePermissions = $role->permissions->pluck('id')->toArray();
@@ -110,8 +120,10 @@ class RoleController extends Controller
      */
     public function update(Request $request, Role $role)
     {
-        // Check if user has permission to edit roles
-        $this->authorize('edit-roles');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to update Roles.');
+        }
         
         $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:roles,name,' . $role->id],
@@ -135,8 +147,10 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
-        // Check if user has permission to delete roles
-        $this->authorize('delete-roles');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to delete Roles.');
+        }
         
         // Don't allow deletion of default roles
         if (in_array($role->name, ['Super Admin', 'Admin'])) {

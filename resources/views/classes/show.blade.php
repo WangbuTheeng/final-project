@@ -147,6 +147,12 @@
                                 <dt class="text-sm font-medium text-gray-500">Department</dt>
                                 <dd class="mt-1 text-sm text-gray-900">{{ $class->course->department->name }}</dd>
                             </div>
+                            @if($class->course->department->faculty)
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Faculty</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ $class->course->department->faculty->name }}</dd>
+                                </div>
+                            @endif
                         @endif
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Organization</dt>
@@ -182,6 +188,129 @@
                 </div>
             </div>
             @endif
+
+            <!-- Subjects Information -->
+            <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        Subjects ({{ $class->subjects->count() }})
+                    </h3>
+                    <div class="flex items-center space-x-3">
+                        <a href="{{ route('subjects.index', ['class_id' => $class->id]) }}"
+                           class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            <i class="fas fa-list mr-2"></i>
+                            View All Subjects
+                        </a>
+                        @can('manage-courses')
+                            <a href="{{ route('subjects.create', ['class_id' => $class->id]) }}"
+                               class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                <i class="fas fa-plus mr-2"></i>
+                                Add Subject
+                            </a>
+                        @endcan
+                    </div>
+                </div>
+                <div class="px-6 py-4">
+                    @if($class->subjects->count() > 0)
+                        <div class="space-y-4">
+                            @foreach($class->subjects as $subject)
+                                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1">
+                                            <div class="flex items-center space-x-3">
+                                                <h4 class="text-sm font-medium text-gray-900">
+                                                    {{ $subject->name }}
+                                                </h4>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                    {{ $subject->code }}
+                                                </span>
+                                                @if($subject->is_mandatory)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                        Mandatory
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        Optional
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            @if($subject->description)
+                                                <p class="mt-1 text-sm text-gray-600">{{ Str::limit($subject->description, 100) }}</p>
+                                            @endif
+                                            <div class="mt-2 flex items-center space-x-4 text-xs text-gray-500">
+                                                @if($subject->instructor)
+                                                    <span><i class="fas fa-user mr-1"></i>{{ $subject->instructor->name }}</span>
+                                                @endif
+                                                @if($subject->credit_weight)
+                                                    <span><i class="fas fa-star mr-1"></i>{{ $subject->credit_weight }} credits</span>
+                                                @endif
+                                                @if($subject->duration_hours)
+                                                    <span><i class="fas fa-clock mr-1"></i>{{ $subject->duration_hours }} hours</span>
+                                                @endif
+                                                <span><i class="fas fa-layer-group mr-1"></i>{{ ucfirst($subject->difficulty_level ?? 'Not set') }}</span>
+                                            </div>
+                                            @if($subject->full_marks_theory || $subject->full_marks_practical)
+                                                <div class="mt-2 flex items-center space-x-4 text-xs text-gray-500">
+                                                    @if($subject->full_marks_theory)
+                                                        <span><i class="fas fa-book mr-1"></i>Theory: {{ $subject->full_marks_theory }} marks</span>
+                                                    @endif
+                                                    @if($subject->full_marks_practical)
+                                                        <span><i class="fas fa-flask mr-1"></i>Practical: {{ $subject->full_marks_practical }} marks</span>
+                                                    @endif
+                                                    <span><i class="fas fa-trophy mr-1"></i>Total: {{ ($subject->full_marks_theory ?? 0) + ($subject->full_marks_practical ?? 0) }} marks</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="flex items-center space-x-2 ml-4">
+                                            @can('view-subjects')
+                                                <a href="{{ route('subjects.show', $subject) }}"
+                                                   class="text-primary-600 hover:text-primary-900 text-sm">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            @endcan
+                                            @can('manage-courses')
+                                                <a href="{{ route('subjects.edit', $subject) }}"
+                                                   class="text-yellow-600 hover:text-yellow-900 text-sm">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <!-- Subjects Summary -->
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-gray-900">{{ $class->subjects->where('is_mandatory', true)->count() }}</div>
+                                <div class="text-sm text-gray-500">Mandatory Subjects</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-gray-900">{{ $class->subjects->where('is_mandatory', false)->count() }}</div>
+                                <div class="text-sm text-gray-500">Optional Subjects</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-gray-900">{{ $class->subjects->sum('credit_weight') ?? 0 }}</div>
+                                <div class="text-sm text-gray-500">Total Credits</div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="text-center py-8">
+                            <i class="fas fa-book-open text-gray-400 text-3xl mb-4"></i>
+                            <h4 class="text-lg font-medium text-gray-900 mb-2">No Subjects Added</h4>
+                            <p class="text-sm text-gray-500 mb-4">This class doesn't have any subjects assigned yet.</p>
+                            @can('manage-courses')
+                                <a href="{{ route('subjects.create', ['class_id' => $class->id]) }}"
+                                   class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                    <i class="fas fa-plus mr-2"></i>
+                                    Add First Subject
+                                </a>
+                            @endcan
+                        </div>
+                    @endif
+                </div>
+            </div>
 
             <!-- Schedule Information -->
             @if($class->schedule && count($class->schedule) > 0)
@@ -365,6 +494,10 @@
                         <span class="text-sm font-medium text-gray-900">{{ $class->enrollments->count() }}</span>
                     </div>
                     <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">Total Subjects</span>
+                        <span class="text-sm font-medium text-gray-900">{{ $class->subjects->count() }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
                         <span class="text-sm text-gray-500">Capacity</span>
                         <span class="text-sm font-medium text-gray-900">{{ $class->capacity }}</span>
                     </div>
@@ -391,6 +524,11 @@
                     <h3 class="text-lg font-medium text-gray-900">Actions</h3>
                 </div>
                 <div class="px-6 py-4 space-y-3">
+                    <a href="{{ route('subjects.index', ['class_id' => $class->id]) }}"
+                       class="w-full inline-flex justify-center items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <i class="fas fa-book mr-2"></i>
+                        Manage Subjects
+                    </a>
                     <a href="{{ route('classes.edit', $class) }}"
                        class="w-full inline-flex justify-center items-center px-4 py-2 bg-yellow-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-700 focus:bg-yellow-700 active:bg-yellow-900 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition ease-in-out duration-150">
                         <i class="fas fa-edit mr-2"></i>

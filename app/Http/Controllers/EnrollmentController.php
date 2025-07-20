@@ -234,7 +234,6 @@ class EnrollmentController extends Controller
                 'student_id' => $request->student_id,
                 'class_id' => $request->class_id,
                 'academic_year_id' => $request->academic_year_id,
-                'semester' => $class->semester,
                 'enrollment_date' => $request->enrollment_date,
                 'status' => 'enrolled'
             ]);
@@ -345,7 +344,6 @@ class EnrollmentController extends Controller
                         'student_id' => $student->id,
                         'class_id' => $class->id,
                         'academic_year_id' => $request->academic_year_id,
-                        'semester' => $class->semester ?? 1,
                         'enrollment_date' => $request->enrollment_date,
                         'status' => 'enrolled'
                     ]);

@@ -33,9 +33,9 @@ class ExamController extends Controller
      */
     public function index(Request $request)
     {
-        // Allow both view-exams and manage-exams permissions
-        if (!auth()->user()->can('view-exams') && !auth()->user()->can('manage-exams')) {
-            abort(403, 'Unauthorized');
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to Exams.');
         }
 
         $query = Exam::with(['class.course', 'subject', 'academicYear', 'creator']);
@@ -95,7 +95,10 @@ class ExamController extends Controller
      */
     public function create(Request $request)
     {
-        $this->authorize('manage-exams');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Exams.');
+        }
 
         $academicYears = AcademicYear::active()->orderBy('name')->get();
         $classes = ClassSection::with(['course.faculty', 'academicYear'])
@@ -123,7 +126,10 @@ class ExamController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('manage-exams');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Exams.');
+        }
 
         // Get the selected class to determine if it's semester or year-based
         $class = ClassSection::with('course')->find($request->class_id);
@@ -279,9 +285,9 @@ class ExamController extends Controller
      */
     public function show(Exam $exam)
     {
-        // Allow both view-exams and manage-exams permissions
-        if (!auth()->user()->can('view-exams') && !auth()->user()->can('manage-exams')) {
-            abort(403, 'Unauthorized');
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to view Exam details.');
         }
 
         $exam->load(['class.course.faculty', 'subject', 'academicYear', 'creator', 'grades.student.user']);
@@ -307,7 +313,10 @@ class ExamController extends Controller
      */
     public function edit(Exam $exam)
     {
-        $this->authorize('manage-exams');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to edit Exams.');
+        }
 
         $exam->load(['class.course', 'subject', 'academicYear']);
 
@@ -333,7 +342,10 @@ class ExamController extends Controller
      */
     public function update(Request $request, Exam $exam)
     {
-        $this->authorize('manage-exams');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to update Exams.');
+        }
 
         // Get the selected class to determine organization type
         $selectedClass = ClassSection::find($request->class_id);
@@ -427,7 +439,10 @@ class ExamController extends Controller
      */
     public function destroy(Exam $exam)
     {
-        $this->authorize('manage-exams');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to delete Exams.');
+        }
 
         // Check if exam has grades
         if ($exam->grades()->count() > 0) {
@@ -450,7 +465,10 @@ class ExamController extends Controller
      */
     public function grades(Exam $exam)
     {
-        $this->authorize('manage-exams');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to manage Exam grades.');
+        }
 
         $exam->load(['class.course', 'subject', 'academicYear']);
 
@@ -462,9 +480,13 @@ class ExamController extends Controller
 
         // Filter by semester or year based on course type
         if ($exam->semester) {
-            $enrollments->where('semester', $exam->semester);
+            $enrollments->whereHas('class', function($q) use ($exam) {
+                $q->where('semester', $exam->semester);
+            });
         } elseif ($exam->year) {
-            $enrollments->where('year', $exam->year);
+            $enrollments->whereHas('class', function($q) use ($exam) {
+                $q->where('year', $exam->year);
+            });
         }
 
         $enrollments = $enrollments->orderBy('student_id')->get();
@@ -482,7 +504,10 @@ class ExamController extends Controller
      */
     public function storeGrades(Request $request, Exam $exam)
     {
-        $this->authorize('manage-exams');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to store Exam grades.');
+        }
 
         $request->validate([
             'grades' => ['required', 'array'],

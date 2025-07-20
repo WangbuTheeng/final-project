@@ -105,7 +105,7 @@
             </div>
             <div>
                 <p class="text-sm font-medium text-gray-500">Semester:</p>
-                <p class="mt-1 text-sm text-gray-900">{{ ucfirst($enrollment->semester) }}</p>
+                <p class="mt-1 text-sm text-gray-900">{{ $enrollment->semester ? ucfirst($enrollment->semester) : 'N/A' }}</p>
             </div>
         </div>
     </div>

@@ -569,8 +569,8 @@ Route::middleware(['auth'])->group(function () {
         });
     });
     
-    // Exam Management Routes (Admin/Examiner only)
-    Route::middleware(['permission:manage-exams'])->group(function () {
+    // Exam Management Routes - Allow Super Admin and Admin access
+    Route::middleware(['role:Super Admin|Admin'])->group(function () {
         Route::resource('exams', ExamController::class)->except(['index', 'show']);
         Route::get('exams/{exam}/grades', [ExamController::class, 'grades'])
             ->name('exams.grades');
@@ -584,14 +584,14 @@ Route::middleware(['auth'])->group(function () {
             ->name('exams.class-marks');
     });
 
-    // Exam View Routes (accessible by teachers and admins)
-    Route::middleware(['permission:view-exams|manage-exams'])->group(function () {
+    // Exam View Routes - Allow Super Admin, Admin, and Teacher access
+    Route::middleware(['role:Super Admin|Admin|Teacher'])->group(function () {
         Route::get('exams', [ExamController::class, 'index'])->name('exams.index');
         Route::get('exams/{exam}', [ExamController::class, 'show'])->name('exams.show');
     });
 
-    // Bulk Marks Entry Routes
-    Route::middleware(['permission:manage-exams'])->group(function () {
+    // Bulk Marks Entry Routes - Allow Super Admin and Admin access
+    Route::middleware(['role:Super Admin|Admin'])->group(function () {
         Route::get('bulk-marks', [BulkMarksController::class, 'index'])
             ->name('bulk-marks.index');
         Route::get('bulk-marks/create', [BulkMarksController::class, 'create'])
@@ -615,8 +615,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('grades/subjects/by-class', [GradeController::class, 'getSubjects'])
         ->name('grades.subjects.by-class');
 
-    // Marks Entry Routes
-    Route::middleware(['permission:manage-exams'])->group(function () {
+    // Marks Entry Routes - Allow Super Admin and Admin access
+    Route::middleware(['role:Super Admin|Admin'])->group(function () {
         Route::get('marks', [MarkController::class, 'index'])->name('marks.index');
         Route::post('marks/search', [MarkController::class, 'search'])->name('marks.search');
         // Redirect GET requests to marks/search back to marks index
@@ -628,8 +628,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('marks/exams-by-class', [MarkController::class, 'getExamsByClass'])->name('marks.exams-by-class');
     });
 
-    // Marksheet Generation Routes
-    Route::middleware(['permission:manage-exams'])->group(function () {
+    // Marksheet Generation Routes - Allow Super Admin and Admin access
+    Route::middleware(['role:Super Admin|Admin'])->group(function () {
         Route::get('marksheets', [MarksheetController::class, 'index'])->name('marksheets.index');
         Route::get('marksheets/exam/{exam}/student/{student}', [MarksheetController::class, 'generate'])->name('marksheets.generate');
         Route::get('marksheets/exam/{exam}/student/{student}/pdf', [MarksheetController::class, 'generatePdf'])->name('marksheets.generate-pdf');
@@ -637,8 +637,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('marksheets/students-by-exam', [MarksheetController::class, 'getStudentsByExam'])->name('marksheets.students-by-exam');
     });
 
-    // Result Management Routes
-    Route::middleware(['permission:manage-exams|view-exams|view-grades'])->group(function () {
+    // Result Management Routes - Allow Super Admin, Admin, and Teacher access
+    Route::middleware(['role:Super Admin|Admin|Teacher'])->group(function () {
         Route::get('results', [ResultController::class, 'index'])->name('results.index');
         Route::get('results/exam/{exam}/generate', [ResultController::class, 'generate'])->name('results.generate');
         Route::get('results/exam/{exam}/pdf', [ResultController::class, 'generatePdf'])->name('results.generate-pdf');
@@ -888,3 +888,5 @@ Route::get('/check-super-admin-access', function() {
         return 'Error: ' . $e->getMessage();
     }
 });
+
+

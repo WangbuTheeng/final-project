@@ -22,7 +22,10 @@ class MarkController extends Controller
      */
     public function index()
     {
-        $this->authorize('manage-exams');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to Marks management.');
+        }
 
         $academicYears = AcademicYear::active()->orderBy('name')->get();
         $courses = Course::with('faculty')->active()->orderBy('title')->get();
@@ -35,7 +38,10 @@ class MarkController extends Controller
      */
     public function search(Request $request)
     {
-        $this->authorize('manage-exams');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to search Marks.');
+        }
 
         $request->validate([
             'course_id' => 'required|exists:courses,id',
@@ -154,7 +160,10 @@ class MarkController extends Controller
      */
     public function storeBulk(Request $request)
     {
-        $this->authorize('manage-exams');
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to store Marks.');
+        }
 
         $request->validate([
             'exam_id' => 'required|exists:exams,id',

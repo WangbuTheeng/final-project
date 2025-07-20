@@ -236,71 +236,87 @@
                 </div>
             @endif
 
-            <div class="overflow-x-auto table-container">
-                <table class="min-w-full divide-y divide-gray-200">
+            <!-- Responsive Compact Table Design -->
+            <div class="hidden lg:block table-container no-scroll">
+                <!-- Desktop Compact Table -->
+                <table class="w-full divide-y divide-gray-200 compact-table">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Student
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Admission Number
+                            <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Admission
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Faculty/Department
+                            <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Faculty
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Location
+                            </th>
+                            <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 CGPA
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Admission Year
-                            </th>
-                            <th scope="col" class="relative px-6 py-3">
+                            <th scope="col" class="relative px-2 py-2">
                                 <span class="sr-only">Actions</span>
                             </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($students as $student)
-                            <tr class="table-row-hover transition-all duration-200">
-                                <td class="px-6 py-4 whitespace-nowrap">
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <!-- Student Info -->
+                                <td class="px-3 py-3">
                                     <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-12 w-12">
-                                            <div class="h-12 w-12 rounded-full avatar-gradient flex items-center justify-center shadow-lg">
-                                                <span class="text-white font-bold text-sm">
+                                        <div class="flex-shrink-0 h-8 w-8">
+                                            <div class="h-8 w-8 rounded-full avatar-gradient flex items-center justify-center">
+                                                <span class="text-white font-bold text-xs">
                                                     {{ substr($student->user->first_name, 0, 1) }}{{ substr($student->user->last_name, 0, 1) }}
                                                 </span>
                                             </div>
                                         </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">
-                                                {{ $student->user->name ?? $student->user->first_name . ' ' . $student->user->last_name }}
+                                        <div class="ml-3">
+                                            <div class="text-sm font-medium text-gray-900 truncate max-w-32">
+                                                {{ $student->user->first_name . ' ' . $student->user->last_name }}
                                             </div>
-                                            <div class="text-sm text-gray-500">{{ $student->user->email }}</div>
+                                            <div class="text-xs text-gray-500 truncate max-w-32">{{ $student->user->email }}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 font-mono">
+
+                                <!-- Admission Number -->
+                                <td class="px-2 py-3">
+                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800 font-mono">
                                         {{ $student->admission_number }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900 font-medium">{{ $student->faculty->name ?? 'Not assigned' }}</div>
-                                    <div class="text-sm text-gray-500">{{ $student->department->name ?? 'No department' }}</div>
+
+                                <!-- Faculty -->
+                                <td class="px-2 py-3">
+                                    <div class="text-sm text-gray-900 font-medium truncate max-w-24">{{ $student->faculty->name ?? 'Not assigned' }}</div>
+                                    <div class="text-xs text-gray-500 truncate max-w-24">{{ $student->department->name ?? 'No dept' }}</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex flex-col">
+
+                                <!-- Location -->
+                                <td class="px-2 py-3">
+                                    <div class="text-sm text-gray-900 truncate max-w-20">{{ $student->user->district ?? 'N/A' }}</div>
+                                    <div class="text-xs text-gray-500 truncate max-w-20">{{ $student->user->province ?? 'N/A' }}</div>
+                                </td>
+
+                                <!-- CGPA -->
+                                <td class="px-2 py-3">
+                                    <div class="text-center">
                                         <span class="text-sm font-bold {{ $student->cgpa >= 3.5 ? 'text-green-600' : ($student->cgpa >= 2.5 ? 'text-yellow-600' : 'text-red-600') }}">
                                             {{ number_format($student->cgpa, 2) }}
                                         </span>
-                                        <span class="text-xs text-gray-500">{{ $student->academic_standing }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+
+                                <!-- Status -->
+                                <td class="px-2 py-3">
                                     @php
                                         $statusColors = [
                                             'active' => 'bg-green-100 text-green-800',
@@ -311,45 +327,31 @@
                                         ];
                                         $statusColor = $statusColors[$student->status] ?? 'bg-gray-100 text-gray-800';
                                     @endphp
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium status-badge {{ $statusColor }}">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusColor }}">
                                         {{ ucfirst($student->status) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $student->academicYear->name ?? 'N/A' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex items-center space-x-2">
+
+                                <!-- Actions -->
+                                <td class="px-2 py-3">
+                                    <div class="flex items-center space-x-1">
                                         <a href="{{ route('students.show', $student) }}"
-                                           class="action-btn inline-flex items-center p-2 border border-transparent rounded-md text-primary-600 hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                                           class="inline-flex items-center p-1.5 border border-transparent rounded text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                            title="View Details">
-                                            <i class="fas fa-eye w-4 h-4"></i>
+                                            <i class="fas fa-eye w-3 h-3"></i>
                                         </a>
                                         @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                                         <a href="{{ route('students.edit', $student) }}"
-                                           class="action-btn inline-flex items-center p-2 border border-transparent rounded-md text-yellow-600 hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                                           class="inline-flex items-center p-1.5 border border-transparent rounded text-yellow-600 hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
                                            title="Edit">
-                                            <i class="fas fa-edit w-4 h-4"></i>
+                                            <i class="fas fa-edit w-3 h-3"></i>
                                         </a>
-                                        @if($student->status !== 'active')
-                                            <form method="POST" action="{{ route('students.destroy', $student) }}"
-                                                  class="inline" onsubmit="return confirm('Are you sure you want to delete this student?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                        class="action-btn inline-flex items-center p-2 border border-transparent rounded-md text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                                                        title="Delete">
-                                                    <i class="fas fa-trash w-4 h-4"></i>
-                                                </button>
-                                            </form>
-                                        @endif
                                         @endif
                                     </div>
-                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-12 text-center">
+                                <td colspan="7" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center">
                                         <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                                             <i class="fas fa-users text-gray-400 text-2xl"></i>
@@ -375,6 +377,108 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div class="lg:hidden space-y-4">
+                @forelse($students as $student)
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mobile-card">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full avatar-gradient flex items-center justify-center">
+                                        <span class="text-white font-bold text-sm">
+                                            {{ substr($student->user->first_name, 0, 1) }}{{ substr($student->user->last_name, 0, 1) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ $student->user->first_name . ' ' . $student->user->last_name }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">{{ $student->user->email }}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                @php
+                                    $statusColors = [
+                                        'active' => 'bg-green-100 text-green-800',
+                                        'graduated' => 'bg-blue-100 text-blue-800',
+                                        'suspended' => 'bg-red-100 text-red-800',
+                                        'withdrawn' => 'bg-gray-100 text-gray-800',
+                                        'deferred' => 'bg-yellow-100 text-yellow-800'
+                                    ];
+                                    $statusColor = $statusColors[$student->status] ?? 'bg-gray-100 text-gray-800';
+                                @endphp
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusColor }}">
+                                    {{ ucfirst($student->status) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <span class="text-gray-500">Admission:</span>
+                                <span class="font-mono text-gray-900">{{ $student->admission_number }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">CGPA:</span>
+                                <span class="font-bold {{ $student->cgpa >= 3.5 ? 'text-green-600' : ($student->cgpa >= 2.5 ? 'text-yellow-600' : 'text-red-600') }}">
+                                    {{ number_format($student->cgpa, 2) }}
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Faculty:</span>
+                                <span class="text-gray-900">{{ $student->faculty->name ?? 'Not assigned' }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Location:</span>
+                                <span class="text-gray-900">{{ $student->user->district ?? 'N/A' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 flex items-center justify-between">
+                            <div class="text-xs text-gray-500">
+                                Citizenship: {{ $student->user->citizenship_number ?? 'N/A' }}
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <a href="{{ route('students.show', $student) }}"
+                                   class="inline-flex items-center p-2 border border-transparent rounded text-blue-600 hover:bg-blue-50"
+                                   title="View Details">
+                                    <i class="fas fa-eye w-4 h-4"></i>
+                                </a>
+                                @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
+                                <a href="{{ route('students.edit', $student) }}"
+                                   class="inline-flex items-center p-2 border border-transparent rounded text-yellow-600 hover:bg-yellow-50"
+                                   title="Edit">
+                                    <i class="fas fa-edit w-4 h-4"></i>
+                                </a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-users text-gray-400 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No students found</h3>
+                        <p class="text-gray-500 mb-6">
+                            @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
+                                No students match the selected criteria. Try adjusting your filters or add a new student.
+                            @else
+                                No students match the selected criteria. Try adjusting your filters.
+                            @endif
+                        </p>
+                        @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
+                        <a href="{{ route('students.create') }}"
+                           class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add First Student
+                        </a>
+                        @endif
+                    </div>
+                @endforelse
             </div>
 
             <!-- Pagination -->
@@ -410,20 +514,34 @@
 
 @push('styles')
 <style>
-/* Custom hover effects for table rows */
-.table-row-hover:hover {
-    background-color: #f9fafb;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+/* Compact Table Styles */
+.compact-table {
+    font-size: 0.875rem;
 }
 
-/* Smooth transitions for action buttons */
-.action-btn {
-    transition: all 0.2s ease-in-out;
+.compact-table th {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.action-btn:hover {
-    transform: scale(1.05);
+.compact-table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+}
+
+/* Prevent horizontal scrolling */
+.no-scroll {
+    overflow-x: hidden;
+}
+
+/* Truncate text for compact display */
+.truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Custom gradient for avatars */
@@ -431,14 +549,64 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-/* Status badge animations */
-.status-badge {
-    animation: fadeIn 0.3s ease-in-out;
+/* Responsive table adjustments */
+@media (max-width: 1024px) {
+    .compact-table th,
+    .compact-table td {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.75rem;
+    }
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Mobile card hover effects */
+.mobile-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.mobile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Status badge styles */
+.status-badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Action button styles */
+.action-btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.action-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Compact spacing utilities */
+.space-compact > * + * {
+    margin-left: 0.25rem;
+}
+
+/* Table row hover effects */
+.table-row:hover {
+    background-color: #f8fafc;
+}
+
+/* Ensure table fits container */
+.table-container {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Hide scrollbars but keep functionality */
+.table-container::-webkit-scrollbar {
+    display: none;
+}
+
+.table-container {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 /* Custom scrollbar for table */

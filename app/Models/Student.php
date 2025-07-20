@@ -24,7 +24,31 @@ class Student extends Model
         'total_credits_earned',
         'expected_graduation_date',
         'actual_graduation_date',
-        'guardian_info'
+        'guardian_info',
+        // Nepal-specific academic fields
+        'previous_school_name',
+        'slc_see_board',
+        'slc_see_year',
+        'slc_see_marks',
+        'plus_two_board',
+        'plus_two_year',
+        'plus_two_marks',
+        'plus_two_stream',
+        // Enhanced family information
+        'father_name',
+        'father_occupation',
+        'mother_name',
+        'mother_occupation',
+        'guardian_citizenship_number',
+        'annual_family_income',
+        // Additional information
+        'scholarship_info',
+        'hostel_required',
+        'medical_info',
+        'entrance_exam_score',
+        'preferred_subjects',
+        'photo_path',
+        'document_paths'
     ];
 
     protected $casts = [
@@ -32,7 +56,11 @@ class Student extends Model
         'total_credits_earned' => 'integer',
         'expected_graduation_date' => 'date',
         'actual_graduation_date' => 'date',
-        'guardian_info' => 'array'
+        'guardian_info' => 'array',
+        'annual_family_income' => 'decimal:2',
+        'entrance_exam_score' => 'decimal:2',
+        'hostel_required' => 'boolean',
+        'document_paths' => 'array'
     ];
 
     protected $dates = [
@@ -140,7 +168,7 @@ class Student extends Model
     }
 
     /**
-     * Get current semester enrollments
+     * Get current academic year enrollments
      */
     public function currentEnrollments()
     {
@@ -151,13 +179,12 @@ class Student extends Model
     }
 
     /**
-     * Get enrollments for a specific academic year and semester
+     * Get enrollments for a specific academic year
      */
-    public function enrollmentsForSemester($academicYearId, $semester)
+    public function enrollmentsForAcademicYear($academicYearId)
     {
         return $this->enrollments()
-            ->where('academic_year_id', $academicYearId)
-            ->where('semester', $semester);
+            ->where('academic_year_id', $academicYearId);
     }
 
     /**
@@ -233,18 +260,18 @@ class Student extends Model
      * Legacy method for backward compatibility
      * @deprecated Use canEnrollInClass() instead
      */
-    public function canEnrollInCourse(ClassSection $class, $academicYearId, $semester = null)
+    public function canEnrollInCourse(ClassSection $class, $academicYearId)
     {
         $result = $this->canEnrollInClass($class, $academicYearId);
         return [$result->isValid(), $result->getErrors()];
     }
 
     /**
-     * Calculate current semester CGPA
+     * Calculate current academic year GPA
      */
-    public function calculateCurrentSemesterGPA($academicYearId, $semester)
+    public function calculateCurrentAcademicYearGPA($academicYearId)
     {
-        $enrollments = $this->enrollmentsForSemester($academicYearId, $semester)
+        $enrollments = $this->enrollmentsForAcademicYear($academicYearId)
             ->where('status', 'completed')
             ->with('class.course')
             ->get();

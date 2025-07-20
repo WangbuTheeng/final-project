@@ -28,7 +28,10 @@ class GradeController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('manage-grades');
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to Grades.');
+        }
 
         $query = Grade::with(['student.user', 'exam', 'subject', 'academicYear', 'grader']);
 
@@ -87,7 +90,10 @@ class GradeController extends Controller
      */
     public function create(Request $request)
     {
-        // $this->authorize('manage-grades'); // Temporarily disabled for testing
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to create Grades.');
+        }
 
         $academicYears = AcademicYear::active()->orderBy('name')->get();
         $classes = ClassSection::with(['course.faculty', 'academicYear'])
@@ -111,7 +117,10 @@ class GradeController extends Controller
      */
     public function store(Request $request)
     {
-        // $this->authorize('manage-grades'); // Temporarily disabled for testing
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to store Grades.');
+        }
 
         $request->validate([
             'student_id' => ['required', 'exists:students,id'],
@@ -188,7 +197,10 @@ class GradeController extends Controller
      */
     public function bulkEntry(Request $request)
     {
-        // $this->authorize('manage-grades'); // Temporarily disabled for testing
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to bulk Grade entry.');
+        }
 
         // Get filter options for the form
         $academicYears = AcademicYear::active()->orderBy('name')->get();
@@ -230,7 +242,9 @@ class GradeController extends Controller
             ->where('status', 'enrolled');
 
         if ($request->semester) {
-            $enrollments->where('semester', $request->semester);
+            $enrollments->whereHas('class', function($q) use ($request) {
+                $q->where('semester', $request->semester);
+            });
         }
 
         if ($request->year) {
@@ -265,7 +279,10 @@ class GradeController extends Controller
      */
     public function storeBulk(Request $request)
     {
-        // $this->authorize('manage-grades'); // Temporarily disabled for testing
+        // Check if user has Super Admin or Admin role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Unauthorized access to store bulk Grades.');
+        }
 
         $request->validate([
             'class_id' => ['required', 'exists:classes,id'],
@@ -367,7 +384,10 @@ class GradeController extends Controller
      */
     public function studentReport(Student $student)
     {
-        // $this->authorize('view-grades'); // Temporarily disabled for testing
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to view Grade reports.');
+        }
 
         $student->load(['user', 'department', 'academicYear']);
 
@@ -416,7 +436,10 @@ class GradeController extends Controller
      */
     public function show(Grade $grade)
     {
-        // $this->authorize('view-grades'); // Temporarily disabled for testing
+        // Check if user has Super Admin, Admin, or Teacher role
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Teacher')) {
+            abort(403, 'Unauthorized access to view Grade details.');
+        }
 
         $grade->load(['student.user', 'exam', 'subject', 'academicYear', 'grader']);
 

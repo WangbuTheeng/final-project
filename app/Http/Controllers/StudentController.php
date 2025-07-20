@@ -130,24 +130,76 @@ class StudentController extends Controller
             'phone' => 'nullable|string|max:20',
             'date_of_birth' => 'required|date|before:today',
             'gender' => 'required|in:male,female,other',
-            'address' => 'nullable|string',
 
-            // Student fields
+            // Nepal-specific user fields
+            'citizenship_number' => 'required|string|max:50|unique:users,citizenship_number',
+            'permanent_address' => 'required|string',
+            'temporary_address' => 'nullable|string',
+            'district' => 'required|string|max:100',
+            'province' => 'required|string|max:100',
+            'religion' => 'nullable|string|max:100',
+            'caste_ethnicity' => 'nullable|string|max:100',
+            'blood_group' => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
+
+            // Student academic fields
             'faculty_id' => 'required|exists:faculties,id',
             'department_id' => 'nullable|exists:departments,id',
             'academic_year_id' => 'required|exists:academic_years,id',
             'mode_of_entry' => 'required|in:entrance_exam,direct_entry,transfer',
-            
-            // Guardian information
+
+            // Academic background
+            'previous_school_name' => 'nullable|string|max:255',
+            'slc_see_board' => 'nullable|string|max:100',
+            'slc_see_year' => 'nullable|integer|min:2000|max:' . date('Y'),
+            'slc_see_marks' => 'nullable|string|max:50',
+            'plus_two_board' => 'nullable|string|max:100',
+            'plus_two_year' => 'nullable|integer|min:2000|max:' . date('Y'),
+            'plus_two_marks' => 'nullable|string|max:50',
+            'plus_two_stream' => 'nullable|in:Science,Management,Humanities,Technical,Other',
+            'entrance_exam_score' => 'nullable|numeric|min:0|max:100',
+
+            // Family information
+            'father_name' => 'nullable|string|max:255',
+            'father_occupation' => 'nullable|string|max:255',
+            'mother_name' => 'nullable|string|max:255',
+            'mother_occupation' => 'nullable|string|max:255',
+            'guardian_citizenship_number' => 'nullable|string|max:50',
+            'annual_family_income' => 'nullable|numeric|min:0',
+
+            // Additional information
+            'scholarship_info' => 'nullable|string',
+            'hostel_required' => 'nullable|boolean',
+            'medical_info' => 'nullable|string',
+            'preferred_subjects' => 'nullable|string',
+
+            // Guardian information (legacy)
             'guardian_name' => 'nullable|string|max:255',
             'guardian_phone' => 'nullable|string|max:20',
             'guardian_email' => 'nullable|email',
             'guardian_address' => 'nullable|string',
             'guardian_relationship' => 'nullable|string|max:100',
+
+            // File uploads
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'documents.*' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:5120',
         ]);
 
         try {
             DB::beginTransaction();
+
+            // Handle file uploads
+            $photoPath = null;
+            $documentPaths = [];
+
+            if ($request->hasFile('photo')) {
+                $photoPath = $request->file('photo')->store('student-photos', 'public');
+            }
+
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $document) {
+                    $documentPaths[] = $document->store('student-documents', 'public');
+                }
+            }
 
             // Create user account
             $user = User::create([
@@ -158,10 +210,19 @@ class StudentController extends Controller
                 'phone' => $request->phone,
                 'date_of_birth' => $request->date_of_birth,
                 'gender' => $request->gender,
-                'address' => $request->address,
                 'password' => Hash::make('password123'), // Default password
                 'role' => 'student',
-                'status' => 'active'
+                'status' => 'active',
+                // Nepal-specific fields
+                'citizenship_number' => $request->citizenship_number,
+                'permanent_address' => $request->permanent_address,
+                'temporary_address' => $request->temporary_address,
+                'district' => $request->district,
+                'province' => $request->province,
+                'religion' => $request->religion,
+                'caste_ethnicity' => $request->caste_ethnicity,
+                'blood_group' => $request->blood_group,
+                'country' => 'Nepal'
             ]);
 
             // Prepare guardian info
@@ -201,7 +262,32 @@ class StudentController extends Controller
                 'mode_of_entry' => $request->mode_of_entry,
                 'status' => 'active',
                 'expected_graduation_date' => $expectedGraduationDate,
-                'guardian_info' => $guardianInfo
+                'guardian_info' => $guardianInfo,
+                // Academic background
+                'previous_school_name' => $request->previous_school_name,
+                'slc_see_board' => $request->slc_see_board,
+                'slc_see_year' => $request->slc_see_year,
+                'slc_see_marks' => $request->slc_see_marks,
+                'plus_two_board' => $request->plus_two_board,
+                'plus_two_year' => $request->plus_two_year,
+                'plus_two_marks' => $request->plus_two_marks,
+                'plus_two_stream' => $request->plus_two_stream,
+                'entrance_exam_score' => $request->entrance_exam_score,
+                // Family information
+                'father_name' => $request->father_name,
+                'father_occupation' => $request->father_occupation,
+                'mother_name' => $request->mother_name,
+                'mother_occupation' => $request->mother_occupation,
+                'guardian_citizenship_number' => $request->guardian_citizenship_number,
+                'annual_family_income' => $request->annual_family_income,
+                // Additional information
+                'scholarship_info' => $request->scholarship_info,
+                'hostel_required' => $request->hostel_required ?? false,
+                'medical_info' => $request->medical_info,
+                'preferred_subjects' => $request->preferred_subjects,
+                // File paths
+                'photo_path' => $photoPath,
+                'document_paths' => $documentPaths
             ]);
 
             // Log activity
@@ -245,7 +331,7 @@ class StudentController extends Controller
 
         // Get current academic year enrollments
         $currentAcademicYear = AcademicYear::current();
-        $currentEnrollments = $student->enrollmentsForSemester($currentAcademicYear->id, 'first')
+        $currentEnrollments = $student->enrollmentsForAcademicYear($currentAcademicYear->id)
             ->with(['class.course', 'class.instructor.user'])
             ->get();
 
@@ -253,9 +339,9 @@ class StudentController extends Controller
         $academicHistory = Enrollment::where('student_id', $student->id)
             ->with(['class.course', 'academicYear'])
             ->orderBy('academic_year_id', 'desc')
-            ->orderBy('semester', 'desc')
+            ->orderBy('created_at', 'desc')
             ->get()
-            ->groupBy(['academic_year_id', 'semester']);
+            ->groupBy('academic_year_id');
 
         return view('students.show', compact('student', 'currentEnrollments', 'academicHistory'));
     }

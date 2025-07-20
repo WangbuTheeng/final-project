@@ -34,6 +34,16 @@ class User extends Authenticatable
         'role',
         'status',
         'last_login_at',
+        // Nepal-specific fields
+        'citizenship_number',
+        'permanent_address',
+        'temporary_address',
+        'district',
+        'province',
+        'religion',
+        'caste_ethnicity',
+        'blood_group',
+        'country',
     ];
 
     /**

@@ -96,7 +96,10 @@
         <div class="lg:col-span-2">
             <div class="bg-white shadow-sm rounded-lg border border-gray-200">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-900">Personal Information</h3>
+                    <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                        <i class="fas fa-user mr-3 text-blue-500"></i>
+                        Personal Information
+                    </h3>
                 </div>
                 <div class="p-6">
                     <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
@@ -124,9 +127,51 @@
                             <dt class="text-sm font-medium text-gray-500">Admission Number</dt>
                             <dd class="mt-1 text-sm text-gray-900 font-mono">{{ $student->admission_number }}</dd>
                         </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Citizenship Number</dt>
+                            <dd class="mt-1 text-sm text-gray-900 font-mono">{{ $student->user->citizenship_number ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Religion</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->user->religion ?? 'Not specified' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Caste/Ethnicity</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->user->caste_ethnicity ?? 'Not specified' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Blood Group</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->user->blood_group ?? 'Not specified' }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Address Information -->
+            <div class="bg-white shadow-sm rounded-lg border border-gray-200 mt-6">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                        <i class="fas fa-map-marker-alt mr-3 text-green-500"></i>
+                        Address Information
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                         <div class="sm:col-span-2">
-                            <dt class="text-sm font-medium text-gray-500">Address</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ $student->user->address ?? 'Not provided' }}</dd>
+                            <dt class="text-sm font-medium text-gray-500">Permanent Address</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->user->permanent_address ?? 'Not provided' }}</dd>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <dt class="text-sm font-medium text-gray-500">Temporary Address</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->user->temporary_address ?? 'Same as permanent' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">District</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->user->district ?? 'Not specified' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Province</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->user->province ?? 'Not specified' }}</dd>
                         </div>
                     </dl>
                 </div>
@@ -135,7 +180,10 @@
             <!-- Academic Information -->
             <div class="bg-white shadow-sm rounded-lg border border-gray-200 mt-6">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-900">Academic Information</h3>
+                    <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                        <i class="fas fa-graduation-cap mr-3 text-purple-500"></i>
+                        Academic Information
+                    </h3>
                 </div>
                 <div class="p-6">
                     <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
@@ -155,7 +203,14 @@
                             <dt class="text-sm font-medium text-gray-500">Mode of Entry</dt>
                             <dd class="mt-1 text-sm text-gray-900 uppercase">{{ str_replace('_', ' ', $student->mode_of_entry) }}</dd>
                         </div>
-
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Previous School</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->previous_school_name ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Entrance Exam Score</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->entrance_exam_score ? number_format($student->entrance_exam_score, 2) : 'N/A' }}</dd>
+                        </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Expected Graduation</dt>
                             <dd class="mt-1 text-sm text-gray-900">{{ $student->expected_graduation_date?->format('M Y') ?? 'Not calculated' }}</dd>
@@ -166,6 +221,120 @@
                             <dd class="mt-1 text-sm text-gray-900">{{ $student->actual_graduation_date->format('M d, Y') }}</dd>
                         </div>
                         @endif
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Academic Background -->
+            <div class="bg-white shadow-sm rounded-lg border border-gray-200 mt-6">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                        <i class="fas fa-certificate mr-3 text-indigo-500"></i>
+                        Academic Background
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">SLC/SEE Board</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->slc_see_board ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">SLC/SEE Year</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->slc_see_year ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">SLC/SEE Marks</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->slc_see_marks ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">+2 Board</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->plus_two_board ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">+2 Year</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->plus_two_year ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">+2 Marks</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->plus_two_marks ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">+2 Stream</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->plus_two_stream ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Preferred Subjects</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->preferred_subjects ?? 'Not specified' }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Family Information -->
+            <div class="bg-white shadow-sm rounded-lg border border-gray-200 mt-6">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                        <i class="fas fa-users mr-3 text-orange-500"></i>
+                        Family Information
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Father's Name</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->father_name ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Father's Occupation</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->father_occupation ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Mother's Name</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->mother_name ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Mother's Occupation</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->mother_occupation ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Guardian Citizenship No.</dt>
+                            <dd class="mt-1 text-sm text-gray-900 font-mono">{{ $student->guardian_citizenship_number ?? 'Not provided' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Annual Family Income</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->annual_family_income ? 'NPR ' . number_format($student->annual_family_income, 2) : 'Not provided' }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="bg-white shadow-sm rounded-lg border border-gray-200 mt-6">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                        <i class="fas fa-plus-circle mr-3 text-indigo-500"></i>
+                        Additional Information
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Hostel Required</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $student->hostel_required ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                    {{ $student->hostel_required ? 'Yes' : 'No' }}
+                                </span>
+                            </dd>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <dt class="text-sm font-medium text-gray-500">Scholarship Information</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->scholarship_info ?? 'No scholarship information' }}</dd>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <dt class="text-sm font-medium text-gray-500">Medical Information</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $student->medical_info ?? 'No medical information provided' }}</dd>
+                        </div>
                     </dl>
                 </div>
             </div>

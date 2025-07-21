@@ -23,6 +23,7 @@ return new class extends Migration
             $table->integer('year')->nullable(); // For yearly organization
             $table->integer('semester_period')->nullable(); // For semester organization
             $table->enum('course_type', ['core', 'elective', 'general'])->default('core');
+            $table->enum('examination_system', ['annual', 'semester'])->default('semester')->comment('Annual system (yearly exam) or Semester system (semester-wise exam)');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

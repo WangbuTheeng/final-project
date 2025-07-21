@@ -103,14 +103,89 @@
                     </div>
                 </div>
 
-                <div>
-                    <label for="enrollment_date" class="block text-sm font-medium text-gray-700">Enrollment Date <span class="text-red-600">*</span></label>
-                    <div class="mt-1">
-                        <input type="date" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" id="enrollment_date" name="enrollment_date"
-                               value="{{ old('enrollment_date', date('Y-m-d')) }}" required>
-                        @error('enrollment_date')
-                            <div class="text-sm text-red-600 mt-1">{{ $message }}</div>
-                        @enderror
+                <!-- Nepal-Specific Enrollment Fields -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
+                    <h4 class="text-sm font-medium text-blue-900 flex items-center">
+                        <i class="fas fa-flag mr-2"></i>
+                        Nepal University Enrollment Details
+                    </h4>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="enrollment_date" class="block text-sm font-medium text-gray-700">Enrollment Date <span class="text-red-600">*</span></label>
+                            <div class="mt-1">
+                                <input type="date" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" id="enrollment_date" name="enrollment_date"
+                                       value="{{ old('enrollment_date', date('Y-m-d')) }}" required>
+                                @error('enrollment_date')
+                                    <div class="text-sm text-red-600 mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="enrollment_type" class="block text-sm font-medium text-gray-700">Enrollment Type <span class="text-red-600">*</span></label>
+                            <div class="mt-1">
+                                <select name="enrollment_type" id="enrollment_type" required
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                    <option value="">Select Type</option>
+                                    <option value="regular" selected>Regular Enrollment</option>
+                                    <option value="late">Late Enrollment (+NPR 500)</option>
+                                    <option value="makeup">Makeup Enrollment</option>
+                                    <option value="readmission">Readmission</option>
+                                </select>
+                                @error('enrollment_type')
+                                    <div class="text-sm text-red-600 mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="payment_status" class="block text-sm font-medium text-gray-700">Payment Status <span class="text-red-600">*</span></label>
+                            <div class="mt-1">
+                                <select name="payment_status" id="payment_status" required
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                    <option value="">Select Status</option>
+                                    <option value="pending" selected>Pending Payment</option>
+                                    <option value="paid">Paid</option>
+                                    <option value="partial">Partial Payment</option>
+                                    <option value="waived">Fee Waived (Scholarship)</option>
+                                </select>
+                                @error('payment_status')
+                                    <div class="text-sm text-red-600 mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Semester Field (Dynamic based on course selection) -->
+                    <div id="semester_field" style="display: none;">
+                        <label for="semester" class="block text-sm font-medium text-gray-700">
+                            Semester <span class="text-red-600">*</span>
+                            <span class="text-xs text-gray-500">(Required for Semester System Courses)</span>
+                        </label>
+                        <div class="mt-1">
+                            <select name="semester" id="semester"
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                <option value="">Select Semester</option>
+                                <option value="first">First Semester (Shrawan - Poush)</option>
+                                <option value="second">Second Semester (Magh - Ashar)</option>
+                                <option value="summer">Summer Semester (Jestha - Ashar)</option>
+                            </select>
+                            @error('semester')
+                                <div class="text-sm text-red-600 mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Fee Information -->
+                    <div class="bg-white border border-gray-200 rounded p-3">
+                        <h5 class="text-xs font-medium text-gray-700 mb-2">Nepal University Fee Structure</h5>
+                        <div class="text-xs text-gray-600 space-y-1">
+                            <div>• Base Enrollment Fee: NPR 2,000</div>
+                            <div>• Per Credit Fee: NPR 150 per credit hour</div>
+                            <div>• Late Enrollment Penalty: NPR 500 (if applicable)</div>
+                            <div>• Attendance Requirement: 75% minimum</div>
+                        </div>
                     </div>
                 </div>
 
@@ -387,15 +462,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.courses && data.courses.length > 0) {
                         let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
                         data.courses.forEach(course => {
+                            const systemBadge = course.examination_system === 'annual' ?
+                                '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Annual</span>' :
+                                '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">Semester</span>';
+
                             html += `
                                 <div>
                                     <label class="inline-flex items-center">
                                         <input type="checkbox" class="form-checkbox h-5 w-5 text-primary-600 course-checkbox"
-                                               value="${course.id}" id="course_${course.id}">
+                                               value="${course.id}" id="course_${course.id}"
+                                               data-examination-system="${course.examination_system}">
                                         <span class="ml-2 text-sm text-gray-700">
-                                            <strong>${course.code}</strong> - ${course.title}
-                                            <br><span class="text-xs text-gray-500">${course.credit_units} credits | ${course.classes_count} class(es)</span>
-                                            <br><span class="text-xs text-gray-400">Enrollment: ${course.current_enrollment}/${course.total_capacity}</span>
+                                            <div class="flex items-center gap-2">
+                                                <strong>${course.code}</strong> - ${course.title}
+                                                ${systemBadge}
+                                            </div>
+                                            <div class="text-xs text-gray-500">${course.credit_units} credits | ${course.classes_count} class(es)</div>
+                                            <div class="text-xs text-gray-400">Enrollment: ${course.current_enrollment}/${course.total_capacity}</div>
                                         </span>
                                     </label>
                                 </div>
@@ -407,6 +490,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Add event listeners to checkboxes
                         document.querySelectorAll('.course-checkbox').forEach(checkbox => {
                             checkbox.addEventListener('change', function() {
+                                handleCourseSelection();
                                 loadClasses();
                                 validateForm();
                             });
@@ -802,6 +886,74 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
             alert('Error creating class. Please try again.');
         });
+    }
+
+    // Handle course selection and semester field visibility
+    function handleCourseSelection() {
+        const selectedCourses = document.querySelectorAll('.course-checkbox:checked');
+        const semesterField = document.getElementById('semester_field');
+        const semesterSelect = document.getElementById('semester');
+
+        let hasSemesterSystem = false;
+        let hasAnnualSystem = false;
+
+        // Check examination systems of selected courses
+        selectedCourses.forEach(checkbox => {
+            const examinationSystem = checkbox.dataset.examinationSystem;
+            if (examinationSystem === 'semester') {
+                hasSemesterSystem = true;
+            } else if (examinationSystem === 'annual') {
+                hasAnnualSystem = true;
+            }
+        });
+
+        // Show/hide semester field based on course selection
+        if (hasSemesterSystem && !hasAnnualSystem) {
+            // Only semester system courses selected
+            semesterField.style.display = 'block';
+            semesterSelect.required = true;
+        } else if (hasAnnualSystem && !hasSemesterSystem) {
+            // Only annual system courses selected
+            semesterField.style.display = 'none';
+            semesterSelect.required = false;
+            semesterSelect.value = '';
+        } else if (hasSemesterSystem && hasAnnualSystem) {
+            // Mixed systems - show warning and require semester
+            semesterField.style.display = 'block';
+            semesterSelect.required = true;
+
+            // Show warning about mixed systems
+            if (!document.getElementById('mixed_system_warning')) {
+                const warning = document.createElement('div');
+                warning.id = 'mixed_system_warning';
+                warning.className = 'bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4';
+                warning.innerHTML = `
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                <strong>Mixed Systems Selected:</strong> You have selected both Annual and Semester system courses.
+                                Semester field will be applied only to semester system courses.
+                            </p>
+                        </div>
+                    </div>
+                `;
+                semesterField.parentNode.insertBefore(warning, semesterField.nextSibling);
+            }
+        } else {
+            // No courses selected
+            semesterField.style.display = 'none';
+            semesterSelect.required = false;
+            semesterSelect.value = '';
+
+            // Remove warning if exists
+            const warning = document.getElementById('mixed_system_warning');
+            if (warning) {
+                warning.remove();
+            }
+        }
     }
 
     // Initial validation

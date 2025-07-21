@@ -199,12 +199,26 @@ class EnrollmentController extends Controller
     {
         $this->authorize('manage-enrollments');
 
-        $request->validate([
+        // Get the class and course to determine examination system
+        $class = \App\Models\Classes::findOrFail($request->class_id);
+        $course = $class->course;
+
+        // Dynamic validation based on examination system
+        $rules = [
             'student_id' => 'required|exists:students,id',
             'class_id' => 'required|exists:classes,id',
             'academic_year_id' => 'required|exists:academic_years,id',
-            'enrollment_date' => 'required|date'
-        ]);
+            'enrollment_date' => 'required|date',
+            'enrollment_type' => 'required|in:regular,late,makeup,readmission',
+            'payment_status' => 'required|in:pending,paid,partial,waived'
+        ];
+
+        // Only require semester for semester system courses
+        if ($course->examination_system === 'semester') {
+            $rules['semester'] = 'required|in:first,second,summer';
+        }
+
+        $request->validate($rules);
 
         try {
             DB::beginTransaction();
@@ -285,12 +299,16 @@ class EnrollmentController extends Controller
     {
         $this->authorize('manage-enrollments');
 
+        // Basic validation
         $request->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
             'faculty_id' => 'required|exists:faculties,id',
             'class_ids' => 'required|array',
             'class_ids.*' => 'exists:classes,id',
-            'enrollment_date' => 'required|date'
+            'enrollment_date' => 'required|date',
+            'enrollment_type' => 'required|in:regular,late,makeup,readmission',
+            'payment_status' => 'required|in:pending,paid,partial,waived',
+            'semester' => 'nullable|in:first,second,summer' // Optional for annual system
         ]);
 
         try {
@@ -328,25 +346,59 @@ class EnrollmentController extends Controller
                         break;
                     }
 
-                    // Check if student can enroll (basic validation)
-                    $existingEnrollment = Enrollment::where('student_id', $student->id)
+                    // Check examination system and semester requirement
+                    $course = $class->course;
+                    $semesterRequired = $course->examination_system === 'semester';
+
+                    if ($semesterRequired && !$request->semester) {
+                        $errors[] = "Semester is required for {$course->code} (semester system)";
+                        continue;
+                    }
+
+                    // Check if student can enroll (enhanced validation)
+                    $existingEnrollmentQuery = Enrollment::where('student_id', $student->id)
                         ->where('class_id', $classId)
                         ->where('academic_year_id', $request->academic_year_id)
-                        ->where('status', 'enrolled')
-                        ->exists();
+                        ->where('status', 'enrolled');
 
-                    if ($existingEnrollment) {
+                    // Add semester check for semester system courses
+                    if ($semesterRequired && $request->semester) {
+                        $existingEnrollmentQuery->where('semester', $request->semester);
+                    }
+
+                    if ($existingEnrollmentQuery->exists()) {
                         continue; // Skip if already enrolled
                     }
 
-                    // Create enrollment
-                    Enrollment::create([
+                    // Calculate fees based on Nepal system
+                    $baseFee = 2000; // NPR 2,000 base enrollment fee
+                    $creditFee = $course->credit_units * 150; // NPR 150 per credit
+                    $lateFee = $request->enrollment_type === 'late' ? 500 : 0; // NPR 500 late fee
+                    $totalFee = $baseFee + $creditFee + $lateFee;
+
+                    // Create enrollment with Nepal-specific fields
+                    $enrollmentData = [
                         'student_id' => $student->id,
                         'class_id' => $class->id,
                         'academic_year_id' => $request->academic_year_id,
                         'enrollment_date' => $request->enrollment_date,
+                        'enrollment_type' => $request->enrollment_type,
+                        'payment_status' => $request->payment_status,
+                        'credit_hours' => $course->credit_units,
+                        'base_fee' => $baseFee,
+                        'credit_fee' => $creditFee,
+                        'late_fee' => $lateFee,
+                        'total_fee' => $totalFee,
+                        'attendance_requirement' => 75.0, // Nepal standard 75%
                         'status' => 'enrolled'
-                    ]);
+                    ];
+
+                    // Add semester only for semester system courses
+                    if ($semesterRequired && $request->semester) {
+                        $enrollmentData['semester'] = $request->semester;
+                    }
+
+                    Enrollment::create($enrollmentData);
 
                     $enrollmentCount++;
                     $enrolledStudents[] = $student->admission_number;

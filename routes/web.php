@@ -384,7 +384,7 @@ Route::middleware(['auth'])->group(function () {
     // Placeholder routes for quick actions (to be implemented)
     Route::get('/courses', function() { return view('placeholder', ['title' => 'Courses', 'message' => 'Course management coming soon']); })->name('courses.index');
     Route::get('/courses/create', function() { return view('placeholder', ['title' => 'Create Course', 'message' => 'Course creation coming soon']); })->name('courses.create');
-    Route::get('/enrollments', function() { return view('placeholder', ['title' => 'Enrollments', 'message' => 'Enrollment management coming soon']); })->name('enrollments.index');
+    // Route::get('/enrollments', function() { return view('placeholder', ['title' => 'Enrollments', 'message' => 'Enrollment management coming soon']); })->name('enrollments.index'); // REMOVED - conflicts with actual enrollment routes
     Route::get('/settings', function() { return view('placeholder', ['title' => 'Settings', 'message' => 'System settings coming soon']); })->name('settings.index');
     Route::get('/import', function() { return view('placeholder', ['title' => 'Bulk Import', 'message' => 'Data import system coming soon']); })->name('import.index');
 

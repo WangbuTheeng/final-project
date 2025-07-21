@@ -24,7 +24,21 @@ class Enrollment extends Model
         'ca_score',
         'exam_score',
         'total_score',
-        'final_grade'
+        'final_grade',
+        // Nepal-specific fields
+        'credit_hours',
+        'fee_amount',
+        'enrollment_type',
+        'waitlist_position',
+        'prerequisites_met',
+        'fee_payment_date',
+        'payment_status',
+        'enrollment_period_start',
+        'enrollment_period_end',
+        'add_drop_deadline',
+        'attendance_required',
+        'minimum_attendance_percentage',
+        'enrollment_notes'
     ];
 
     protected $casts = [
@@ -33,12 +47,26 @@ class Enrollment extends Model
         'attendance_percentage' => 'decimal:2',
         'ca_score' => 'decimal:2',
         'exam_score' => 'decimal:2',
-        'total_score' => 'decimal:2'
+        'total_score' => 'decimal:2',
+        // Nepal-specific field casts
+        'credit_hours' => 'decimal:2',
+        'fee_amount' => 'decimal:2',
+        'prerequisites_met' => 'boolean',
+        'fee_payment_date' => 'date',
+        'enrollment_period_start' => 'date',
+        'enrollment_period_end' => 'date',
+        'add_drop_deadline' => 'date',
+        'attendance_required' => 'boolean',
+        'minimum_attendance_percentage' => 'decimal:2'
     ];
 
     protected $dates = [
         'enrollment_date',
         'drop_date',
+        'fee_payment_date',
+        'enrollment_period_start',
+        'enrollment_period_end',
+        'add_drop_deadline',
         'deleted_at'
     ];
 
@@ -331,12 +359,14 @@ class Enrollment extends Model
     public function getStatusBadgeColorAttribute()
     {
         return match($this->status) {
-            'enrolled' => 'success',
-            'completed' => 'primary',
-            'failed' => 'danger',
-            'dropped' => 'warning',
-            'pending_grade' => 'info', // Color for new status
-            default => 'secondary'
+            'enrolled' => 'bg-green-100 text-green-800',
+            'waitlisted' => 'bg-yellow-100 text-yellow-800',
+            'dropped' => 'bg-red-100 text-red-800',
+            'completed' => 'bg-blue-100 text-blue-800',
+            'failed' => 'bg-red-100 text-red-800',
+            'withdrawn' => 'bg-gray-100 text-gray-800',
+            'pending_grade' => 'bg-indigo-100 text-indigo-800',
+            default => 'bg-gray-100 text-gray-800'
         };
     }
 
@@ -354,6 +384,173 @@ class Enrollment extends Model
     public function getFormattedDropDateAttribute()
     {
         return $this->drop_date ? $this->drop_date->format('M d, Y') : null;
+    }
+
+    // ==================== NEPAL-SPECIFIC METHODS ====================
+
+    /**
+     * Check if enrollment is waitlisted
+     */
+    public function isWaitlisted()
+    {
+        return $this->status === 'waitlisted';
+    }
+
+    /**
+     * Check if enrollment fees are paid
+     */
+    public function isFeePaid()
+    {
+        return in_array($this->payment_status, ['paid', 'waived']);
+    }
+
+    /**
+     * Check if enrollment is within add/drop period (Nepal-specific)
+     */
+    public function isWithinAddDropPeriod()
+    {
+        if (!$this->add_drop_deadline) {
+            return false;
+        }
+
+        return now()->lte($this->add_drop_deadline) &&
+               in_array($this->status, ['enrolled', 'waitlisted']);
+    }
+
+    /**
+     * Check if prerequisites are met
+     */
+    public function hasPrerequisitesMet()
+    {
+        return $this->prerequisites_met;
+    }
+
+    /**
+     * Get enrollment type display name
+     */
+    public function getEnrollmentTypeDisplayAttribute()
+    {
+        return match($this->enrollment_type) {
+            'regular' => 'Regular Enrollment',
+            'late' => 'Late Enrollment',
+            'makeup' => 'Makeup Enrollment',
+            'readmission' => 'Readmission',
+            default => ucfirst($this->enrollment_type)
+        };
+    }
+
+    /**
+     * Get payment status display name
+     */
+    public function getPaymentStatusDisplayAttribute()
+    {
+        return match($this->payment_status) {
+            'pending' => 'Payment Pending',
+            'paid' => 'Paid',
+            'partial' => 'Partially Paid',
+            'waived' => 'Fee Waived',
+            default => ucfirst($this->payment_status)
+        };
+    }
+
+
+
+    /**
+     * Get payment status badge color for UI
+     */
+    public function getPaymentStatusBadgeColorAttribute()
+    {
+        return match($this->payment_status) {
+            'paid' => 'bg-green-100 text-green-800',
+            'waived' => 'bg-blue-100 text-blue-800',
+            'partial' => 'bg-yellow-100 text-yellow-800',
+            'pending' => 'bg-red-100 text-red-800',
+            default => 'bg-gray-100 text-gray-800'
+        };
+    }
+
+    /**
+     * Calculate total fee including late penalties
+     */
+    public function calculateTotalFee()
+    {
+        $baseFee = $this->fee_amount ?? 0;
+
+        // Add late enrollment penalty if applicable
+        if ($this->enrollment_type === 'late') {
+            // You can get this from enrollment period or set a default
+            $latePenalty = 500; // NPR 500 default late penalty
+            $baseFee += $latePenalty;
+        }
+
+        return $baseFee;
+    }
+
+    /**
+     * Check if student meets minimum attendance requirement
+     */
+    public function meetsAttendanceRequirement()
+    {
+        if (!$this->attendance_required) {
+            return true;
+        }
+
+        $requiredPercentage = $this->minimum_attendance_percentage ?? 75.00;
+        return $this->attendance_percentage >= $requiredPercentage;
+    }
+
+    /**
+     * Get attendance status for display
+     */
+    public function getAttendanceStatusAttribute()
+    {
+        if (!$this->attendance_required) {
+            return 'Not Required';
+        }
+
+        if ($this->attendance_percentage === null) {
+            return 'Not Recorded';
+        }
+
+        $required = $this->minimum_attendance_percentage ?? 75.00;
+
+        if ($this->attendance_percentage >= $required) {
+            return 'Satisfactory';
+        } else {
+            return 'Below Requirement';
+        }
+    }
+
+    /**
+     * Scope to get enrollments by payment status
+     */
+    public function scopeByPaymentStatus($query, $status)
+    {
+        return $query->where('payment_status', $status);
+    }
+
+    /**
+     * Scope to get waitlisted enrollments
+     */
+    public function scopeWaitlisted($query)
+    {
+        return $query->where('status', 'waitlisted');
+    }
+
+    /**
+     * Scope to get enrollments by enrollment type
+     */
+    public function scopeByEnrollmentType($query, $type)
+    {
+        return $query->where('enrollment_type', $type);
+    }
+
+    /**
+     * Scope to get enrollments with unpaid fees
+     */
+    public function scopeUnpaidFees($query)
+    {
+        return $query->whereIn('payment_status', ['pending', 'partial']);
     }
 
     /**

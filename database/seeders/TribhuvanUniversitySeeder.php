@@ -184,6 +184,7 @@ class TribhuvanUniversitySeeder extends Seeder
                 'organization_type' => 'yearly',
                 'year' => 4,
                 'course_type' => 'core',
+                'examination_system' => 'annual', // Traditional annual system
                 'is_active' => true,
             ],
             [
@@ -195,6 +196,7 @@ class TribhuvanUniversitySeeder extends Seeder
                 'organization_type' => 'yearly',
                 'year' => 4,
                 'course_type' => 'core',
+                'examination_system' => 'annual', // Traditional annual system
                 'is_active' => true,
             ],
             // Humanities Faculty Courses
@@ -207,6 +209,7 @@ class TribhuvanUniversitySeeder extends Seeder
                 'organization_type' => 'semester',
                 'semester_period' => 8,
                 'course_type' => 'core',
+                'examination_system' => 'semester', // Modern semester system
                 'is_active' => true,
             ],
             [
@@ -218,6 +221,7 @@ class TribhuvanUniversitySeeder extends Seeder
                 'organization_type' => 'yearly',
                 'year' => 4,
                 'course_type' => 'core',
+                'examination_system' => 'annual', // Traditional annual system
                 'is_active' => true,
             ],
             // Science Faculty Courses
@@ -230,6 +234,7 @@ class TribhuvanUniversitySeeder extends Seeder
                 'organization_type' => 'semester',
                 'semester_period' => 8,
                 'course_type' => 'core',
+                'examination_system' => 'semester', // Modern semester system
                 'is_active' => true,
             ],
         ];

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
             $table->foreignId('class_id')->constrained('classes')->onDelete('cascade');
             $table->foreignId('academic_year_id')->constrained('academic_years')->onDelete('cascade');
-            $table->enum('semester', ['first', 'second']);
+            $table->enum('semester', ['first', 'second'])->nullable(); // Nullable for annual system courses
             $table->enum('status', ['enrolled', 'dropped', 'completed', 'failed'])->default('enrolled');
             $table->date('enrollment_date');
             $table->date('drop_date')->nullable();

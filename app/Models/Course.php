@@ -21,6 +21,7 @@ class Course extends Model
         'year',
         'semester_period',
         'course_type',
+        'examination_system',
         'is_active'
     ];
 

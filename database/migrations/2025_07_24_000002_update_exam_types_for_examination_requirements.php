@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 use App\Models\ExamType;
 
 return new class extends Migration
@@ -12,8 +13,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Clear existing exam types
-        ExamType::query()->delete();
+        // Check if exam_types table exists before trying to delete
+        if (Schema::hasTable('exam_types')) {
+            // Clear existing exam types
+            try {
+                ExamType::query()->delete();
+            } catch (\Exception $e) {
+                // If model doesn't work, try direct DB query
+                DB::table('exam_types')->delete();
+            }
+        }
         
         // Insert new exam types according to examination requirements
         $examTypes = [
@@ -107,8 +116,19 @@ return new class extends Migration
             ]
         ];
 
-        foreach ($examTypes as $examType) {
-            ExamType::create($examType);
+        // Only insert if exam_types table exists
+        if (Schema::hasTable('exam_types')) {
+            foreach ($examTypes as $examType) {
+                try {
+                    ExamType::create($examType);
+                } catch (\Exception $e) {
+                    // If model doesn't work, try direct DB insert
+                    DB::table('exam_types')->insert(array_merge($examType, [
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]));
+                }
+            }
         }
     }
 
@@ -117,7 +137,14 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Delete the new exam types
-        ExamType::query()->delete();
+        // Delete the new exam types only if table exists
+        if (Schema::hasTable('exam_types')) {
+            try {
+                ExamType::query()->delete();
+            } catch (\Exception $e) {
+                // If model doesn't work, try direct DB query
+                DB::table('exam_types')->delete();
+            }
+        }
     }
 };

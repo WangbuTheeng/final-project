@@ -13,8 +13,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Delete existing exam types (this respects foreign key constraints)
-        ExamType::query()->delete();
+        // Check if exam_types table exists before trying to delete
+        if (Schema::hasTable('exam_types')) {
+            // Delete existing exam types (this respects foreign key constraints)
+            try {
+                ExamType::query()->delete();
+            } catch (\Exception $e) {
+                // If model doesn't work, try direct DB query
+                DB::table('exam_types')->delete();
+            }
+        }
 
         $examTypes = [
             [
@@ -107,8 +115,19 @@ return new class extends Migration
             ]
         ];
 
-        foreach ($examTypes as $examType) {
-            ExamType::create($examType);
+        // Only insert if exam_types table exists
+        if (Schema::hasTable('exam_types')) {
+            foreach ($examTypes as $examType) {
+                try {
+                    ExamType::create($examType);
+                } catch (\Exception $e) {
+                    // If model doesn't work, try direct DB insert
+                    DB::table('exam_types')->insert(array_merge($examType, [
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]));
+                }
+            }
         }
     }
 
@@ -117,7 +136,14 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Delete exam types (respects foreign key constraints)
-        ExamType::query()->delete();
+        // Delete exam types only if table exists
+        if (Schema::hasTable('exam_types')) {
+            try {
+                ExamType::query()->delete();
+            } catch (\Exception $e) {
+                // If model doesn't work, try direct DB query
+                DB::table('exam_types')->delete();
+            }
+        }
     }
 };

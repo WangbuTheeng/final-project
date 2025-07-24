@@ -55,10 +55,25 @@ return new class extends Migration
             }
         }
 
+        // Fix exam_types table if it exists but migration is not recorded
+        if (Schema::hasTable('exam_types')) {
+            $migrationExists = DB::table('migrations')
+                ->where('migration', '2025_07_23_000001_create_exam_types_table')
+                ->exists();
+
+            if (!$migrationExists) {
+                DB::table('migrations')->insert([
+                    'migration' => '2025_07_23_000001_create_exam_types_table',
+                    'batch' => DB::table('migrations')->max('batch') + 1
+                ]);
+            }
+        }
+
         // Ensure all required tables exist with proper structure
         $this->ensureGradeScalesTable();
         $this->ensureGradingSystemsTable();
         $this->ensureCollegeSettingsTable();
+        $this->ensureExamTypesTable();
     }
 
     /**
@@ -133,6 +148,31 @@ return new class extends Migration
                 if (!Schema::hasColumn('college_settings', 'show_college_logo')) {
                     $table->boolean('show_college_logo')->default(true);
                 }
+            });
+        }
+    }
+
+    /**
+     * Ensure exam_types table exists
+     */
+    private function ensureExamTypesTable(): void
+    {
+        if (!Schema::hasTable('exam_types')) {
+            Schema::create('exam_types', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('code')->unique();
+                $table->text('description')->nullable();
+                $table->enum('education_level', ['school', 'college', 'both'])->default('both');
+                $table->enum('assessment_category', ['internal', 'external', 'both'])->default('internal');
+                $table->decimal('default_weightage', 5, 2)->default(0);
+                $table->integer('default_duration_minutes')->default(60);
+                $table->boolean('is_active')->default(true);
+                $table->integer('order_sequence')->default(0);
+                $table->timestamps();
+
+                $table->index(['education_level', 'is_active']);
+                $table->index(['assessment_category', 'is_active']);
             });
         }
     }

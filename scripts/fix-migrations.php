@@ -52,7 +52,8 @@ try {
     $problematicTables = [
         'grade_scales' => '2024_01_20_000003_create_grade_scales_table',
         'grading_systems' => '2024_01_20_000002_create_grading_systems_table',
-        'college_settings' => '2024_01_20_000001_create_college_settings_table'
+        'college_settings' => '2024_01_20_000001_create_college_settings_table',
+        'exam_types' => '2025_07_23_000001_create_exam_types_table'
     ];
     
     echo "🔍 Checking problematic tables...\n";

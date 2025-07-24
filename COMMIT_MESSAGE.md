@@ -17,6 +17,11 @@
 - **Cause**: Collection `each()` method doesn't persist modifications
 - **Fix**: Changed to `map()` method for proper rank assignment
 
+### 4. Exam Types Table Missing
+- **Error**: `SQLSTATE[42S02]: Base table or view not found: 1146 Table 'exam_types' doesn't exist`
+- **Cause**: Migration trying to use ExamType model before table exists
+- **Fix**: Added table existence checks in exam type migrations
+
 ## 🔧 Changes Made
 
 ### Migration Files Modified:
@@ -34,15 +39,27 @@
    - Fixed ranking assignment in `getResultData()` method
    - Changed from `each()` to `map()` for proper data persistence
 
+4. **`database/migrations/2025_01_24_000001_update_exam_types_for_new_system.php`**
+   - Added table existence check before using ExamType model
+   - Added try-catch blocks for safe model operations
+   - Added fallback to direct DB operations
+
+5. **`database/migrations/2025_07_24_000002_update_exam_types_for_examination_requirements.php`**
+   - Added table existence check before using ExamType model
+   - Added try-catch blocks for safe model operations
+   - Added fallback to direct DB operations
+
 ### New Files Added:
 1. **`database/migrations/2025_01_24_000000_fix_migration_conflicts.php`**
    - Comprehensive migration fix for orphaned tables
-   - Handles grade_scales, grading_systems, and college_settings tables
+   - Handles grade_scales, grading_systems, college_settings, and exam_types tables
    - Fixes foreign key constraint issues in fees table
+   - Creates missing tables with proper structure
 
 2. **`scripts/fix-migrations.php`**
    - Automated migration diagnostic and fix script
    - Checks for orphaned tables (exist but not recorded)
+   - Includes exam_types table in problematic tables list
    - Provides detailed status reporting
 
 3. **`MIGRATION_FIX_GUIDE.md`**
@@ -96,7 +113,10 @@ php artisan migrate
 ### Modified:
 - `database/migrations/2024_01_20_000003_create_grade_scales_table.php`
 - `database/migrations/2025_06_17_000000_update_fees_table_structure.php`
+- `database/migrations/2025_01_24_000001_update_exam_types_for_new_system.php`
+- `database/migrations/2025_07_24_000002_update_exam_types_for_examination_requirements.php`
 - `app/Http/Controllers/ResultController.php`
+- `scripts/fix-migrations.php`
 
 ### Added:
 - `database/migrations/2025_01_24_000000_fix_migration_conflicts.php`

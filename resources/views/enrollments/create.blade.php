@@ -513,13 +513,24 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadFaculties() {
         if (!academicYearSelect.value) return;
 
-        fetch(`/api/faculties?academic_year_id=${academicYearSelect.value}`)
+        fetch(`/ajax/faculties?academic_year_id=${academicYearSelect.value}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 facultySelect.innerHTML = '<option value="">Select Faculty</option>';
-                data.forEach(faculty => {
-                    facultySelect.innerHTML += `<option value="${faculty.id}">${faculty.name}</option>`;
-                });
+                if (data.faculties) {
+                    data.faculties.forEach(faculty => {
+                        facultySelect.innerHTML += `<option value="${faculty.id}">${faculty.name}</option>`;
+                    });
+                } else if (Array.isArray(data)) {
+                    data.forEach(faculty => {
+                        facultySelect.innerHTML += `<option value="${faculty.id}">${faculty.name}</option>`;
+                    });
+                }
                 facultySelect.disabled = false;
             })
             .catch(error => console.error('Error loading faculties:', error));
@@ -528,13 +539,24 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadStudents() {
         if (!facultySelect.value) return;
 
-        fetch(`/api/students?faculty_id=${facultySelect.value}&academic_year_id=${academicYearSelect.value}`)
+        fetch(`/ajax/students?faculty_id=${facultySelect.value}&academic_year_id=${academicYearSelect.value}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 studentSelect.innerHTML = '<option value="">Select Student</option>';
-                data.forEach(student => {
-                    studentSelect.innerHTML += `<option value="${student.id}" data-name="${student.user.first_name} ${student.user.last_name}" data-admission="${student.admission_number}" data-cgpa="${student.cgpa || 'N/A'}">${student.user.first_name} ${student.user.last_name} (${student.admission_number})</option>`;
-                });
+                const students = data.students || data;
+                if (Array.isArray(students)) {
+                    students.forEach(student => {
+                        const firstName = student.user?.first_name || student.user?.name?.split(' ')[0] || '';
+                        const lastName = student.user?.last_name || student.user?.name?.split(' ').slice(1).join(' ') || '';
+                        const fullName = student.user?.name || `${firstName} ${lastName}`.trim();
+                        studentSelect.innerHTML += `<option value="${student.id}" data-name="${fullName}" data-admission="${student.admission_number}" data-cgpa="${student.cgpa || 'N/A'}">${fullName} (${student.admission_number})</option>`;
+                    });
+                }
                 studentSelect.disabled = false;
             })
             .catch(error => console.error('Error loading students:', error));
@@ -544,28 +566,36 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!facultySelect.value) return;
 
         // Build query parameters
-        let params = `faculty_id=${facultySelect.value}`;
-        if (semesterSelect.value && !document.getElementById('semester_field').style.display === 'none') {
+        let params = `faculty_id=${facultySelect.value}&academic_year_id=${academicYearSelect.value}`;
+        if (semesterSelect.value && document.getElementById('semester_field').style.display !== 'none') {
             params += `&semester=${semesterSelect.value}`;
         }
 
-        fetch(`/api/courses-by-faculty?${params}`)
+        fetch(`/ajax/courses/by-faculty?${params}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 courseSelect.innerHTML = '<option value="">Select Course</option>';
-                data.forEach(course => {
-                    const systemBadge = course.examination_system === 'annual' ?
-                        '<span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Annual</span>' :
-                        '<span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Semester</span>';
+                const courses = data.courses || data;
+                if (Array.isArray(courses)) {
+                    courses.forEach(course => {
+                        const systemBadge = course.examination_system === 'annual' ?
+                            '<span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Annual</span>' :
+                            '<span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Semester</span>';
 
-                    courseSelect.innerHTML += `<option value="${course.id}"
-                        data-code="${course.code}"
-                        data-credits="${course.credit_hours}"
-                        data-system="${course.examination_system}"
-                        data-prerequisites="${course.prerequisites || 'None'}">
-                        ${course.code} - ${course.name} (${course.examination_system.toUpperCase()})
-                    </option>`;
-                });
+                        courseSelect.innerHTML += `<option value="${course.id}"
+                            data-code="${course.code}"
+                            data-credits="${course.credit_units || course.credit_hours}"
+                            data-system="${course.examination_system}"
+                            data-prerequisites="${course.prerequisites || 'None'}">
+                            ${course.code} - ${course.title || course.name} (${(course.examination_system || 'semester').toUpperCase()})
+                        </option>`;
+                    });
+                }
                 courseSelect.disabled = false;
             })
             .catch(error => console.error('Error loading courses:', error));
@@ -583,14 +613,23 @@ document.addEventListener('DOMContentLoaded', function() {
             params += `&semester=${semesterSelect.value}`;
         }
 
-        fetch(`/api/classes/by-course?${params}`)
+        fetch(`/ajax/classes/by-course?${params}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 classSelect.innerHTML = '<option value="">Select Class Section</option>';
-                data.forEach(classSection => {
-                    const available = classSection.capacity - classSection.enrolled_count;
-                    classSelect.innerHTML += `<option value="${classSection.id}" data-capacity="${available}" data-total="${classSection.capacity}">${classSection.name} (${available}/${classSection.capacity} available)</option>`;
-                });
+                const classes = data.classes || data;
+                if (Array.isArray(classes)) {
+                    classes.forEach(classSection => {
+                        const available = classSection.available_slots || (classSection.capacity - (classSection.enrolled_count || classSection.current_enrollment || 0));
+                        const total = classSection.capacity;
+                        classSelect.innerHTML += `<option value="${classSection.id}" data-capacity="${available}" data-total="${total}">${classSection.name} (${available}/${total} available)</option>`;
+                    });
+                }
                 classSelect.disabled = false;
             })
             .catch(error => console.error('Error loading classes:', error));

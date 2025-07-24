@@ -143,29 +143,29 @@
         </div>
 
         @if($courses->count() > 0)
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto compact-table">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Course
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Faculty
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Department
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Details
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Classes
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status
                             </th>
-                            <th scope="col" class="relative px-6 py-3">
+                            <th scope="col" class="relative px-3 py-2">
                                 <span class="sr-only">Actions</span>
                             </th>
                         </tr>
@@ -173,49 +173,49 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($courses as $course)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-3 py-2 whitespace-nowrap">
                                     <div>
                                         <div class="flex items-center">
                                             <div class="text-sm font-medium text-gray-900">
-                                                {{ $course->title }}
+                                                {{ Str::limit($course->title, 30) }}
                                             </div>
-                                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                                 {{ $course->code }}
                                             </span>
                                         </div>
                                         @if($course->description)
-                                            <div class="text-sm text-gray-500 truncate max-w-xs">
-                                                {{ Str::limit($course->description, 50) }}
+                                            <div class="text-xs text-gray-500 truncate max-w-xs">
+                                                {{ Str::limit($course->description, 40) }}
                                             </div>
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-3 py-2 whitespace-nowrap">
                                     @if($course->faculty)
                                         <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-8 w-8">
-                                                <div class="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
+                                            <div class="flex-shrink-0 h-6 w-6">
+                                                <div class="h-6 w-6 rounded-full bg-primary-100 flex items-center justify-center">
                                                     <span class="text-xs font-medium text-primary-700">
                                                         {{ $course->faculty->code }}
                                                     </span>
                                                 </div>
                                             </div>
-                                            <div class="ml-3">
+                                            <div class="ml-2">
                                                 <div class="text-sm font-medium text-gray-900">
-                                                    {{ $course->faculty->name }}
+                                                    {{ Str::limit($course->faculty->name, 20) }}
                                                 </div>
                                             </div>
                                         </div>
                                     @else
                                         <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-8 w-8">
-                                                <div class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                            <div class="flex-shrink-0 h-6 w-6">
+                                                <div class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center">
                                                     <span class="text-xs font-medium text-gray-500">
                                                         N/A
                                                     </span>
                                                 </div>
                                             </div>
-                                            <div class="ml-3">
+                                            <div class="ml-2">
                                                 <div class="text-sm font-medium text-gray-500">
                                                     No Faculty
                                                 </div>
@@ -223,83 +223,77 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
                                     @if($course->department)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                             {{ $course->department->code }}
                                         </span>
-                                        <div class="text-xs text-gray-500 mt-1">{{ $course->department->name }}</div>
+                                        <div class="text-xs text-gray-500 mt-1">{{ Str::limit($course->department->name, 15) }}</div>
                                     @else
-                                        <span class="text-gray-400 italic">No department</span>
+                                        <span class="text-gray-400 italic text-xs">No department</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                     <div class="space-y-1">
                                         <div class="flex items-center">
-                                            <i class="fas fa-cog text-gray-400 mr-2"></i>
-                                            <span class="capitalize">{{ $course->organization_type ?? 'yearly' }} Based</span>
+                                            <i class="fas fa-cog text-gray-400 mr-1 w-3"></i>
+                                            <span class="capitalize">{{ $course->organization_type ?? 'yearly' }}</span>
                                         </div>
                                         @if(($course->organization_type ?? 'yearly') === 'yearly')
                                             @if($course->year)
                                                 <div class="flex items-center">
-                                                    <i class="fas fa-graduation-cap text-gray-400 mr-2"></i>
-                                                    <span>{{ $course->year }}{{ $course->year == 1 ? 'st' : ($course->year == 2 ? 'nd' : ($course->year == 3 ? 'rd' : 'th')) }} Year</span>
-                                                </div>
-                                            @endif
-                                            @if($course->semester)
-                                                <div class="flex items-center">
-                                                    <i class="fas fa-calendar text-gray-400 mr-2"></i>
-                                                    <span>{{ ucfirst($course->semester) }} Semester</span>
+                                                    <i class="fas fa-graduation-cap text-gray-400 mr-1 w-3"></i>
+                                                    <span>{{ $course->year }}{{ $course->year == 1 ? 'st' : ($course->year == 2 ? 'nd' : ($course->year == 3 ? 'rd' : 'th')) }} Yr</span>
                                                 </div>
                                             @endif
                                         @else
                                             @if($course->semester_period)
                                                 <div class="flex items-center">
-                                                    <i class="fas fa-calendar text-gray-400 mr-2"></i>
-                                                    <span>Semester {{ $course->semester_period }}</span>
+                                                    <i class="fas fa-calendar text-gray-400 mr-1 w-3"></i>
+                                                    <span>Sem {{ $course->semester_period }}</span>
                                                 </div>
                                             @endif
                                         @endif
                                         <div class="flex items-center">
-                                            <i class="fas fa-star text-gray-400 mr-2"></i>
+                                            <i class="fas fa-star text-gray-400 mr-1 w-3"></i>
                                             <span>{{ $course->credit_units }} units</span>
                                         </div>
                                         <div class="flex items-center">
-                                            <i class="fas fa-tag text-gray-400 mr-2"></i>
+                                            <i class="fas fa-tag text-gray-400 mr-1 w-3"></i>
                                             <span class="capitalize">{{ $course->course_type }}</span>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                        {{ $course->classes_count }} classes
+                                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                        {{ $course->classes_count }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-3 py-2 whitespace-nowrap">
                                     @if($course->is_active)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                             <i class="fas fa-check-circle mr-1"></i>
                                             Active
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                             <i class="fas fa-times-circle mr-1"></i>
                                             Inactive
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex items-center justify-end space-x-2">
+                                <td class="px-3 py-2 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex items-center justify-end space-x-1">
                                         <a href="{{ route('courses.show', $course) }}"
-                                           class="text-primary-600 hover:text-primary-900 transition-colors duration-200"
+                                           class="text-primary-600 hover:text-primary-900 transition-colors duration-200 p-1"
                                            title="View Details">
-                                            <i class="fas fa-eye"></i>
+                                            <i class="fas fa-eye text-xs"></i>
                                         </a>
                                         @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                                         <a href="{{ route('courses.edit', $course) }}"
-                                           class="text-yellow-600 hover:text-yellow-900 transition-colors duration-200"
+                                           class="text-yellow-600 hover:text-yellow-900 transition-colors duration-200 p-1"
                                            title="Edit Course">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="fas fa-edit text-xs"></i>
                                         </a>
                                         <form action="{{ route('courses.destroy', $course) }}"
                                               method="POST"
@@ -308,9 +302,9 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                    class="text-red-600 hover:text-red-900 transition-colors duration-200"
+                                                    class="text-red-600 hover:text-red-900 transition-colors duration-200 p-1"
                                                     title="Delete Course">
-                                                <i class="fas fa-trash"></i>
+                                                <i class="fas fa-trash text-xs"></i>
                                             </button>
                                         </form>
                                         @endif

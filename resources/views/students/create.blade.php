@@ -185,17 +185,72 @@
                         @enderror
                     </div>
 
+                    <!-- Identification Requirement Notice -->
+                    @error('identification')
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-exclamation-triangle text-red-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-red-700">{{ $message }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @enderror
+
                     <!-- Citizenship Number -->
                     <div>
                         <label for="citizenship_number" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-id-card text-gray-400 mr-2"></i>Citizenship Number *
+                            <i class="fas fa-id-card text-gray-400 mr-2"></i>Citizenship Number
+                            <span class="text-xs text-gray-500">(Optional for international students)</span>
                         </label>
-                        <input type="text" name="citizenship_number" id="citizenship_number" required
+                        <input type="text" name="citizenship_number" id="citizenship_number"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors @error('citizenship_number') border-red-500 @enderror"
-                               placeholder="Enter citizenship number" value="{{ old('citizenship_number') }}">
+                               placeholder="Enter citizenship number (leave blank if not available)" value="{{ old('citizenship_number') }}">
+                        <p class="mt-1 text-xs text-gray-500">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            For Nepali citizens, enter citizenship number. International students can leave this blank.
+                        </p>
                         @error('citizenship_number')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
+                    </div>
+
+                    <!-- Alternative ID (for students without citizenship) -->
+                    <div>
+                        <label for="alternative_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-passport text-gray-400 mr-2"></i>Alternative ID
+                            <span class="text-xs text-gray-500">(For students without citizenship number)</span>
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <select name="alternative_id_type" id="alternative_id_type"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors @error('alternative_id_type') border-red-500 @enderror">
+                                    <option value="">Select ID Type</option>
+                                    <option value="passport" {{ old('alternative_id_type') == 'passport' ? 'selected' : '' }}>Passport</option>
+                                    <option value="national_id" {{ old('alternative_id_type') == 'national_id' ? 'selected' : '' }}>National ID</option>
+                                    <option value="driving_license" {{ old('alternative_id_type') == 'driving_license' ? 'selected' : '' }}>Driving License</option>
+                                    <option value="student_visa" {{ old('alternative_id_type') == 'student_visa' ? 'selected' : '' }}>Student Visa</option>
+                                    <option value="other" {{ old('alternative_id_type') == 'other' ? 'selected' : '' }}>Other</option>
+                                </select>
+                                @error('alternative_id_type')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <input type="text" name="alternative_id_number" id="alternative_id_number"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors @error('alternative_id_number') border-red-500 @enderror"
+                                       placeholder="Enter ID number" value="{{ old('alternative_id_number') }}">
+                                @error('alternative_id_number')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Provide any valid government-issued ID if citizenship number is not available.
+                        </p>
                     </div>
 
                     <!-- Religion -->
@@ -1013,6 +1068,44 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Error saving draft. Please try again.');
         });
     };
+
+    // Citizenship and Alternative ID interaction
+    const citizenshipInput = document.getElementById('citizenship_number');
+    const alternativeIdType = document.getElementById('alternative_id_type');
+    const alternativeIdNumber = document.getElementById('alternative_id_number');
+
+    function updateIdFieldsState() {
+        const hasCitizenship = citizenshipInput.value.trim() !== '';
+        const hasAlternativeId = alternativeIdType.value !== '' && alternativeIdNumber.value.trim() !== '';
+
+        // If citizenship is filled, make alternative ID optional
+        if (hasCitizenship) {
+            alternativeIdType.style.opacity = '0.6';
+            alternativeIdNumber.style.opacity = '0.6';
+            alternativeIdType.parentElement.parentElement.querySelector('label').style.opacity = '0.6';
+        } else {
+            alternativeIdType.style.opacity = '1';
+            alternativeIdNumber.style.opacity = '1';
+            alternativeIdType.parentElement.parentElement.querySelector('label').style.opacity = '1';
+        }
+
+        // If alternative ID is filled, make citizenship optional
+        if (hasAlternativeId) {
+            citizenshipInput.style.opacity = '0.6';
+            citizenshipInput.parentElement.querySelector('label').style.opacity = '0.6';
+        } else {
+            citizenshipInput.style.opacity = '1';
+            citizenshipInput.parentElement.querySelector('label').style.opacity = '1';
+        }
+    }
+
+    // Add event listeners for ID fields
+    citizenshipInput.addEventListener('input', updateIdFieldsState);
+    alternativeIdType.addEventListener('change', updateIdFieldsState);
+    alternativeIdNumber.addEventListener('input', updateIdFieldsState);
+
+    // Initialize state
+    updateIdFieldsState();
 
     // Form submission with loading state
     const form = document.querySelector('form');

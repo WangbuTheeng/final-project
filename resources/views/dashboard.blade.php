@@ -543,7 +543,7 @@
         @if($role === 'Examiner' || $role === 'Super Admin')
             <!-- Schedule Exam -->
             @can('create-exams')
-            <a href="{{ route('exams.create') }}" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-warning-200 text-center">
+            <a href="{{ route('examinations.create') }}" class="group relative bg-white rounded-xl shadow-soft hover:shadow-large transition-all duration-300 p-4 border border-gray-100 hover:border-warning-200 text-center">
                 <div class="w-12 h-12 bg-gradient-to-br from-warning-500 to-warning-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
                     <i class="fas fa-calendar-plus text-white text-lg"></i>
                 </div>
@@ -1277,7 +1277,7 @@
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                 <div class="space-y-3">
                     @can('manage-exams')
-                        <a href="{{ route('exams.create') }}" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                        <a href="{{ route('examinations.create') }}" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200">
                             <div class="p-2 rounded-lg" style="background-color: rgba(55, 162, 188, 0.1);">
                                 <i class="fas fa-plus text-sm" style="color: #37a2bc;"></i>
                             </div>

@@ -28,7 +28,7 @@ class ReportsController extends Controller
     public function index()
     {
         // Check if user has any report permissions
-        if (!auth()->user()->hasRole(['Super Admin', 'Admin']) &&
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') &&
             !auth()->user()->can('view-reports') &&
             !auth()->user()->can('view-financial-reports')) {
             abort(403, 'Unauthorized access to reports.');
@@ -52,7 +52,7 @@ class ReportsController extends Controller
     public function studentReports(Request $request)
     {
         // Check if user has permission to view reports
-        if (!auth()->user()->hasRole(['Super Admin', 'Admin']) &&
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') &&
             !auth()->user()->can('view-reports')) {
             abort(403, 'Unauthorized access to student reports.');
         }
@@ -125,7 +125,7 @@ class ReportsController extends Controller
     public function academicReports(Request $request)
     {
         // Check if user has permission to view reports
-        if (!auth()->user()->hasRole(['Super Admin', 'Admin']) &&
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') &&
             !auth()->user()->can('view-reports')) {
             abort(403, 'Unauthorized access to academic reports.');
         }
@@ -172,7 +172,7 @@ class ReportsController extends Controller
     public function teacherReports(Request $request)
     {
         // Check if user has permission to view reports
-        if (!auth()->user()->hasRole(['Super Admin', 'Admin']) &&
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') &&
             !auth()->user()->can('view-reports')) {
             abort(403, 'Unauthorized access to teacher reports.');
         }
@@ -308,7 +308,7 @@ class ReportsController extends Controller
     public function exportStudents(Request $request)
     {
         // Check if user has permission to view reports
-        if (!auth()->user()->hasRole(['Super Admin', 'Admin']) &&
+        if (!auth()->user()->hasRole('Super Admin') && !auth()->user()->hasRole('Admin') &&
             !auth()->user()->can('view-reports')) {
             abort(403, 'Unauthorized access to export reports.');
         }

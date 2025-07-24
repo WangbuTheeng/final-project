@@ -11,13 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('grade_scales', function (Blueprint $table) {
-            // Drop the unique constraint on grade_letter
-            $table->dropUnique(['grade_letter']);
-            
-            // Add a composite unique constraint for grade_letter within a grading system
-            $table->unique(['grading_system_id', 'grade_letter'], 'grade_scales_system_letter_unique');
-        });
+        try {
+            Schema::table('grade_scales', function (Blueprint $table) {
+                // Try to drop the unique constraint on grade_letter if it exists
+                try {
+                    $table->dropUnique(['grade_letter']);
+                } catch (\Exception $e) {
+                    // Index doesn't exist, continue
+                }
+
+                // Add a composite unique constraint for grade_letter within a grading system
+                $table->unique(['grading_system_id', 'grade_letter'], 'grade_scales_system_letter_unique');
+            });
+        } catch (\Exception $e) {
+            // If the migration fails, log it but don't stop the process
+            \Log::warning('Grade scales migration warning: ' . $e->getMessage());
+        }
     }
 
     /**

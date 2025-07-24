@@ -26,12 +26,12 @@ class CourseController extends Controller
             abort(403, 'Unauthorized access to Courses.');
         }
 
-        $query = Course::with(['faculty', 'department'])
+        $query = Course::with(['department.faculty', 'department'])
             ->withCount('classes');
 
         // Filter by faculty
         if ($request->filled('faculty_id')) {
-            $query->where('faculty_id', $request->faculty_id);
+            $query->byFaculty($request->faculty_id);
         }
 
         // Filter by department

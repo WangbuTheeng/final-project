@@ -36,6 +36,8 @@ class User extends Authenticatable
         'last_login_at',
         // Nepal-specific fields
         'citizenship_number',
+        'alternative_id_type',
+        'alternative_id_number',
         'permanent_address',
         'temporary_address',
         'district',

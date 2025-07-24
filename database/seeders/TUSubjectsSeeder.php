@@ -14,8 +14,14 @@ class TUSubjectsSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get instructors
-        $instructors = User::where('role', 'instructor')->get();
+        // Get instructors (faculty role)
+        $instructors = User::where('role', 'faculty')->get();
+
+        // If no faculty users exist, skip seeding subjects
+        if ($instructors->isEmpty()) {
+            $this->command->warn('No faculty users found. Skipping subject seeding.');
+            return;
+        }
         
         // BCA 1st Semester Subjects
         $bcaFirstSem = ClassSection::where('name', 'BCA 1st Semester')->first();
@@ -102,7 +108,13 @@ class TUSubjectsSeeder extends Seeder
                     'Apply theoretical knowledge',
                     'Develop practical skills'
                 ];
-                Subject::create($subjectData);
+                Subject::updateOrCreate(
+                    [
+                        'code' => $subjectData['code'],
+                        'class_id' => $subjectData['class_id']
+                    ],
+                    $subjectData
+                );
             }
         }
 
@@ -191,7 +203,13 @@ class TUSubjectsSeeder extends Seeder
                     'Implement practical solutions',
                     'Analyze complex problems'
                 ];
-                Subject::create($subjectData);
+                Subject::updateOrCreate(
+                    [
+                        'code' => $subjectData['code'],
+                        'class_id' => $subjectData['class_id']
+                    ],
+                    $subjectData
+                );
             }
         }
 
@@ -274,7 +292,13 @@ class TUSubjectsSeeder extends Seeder
                     'Apply management principles',
                     'Develop analytical skills'
                 ];
-                Subject::create($subjectData);
+                Subject::updateOrCreate(
+                    [
+                        'code' => $subjectData['code'],
+                        'class_id' => $subjectData['class_id']
+                    ],
+                    $subjectData
+                );
             }
         }
 

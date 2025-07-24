@@ -205,6 +205,66 @@ class MarksheetController extends Controller
     }
 
     /**
+     * Preview all students' marksheets at once
+     */
+    public function bulkPreview(Request $request, Exam $exam)
+    {
+        $this->authorize('manage-exams');
+
+        // Get all students who have marks in this exam
+        $studentsWithMarks = Mark::where('exam_id', $exam->id)
+            ->with('student.user')
+            ->distinct('student_id')
+            ->get()
+            ->pluck('student')
+            ->unique('id');
+
+        if ($studentsWithMarks->isEmpty()) {
+            return redirect()->back()->with('error', 'No marks found for any students in this exam.');
+        }
+
+        // Generate marksheet data for all students
+        $marksheetData = [];
+        $collegeSettings = CollegeSetting::getSettings();
+        $gradingSystem = $exam->getEffectiveGradingSystem();
+
+        foreach ($studentsWithMarks as $student) {
+            $marks = Mark::with(['subject', 'exam'])
+                ->where('exam_id', $exam->id)
+                ->where('student_id', $student->id)
+                ->get();
+
+            if ($marks->isNotEmpty()) {
+                // Calculate totals and grades
+                $totalObtained = $marks->sum('obtained_marks');
+                $totalMaximum = $marks->sum('total_marks');
+                $overallPercentage = $totalMaximum > 0 ? ($totalObtained / $totalMaximum) * 100 : 0;
+
+                // Get grade using the exam's grading system
+                $overallGrade = $exam->getGradeByPercentage($overallPercentage);
+                $gpa = $overallGrade ? $overallGrade->grade_point : 0;
+
+                // Determine result status
+                $passPercentage = CollegeSetting::getPassPercentage();
+                $resultStatus = $overallPercentage >= $passPercentage ? 'PASS' : 'FAIL';
+
+                $marksheetData[] = [
+                    'student' => $student,
+                    'marks' => $marks,
+                    'totalObtained' => $totalObtained,
+                    'totalMaximum' => $totalMaximum,
+                    'overallPercentage' => $overallPercentage,
+                    'overallGrade' => $overallGrade,
+                    'gpa' => $gpa,
+                    'resultStatus' => $resultStatus,
+                ];
+            }
+        }
+
+        return view('marksheets.bulk-preview', compact('exam', 'marksheetData', 'collegeSettings', 'gradingSystem'));
+    }
+
+    /**
      * Get students by exam (AJAX)
      */
     public function getStudentsByExam(Request $request)

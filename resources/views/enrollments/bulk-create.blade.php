@@ -103,6 +103,8 @@
                     </div>
                 </div>
 
+
+
                 <!-- Nepal-Specific Enrollment Fields -->
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
                     <h4 class="text-sm font-medium text-blue-900 flex items-center">
@@ -157,23 +159,13 @@
                         </div>
                     </div>
 
-                    <!-- Semester Field (Dynamic based on course selection) -->
-                    <div id="semester_field" style="display: none;">
-                        <label for="semester" class="block text-sm font-medium text-gray-700">
-                            Semester <span class="text-red-600">*</span>
-                            <span class="text-xs text-gray-500">(Required for Semester System Courses)</span>
-                        </label>
-                        <div class="mt-1">
-                            <select name="semester" id="semester"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
-                                <option value="">Select Semester</option>
-                                <option value="first">First Semester (Shrawan - Poush)</option>
-                                <option value="second">Second Semester (Magh - Ashar)</option>
-                                <option value="summer">Summer Semester (Jestha - Ashar)</option>
-                            </select>
-                            @error('semester')
-                                <div class="text-sm text-red-600 mt-1">{{ $message }}</div>
-                            @enderror
+                    <!-- Note about Examination Systems -->
+                    <div class="bg-gray-50 border border-gray-200 rounded p-3">
+                        <h5 class="text-xs font-medium text-gray-700 mb-2">📚 Nepal University System Information</h5>
+                        <div class="text-xs text-gray-600 space-y-1">
+                            <div>• <strong>Annual System:</strong> BBS, BBA, BSW (yearly enrollment and examination)</div>
+                            <div>• <strong>Semester System:</strong> BCA, BSC-CSIT (semester-wise enrollment and examination)</div>
+                            <div>• Both systems supported in bulk enrollment</div>
                         </div>
                     </div>
 
@@ -409,12 +401,15 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
     const facultySelect = document.getElementById('faculty_id');
     const academicYearSelect = document.getElementById('academic_year_id');
     const coursesContainer = document.getElementById('coursesContainer');
     const classesContainer = document.getElementById('classesContainer');
     const studentsPreview = document.getElementById('studentsPreview');
     const submitBtn = document.getElementById('submitBtn');
+
+
 
     // Add Course/Class form elements
     const addCourseBtn = document.getElementById('addCourseBtn');
@@ -430,14 +425,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const facultyId = facultySelect.value;
         const academicYearId = academicYearSelect.value;
 
-        console.log('Loading courses for faculty:', facultyId, 'academic year:', academicYearId);
-
         if (facultyId && academicYearId) {
             // Show loading
             coursesContainer.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-primary-500 text-2xl"></i><p class="text-gray-500 mt-2">Loading courses...</p></div>';
 
-            const url = `/api/courses?faculty_id=${facultyId}&academic_year_id=${academicYearId}`;
-            console.log('Fetching courses from URL:', url);
+            const url = `/api/courses-by-faculty?faculty_id=${facultyId}&academic_year_id=${academicYearId}`;
 
             // Fetch courses using the correct endpoint
             fetch(url, {
@@ -451,14 +443,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 credentials: 'same-origin'
             })
                 .then(response => {
-                    console.log('Courses response status:', response.status);
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Courses data:', data);
                     if (data.courses && data.courses.length > 0) {
                         let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
                         data.courses.forEach(course => {
@@ -490,7 +480,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Add event listeners to checkboxes
                         document.querySelectorAll('.course-checkbox').forEach(checkbox => {
                             checkbox.addEventListener('change', function() {
-                                handleCourseSelection();
                                 loadClasses();
                                 validateForm();
                             });
@@ -591,7 +580,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const academicYearId = academicYearSelect.value;
         const selectedClasses = Array.from(document.querySelectorAll('.class-checkbox:checked')).map(cb => cb.value);
 
-        console.log('Loading students for faculty:', facultyId, 'academic year:', academicYearId, 'classes:', selectedClasses);
+
 
         if (facultyId && academicYearId) {
             // Show loading
@@ -792,7 +781,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Save course via AJAX
-        fetch('/api/courses/create', {
+        fetch('/api/courses', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -888,73 +877,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handle course selection and semester field visibility
-    function handleCourseSelection() {
-        const selectedCourses = document.querySelectorAll('.course-checkbox:checked');
-        const semesterField = document.getElementById('semester_field');
-        const semesterSelect = document.getElementById('semester');
 
-        let hasSemesterSystem = false;
-        let hasAnnualSystem = false;
-
-        // Check examination systems of selected courses
-        selectedCourses.forEach(checkbox => {
-            const examinationSystem = checkbox.dataset.examinationSystem;
-            if (examinationSystem === 'semester') {
-                hasSemesterSystem = true;
-            } else if (examinationSystem === 'annual') {
-                hasAnnualSystem = true;
-            }
-        });
-
-        // Show/hide semester field based on course selection
-        if (hasSemesterSystem && !hasAnnualSystem) {
-            // Only semester system courses selected
-            semesterField.style.display = 'block';
-            semesterSelect.required = true;
-        } else if (hasAnnualSystem && !hasSemesterSystem) {
-            // Only annual system courses selected
-            semesterField.style.display = 'none';
-            semesterSelect.required = false;
-            semesterSelect.value = '';
-        } else if (hasSemesterSystem && hasAnnualSystem) {
-            // Mixed systems - show warning and require semester
-            semesterField.style.display = 'block';
-            semesterSelect.required = true;
-
-            // Show warning about mixed systems
-            if (!document.getElementById('mixed_system_warning')) {
-                const warning = document.createElement('div');
-                warning.id = 'mixed_system_warning';
-                warning.className = 'bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4';
-                warning.innerHTML = `
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-yellow-700">
-                                <strong>Mixed Systems Selected:</strong> You have selected both Annual and Semester system courses.
-                                Semester field will be applied only to semester system courses.
-                            </p>
-                        </div>
-                    </div>
-                `;
-                semesterField.parentNode.insertBefore(warning, semesterField.nextSibling);
-            }
-        } else {
-            // No courses selected
-            semesterField.style.display = 'none';
-            semesterSelect.required = false;
-            semesterSelect.value = '';
-
-            // Remove warning if exists
-            const warning = document.getElementById('mixed_system_warning');
-            if (warning) {
-                warning.remove();
-            }
-        }
-    }
 
     // Initial validation
     validateForm();

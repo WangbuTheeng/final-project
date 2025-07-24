@@ -26,8 +26,8 @@ class EnrollmentApiController extends Controller
             \Log::info('Getting courses for faculty: ' . $request->faculty_id . ', academic year: ' . $request->academic_year_id);
 
             // Get courses for the faculty that have active classes
-            $courses = Course::where('faculty_id', $request->faculty_id)
-                ->where('is_active', true)
+            $courses = Course::where('is_active', true)
+                ->byFaculty($request->faculty_id)
                 ->whereHas('classes', function ($query) use ($request) {
                     $query->where('academic_year_id', $request->academic_year_id)
                           ->where('status', 'active');
@@ -112,20 +112,29 @@ class EnrollmentApiController extends Controller
                         'id' => $student->id,
                         'admission_number' => $student->admission_number,
                         'user' => [
-                            'first_name' => $student->user->first_name,
-                            'last_name' => $student->user->last_name,
-                            'full_name' => $student->user->full_name,
+                            'first_name' => $student->user->first_name ?? '',
+                            'last_name' => $student->user->last_name ?? '',
+                            'full_name' => $student->user->full_name ?? $student->user->name,
                             'email' => $student->user->email
                         ],
                         'department' => $student->department ? [
                             'id' => $student->department->id,
-                            'name' => $student->department->name
+                            'name' => $student->department->name,
+                            'code' => $student->department->code ?? ''
                         ] : null,
                         'faculty' => $student->faculty ? [
                             'id' => $student->faculty->id,
-                            'name' => $student->faculty->name
+                            'name' => $student->faculty->name,
+                            'code' => $student->faculty->code ?? ''
                         ] : null,
-                        'current_level' => $student->current_level
+                        'academic_year' => $student->academicYear ? [
+                            'id' => $student->academicYear->id,
+                            'name' => $student->academicYear->name
+                        ] : null,
+                        'status' => $student->status,
+                        'mode_of_entry' => $student->mode_of_entry,
+                        'cgpa' => $student->cgpa,
+                        'total_credits_earned' => $student->total_credits_earned
                     ];
                 })
             ]);
@@ -154,10 +163,22 @@ class EnrollmentApiController extends Controller
                 'is_active' => 'boolean'
             ]);
 
+            // Find the first department in the selected faculty
+            $department = \App\Models\Department::where('faculty_id', $request->faculty_id)
+                ->where('is_active', true)
+                ->first();
+
+            if (!$department) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No active department found in the selected faculty. Please create a department first.'
+                ], 400);
+            }
+
             $courseData = [
                 'title' => $request->title,
                 'code' => strtoupper($request->code),
-                'faculty_id' => $request->faculty_id,
+                'department_id' => $department->id,
                 'credit_units' => $request->credit_units,
                 'course_type' => $request->course_type,
                 'organization_type' => $request->organization_type,
@@ -467,7 +488,7 @@ class EnrollmentApiController extends Controller
 
         $faculties = \App\Models\Faculty::active()
             ->whereHas('courses', function ($query) use ($request) {
-                $query->where('is_active', true)
+                $query->where('courses.is_active', true)
                       ->whereHas('classes', function ($classQuery) use ($request) {
                           $classQuery->where('academic_year_id', $request->academic_year_id)
                                     ->where('status', 'active');
@@ -498,7 +519,7 @@ class EnrollmentApiController extends Controller
         ]);
 
         $courseQuery = \App\Models\Course::where('is_active', true)
-            ->where('faculty_id', $request->faculty_id)
+            ->byFaculty($request->faculty_id)
             ->whereHas('classes', function ($query) use ($request) {
                 $query->where('academic_year_id', $request->academic_year_id)
                       ->where('status', 'active');

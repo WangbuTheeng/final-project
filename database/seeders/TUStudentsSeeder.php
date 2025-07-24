@@ -65,44 +65,55 @@ class TUStudentsSeeder extends Seeder
                 $regNumber = $courseCode . '-' . $year . '-' . str_pad($enrollmentCounter, 4, '0', STR_PAD_LEFT);
                 
                 // Create user account
-                $user = User::create([
-                    'name' => $fullName,
-                    'email' => strtolower($firstName . '.' . $lastName . $enrollmentCounter . '@student.tu.edu.np'),
-                    'password' => Hash::make('password123'),
-                    'role' => 'student',
-                    'phone' => '+977-98' . rand(10000000, 99999999),
-                    'address' => $districts[array_rand($districts)] . ', Nepal',
-                    'is_active' => true,
-                ]);
+                $email = strtolower($firstName . '.' . $lastName . $enrollmentCounter . '@student.tu.edu.np');
+                $user = User::updateOrCreate(
+                    ['email' => $email],
+                    [
+                        'name' => $fullName,
+                        'email' => $email,
+                        'password' => Hash::make('password123'),
+                        'role' => 'student',
+                        'phone' => '+977-98' . rand(10000000, 99999999),
+                        'address' => $districts[array_rand($districts)] . ', Nepal',
+                    ]
+                );
 
-                // Create student profile
-                $student = Student::create([
-                    'user_id' => $user->id,
-                    'student_id' => $regNumber,
-                    'registration_number' => $regNumber,
-                    'date_of_birth' => Carbon::now()->subYears(rand(18, 25))->subDays(rand(1, 365)),
-                    'gender' => rand(0, 1) ? 'male' : 'female',
-                    'blood_group' => ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'][array_rand(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])],
+                // Create student profile (using actual table structure)
+                $guardianInfo = [
                     'guardian_name' => $lastNames[array_rand($lastNames)] . ' ' . $lastNames[array_rand($lastNames)],
                     'guardian_phone' => '+977-98' . rand(10000000, 99999999),
                     'guardian_email' => strtolower('guardian' . $enrollmentCounter . '@gmail.com'),
                     'emergency_contact' => '+977-98' . rand(10000000, 99999999),
                     'nationality' => 'Nepali',
                     'religion' => ['Hindu', 'Buddhist', 'Christian', 'Muslim', 'Other'][array_rand(['Hindu', 'Buddhist', 'Christian', 'Muslim', 'Other'])],
-                    'admission_date' => $class->start_date,
-                    'status' => 'active',
-                    'academic_year_id' => $class->academic_year_id,
-                ]);
+                ];
+
+                $student = Student::updateOrCreate(
+                    ['admission_number' => $regNumber],
+                    [
+                        'user_id' => $user->id,
+                        'admission_number' => $regNumber,
+                        'department_id' => $class->course->department_id ?? null,
+                        'faculty_id' => $class->course->department->faculty_id ?? null,
+                        'academic_year_id' => $class->academic_year_id,
+                        'mode_of_entry' => 'entrance_exam',
+                        'status' => 'active',
+                        'guardian_info' => json_encode($guardianInfo),
+                    ]
+                );
 
                 // Create enrollment
-                Enrollment::create([
-                    'student_id' => $student->id,
-                    'class_id' => $class->id,
-                    'academic_year_id' => $class->academic_year_id,
-                    'enrollment_date' => $class->start_date,
-                    'status' => 'active',
-                    'semester' => $class->semester,
-                ]);
+                Enrollment::updateOrCreate(
+                    [
+                        'student_id' => $student->id,
+                        'class_id' => $class->id,
+                        'academic_year_id' => $class->academic_year_id,
+                    ],
+                    [
+                        'enrollment_date' => $class->start_date,
+                        'status' => 'enrolled',
+                    ]
+                );
 
                 $createdStudents[] = $student;
                 $enrollmentCounter++;

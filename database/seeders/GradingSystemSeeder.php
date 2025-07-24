@@ -45,8 +45,8 @@ class GradingSystemSeeder extends Seeder
                 ],
                 [
                     'grade_point' => $grade['grade_point'],
-                    'min_percent' => $grade['min_percent'],
-                    'max_percent' => $grade['max_percent'],
+                    'min_percentage' => $grade['min_percent'],
+                    'max_percentage' => $grade['max_percent'],
                     'description' => $grade['description'],
                     'order_sequence' => $index + 1,
                     'status' => 'active',
@@ -86,8 +86,8 @@ class GradingSystemSeeder extends Seeder
                 ],
                 [
                     'grade_point' => $grade['grade_point'],
-                    'min_percent' => $grade['min_percent'],
-                    'max_percent' => $grade['max_percent'],
+                    'min_percentage' => $grade['min_percent'],
+                    'max_percentage' => $grade['max_percent'],
                     'description' => $grade['description'],
                     'order_sequence' => $index + 1,
                     'status' => 'active',
@@ -164,8 +164,8 @@ class GradingSystemSeeder extends Seeder
                 ],
                 [
                     'grade_point' => $grade['grade_point'],
-                    'min_percent' => $grade['min_percent'],
-                    'max_percent' => $grade['max_percent'],
+                    'min_percentage' => $grade['min_percent'],
+                    'max_percentage' => $grade['max_percent'],
                     'description' => $grade['description'],
                     'order_sequence' => $index + 1,
                     'status' => 'active',

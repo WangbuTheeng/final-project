@@ -49,27 +49,27 @@ class Faculty extends Model
     }
 
     /**
-     * Get courses directly under this faculty
+     * Get courses through departments
      */
     public function courses()
     {
-        return $this->hasMany(Course::class);
+        return $this->hasManyThrough(Course::class, Department::class);
     }
 
     /**
-     * Get active courses directly under this faculty
+     * Get active courses through departments
      */
     public function activeCourses()
     {
-        return $this->courses()->where('is_active', true);
+        return $this->courses()->where('courses.is_active', true);
     }
 
     /**
-     * Get all courses (direct + through departments)
+     * Get all courses through departments
      */
     public function allCourses()
     {
-        return Course::where('faculty_id', $this->id);
+        return $this->hasManyThrough(Course::class, Department::class);
     }
 
     /**

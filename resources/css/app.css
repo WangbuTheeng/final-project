@@ -61,6 +61,35 @@
   .sidebar-link-inactive {
     @apply text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100;
   }
+
+  .compact-table {
+    @apply text-sm;
+  }
+
+  .compact-table th {
+    @apply px-3 py-2 text-xs;
+  }
+
+  .compact-table td {
+    @apply px-3 py-2;
+  }
+
+  .compact-table .text-sm {
+    @apply text-xs;
+  }
+
+  .compact-table .text-xs {
+    @apply text-xs;
+  }
+
+  /* Make examination table even more compact */
+  .compact-table tbody tr {
+    @apply hover:bg-gray-50;
+  }
+
+  .compact-table .badge {
+    @apply px-2 py-0.5 text-xs;
+  }
 }
 
 /* Custom scrollbar */

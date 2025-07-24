@@ -126,6 +126,14 @@
                             </button>
 
                             <button type="button"
+                                    id="bulk-preview-btn"
+                                    class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold rounded-lg hover:from-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled>
+                                <i class="fas fa-eye mr-2"></i>
+                                Preview All Students
+                            </button>
+
+                            <button type="button"
                                     id="bulk-btn"
                                     class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white text-sm font-semibold rounded-lg hover:from-orange-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                     disabled>
@@ -176,7 +184,7 @@
                     No completed exams with marks found. Complete some exams and enter marks to generate marksheets.
                 </p>
                 <div class="mt-6">
-                    <a href="{{ route('exams.index') }}"
+                    <a href="{{ route('examinations.index') }}"
                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
                         <i class="fas fa-plus mr-2"></i>
                         View Exams
@@ -196,6 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewBtn = document.getElementById('preview-btn');
     const downloadBtn = document.getElementById('download-btn');
     const bulkBtn = document.getElementById('bulk-btn');
+    const bulkPreviewBtn = document.getElementById('bulk-preview-btn');
     const classPreviewBtn = document.getElementById('class-preview-btn');
     const resultsBtn = document.getElementById('results-btn');
     const examInfo = document.getElementById('exam-info');
@@ -211,6 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
         previewBtn.disabled = true;
         downloadBtn.disabled = true;
         bulkBtn.disabled = !examId;
+        bulkPreviewBtn.disabled = !examId;
         classPreviewBtn.disabled = !examId;
         resultsBtn.disabled = !examId;
 
@@ -294,6 +304,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const url = `{{ route('marksheets.bulk', ['exam' => ':exam']) }}`
                 .replace(':exam', examId);
             window.location.href = url;
+        }
+    });
+
+    // Handle bulk preview button
+    bulkPreviewBtn.addEventListener('click', function() {
+        const examId = examSelect.value;
+
+        if (examId) {
+            const url = `{{ route('marksheets.bulk-preview', ['exam' => ':exam']) }}`
+                .replace(':exam', examId);
+            window.open(url, '_blank');
         }
     });
 

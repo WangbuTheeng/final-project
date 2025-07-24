@@ -11,20 +11,29 @@ class GradeScale extends Model
 
     protected $fillable = [
         'grading_system_id',
+        'scale_name',
         'grade_letter',
         'grade_point',
         'min_percent',
         'max_percent',
+        'min_percentage', // For exam system compatibility
+        'max_percentage', // For exam system compatibility
         'description',
         'status',
-        'order_sequence'
+        'order_sequence',
+        'sort_order',
+        'is_active'
     ];
 
     protected $casts = [
         'grade_point' => 'decimal:2',
         'min_percent' => 'decimal:2',
         'max_percent' => 'decimal:2',
-        'order_sequence' => 'integer'
+        'min_percentage' => 'decimal:2',
+        'max_percentage' => 'decimal:2',
+        'order_sequence' => 'integer',
+        'sort_order' => 'integer',
+        'is_active' => 'boolean'
     ];
 
     /**
@@ -57,8 +66,8 @@ class GradeScale extends Model
     public static function getGradeByPercentage($percentage, $gradingSystemId = null)
     {
         $query = static::active()
-            ->where('min_percent', '<=', $percentage)
-            ->where('max_percent', '>=', $percentage);
+            ->where('min_percentage', '<=', $percentage)
+            ->where('max_percentage', '>=', $percentage);
 
         if ($gradingSystemId) {
             $query->where('grading_system_id', $gradingSystemId);
@@ -80,7 +89,7 @@ class GradeScale extends Model
      */
     public function containsPercentage($percentage)
     {
-        return $percentage >= $this->min_percent && $percentage <= $this->max_percent;
+        return $percentage >= $this->min_percentage && $percentage <= $this->max_percentage;
     }
 
     /**
@@ -96,6 +105,6 @@ class GradeScale extends Model
      */
     public function getPercentageRangeAttribute()
     {
-        return $this->min_percent . '% - ' . $this->max_percent . '%';
+        return $this->min_percentage . '% - ' . $this->max_percentage . '%';
     }
 }

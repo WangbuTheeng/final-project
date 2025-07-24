@@ -251,93 +251,91 @@
                     @endif
 
                     <div class="overflow-x-auto table-container">
-                        <table class="min-w-full divide-y divide-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Student
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Admission Number
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Admission
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Faculty
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Course
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Class
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Department
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Enrollment Date
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Date
                                     </th>
-                                    <th scope="col" class="relative px-6 py-3">
+                                    <th scope="col" class="relative px-3 py-2">
                                         <span class="sr-only">Actions</span>
                                     </th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse($enrollments as $enrollment)
-                                    <tr class="table-row-hover transition-all duration-200">
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                    <tr class="table-row-hover transition-all duration-200 hover:bg-gray-50">
+                                        <td class="px-3 py-2 whitespace-nowrap">
                                             <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-12 w-12">
-                                                    <div class="h-12 w-12 rounded-full avatar-gradient flex items-center justify-center shadow-lg">
-                                                        <span class="text-white font-bold text-sm">
+                                                <div class="flex-shrink-0 h-8 w-8">
+                                                    <div class="h-8 w-8 rounded-full avatar-gradient flex items-center justify-center shadow-sm">
+                                                        <span class="text-white font-bold text-xs">
                                                             {{ substr($enrollment->student->user->first_name, 0, 1) }}{{ substr($enrollment->student->user->last_name, 0, 1) }}
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <div class="ml-4">
+                                                <div class="ml-2">
                                                     <div class="text-sm font-medium text-gray-900">
                                                         {{ $enrollment->student->user->full_name }}
                                                     </div>
-                                                    <div class="text-sm text-gray-500">{{ $enrollment->student->user->email }}</div>
+                                                    <div class="text-xs text-gray-500">{{ $enrollment->student->user->email }}</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 font-mono">
+                                        <td class="px-3 py-2 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 font-mono">
                                                 {{ $enrollment->student->admission_number }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $enrollment->student->faculty->name ?? 'N/A' }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div>
-                                                <div class="text-sm font-medium text-gray-900">{{ $enrollment->class->course->code }}</div>
-                                                <div class="text-sm text-gray-500">{{ $enrollment->class->course->title }}</div>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                            <div class="truncate max-w-24" title="{{ $enrollment->student->faculty->name ?? 'N/A' }}">
+                                                {{ $enrollment->student->faculty->name ?? 'N/A' }}
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $enrollment->class->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $enrollment->student->department->name ?? 'N/A' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium status-badge bg-{{ $enrollment->status_badge_color }}-100 text-{{ $enrollment->status_badge_color }}-800">
+                                        <td class="px-3 py-2 whitespace-nowrap">
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">{{ $enrollment->class->course->code }}</div>
+                                                <div class="text-xs text-gray-500 truncate max-w-32" title="{{ $enrollment->class->course->title }}">{{ $enrollment->class->course->title }}</div>
+                                            </div>
+                                        </td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{{ $enrollment->class->name }}</td>
+                                        <td class="px-3 py-2 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium status-badge bg-{{ $enrollment->status_badge_color }}-100 text-{{ $enrollment->status_badge_color }}-800">
                                                 {{ ucfirst($enrollment->status) }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $enrollment->formatted_enrollment_date }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <div class="flex items-center space-x-2">
-                                                <a href="{{ route('enrollments.show', $enrollment) }}" 
-                                                   class="action-btn inline-flex items-center p-2 border border-transparent rounded-md text-primary-600 hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" 
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-900">{{ $enrollment->formatted_enrollment_date }}</td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-right text-sm font-medium">
+                                            <div class="flex items-center space-x-1">
+                                                <a href="{{ route('enrollments.show', $enrollment) }}"
+                                                   class="action-btn inline-flex items-center p-1.5 border border-transparent rounded text-primary-600 hover:bg-primary-50 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-primary-500"
                                                    title="View Details">
-                                                    <i class="fas fa-eye w-4 h-4"></i>
+                                                    <i class="fas fa-eye w-3 h-3"></i>
                                                 </a>
                                                 @if($enrollment->status === 'enrolled' && $enrollment->canBeDropped())
-                                                    <button type="button" class="action-btn inline-flex items-center p-2 border border-transparent rounded-md text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" 
-                                                            data-bs-toggle="modal" 
+                                                    <button type="button" class="action-btn inline-flex items-center p-1.5 border border-transparent rounded text-red-600 hover:bg-red-50 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-red-500"
+                                                            data-bs-toggle="modal"
                                                             data-bs-target="#dropModal{{ $enrollment->id }}"
                                                             title="Drop Enrollment">
-                                                        <i class="fas fa-user-times w-4 h-4"></i>
+                                                        <i class="fas fa-user-times w-3 h-3"></i>
                                                     </button>
                                                 @endif
                                             </div>

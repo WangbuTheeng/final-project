@@ -81,8 +81,8 @@ class GradingSystem extends Model
     public function getGradeByPercentage($percentage)
     {
         return $this->gradeScales()
-            ->where('min_percent', '<=', $percentage)
-            ->where('max_percent', '>=', $percentage)
+            ->where('min_percentage', '<=', $percentage)
+            ->where('max_percentage', '>=', $percentage)
             ->first();
     }
 

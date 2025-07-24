@@ -176,8 +176,8 @@ class BulkMarksController extends Controller
         $percentage = $totalMarks > 0 ? ($obtainedMarks / $totalMarks) * 100 : 0;
 
         // Determine grade
-        $gradeScale = GradeScale::where('min_percent', '<=', $percentage)
-            ->where('max_percent', '>=', $percentage)
+        $gradeScale = GradeScale::where('min_percentage', '<=', $percentage)
+            ->where('max_percentage', '>=', $percentage)
             ->where('status', 'active')
             ->first();
 

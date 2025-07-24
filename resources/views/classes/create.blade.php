@@ -49,6 +49,29 @@
         </div>
     @endif
 
+    <!-- Debug Information (Remove in production) -->
+    @if(config('app.debug'))
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <h4 class="text-sm font-medium text-blue-800 mb-2">Debug Information</h4>
+        <div class="text-xs text-blue-700">
+            <p><strong>Total Courses:</strong> {{ $courses->count() }}</p>
+            <p><strong>Semester-based Courses:</strong> {{ $courses->where('organization_type', 'semester')->count() }}</p>
+            <p><strong>Yearly-based Courses:</strong> {{ $courses->where('organization_type', 'yearly')->count() }}</p>
+            <div class="mt-2">
+                <strong>Course Types:</strong>
+                <ul class="list-disc list-inside ml-4">
+                    @foreach($courses->take(5) as $course)
+                        <li>{{ $course->code }} - {{ $course->organization_type }}</li>
+                    @endforeach
+                    @if($courses->count() > 5)
+                        <li>... and {{ $courses->count() - 5 }} more</li>
+                    @endif
+                </ul>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Create Form -->
     <div class="bg-white shadow-sm rounded-lg border border-gray-200">
         <div class="px-6 py-4 border-b border-gray-200">
@@ -85,6 +108,7 @@
                         @foreach($courses as $course)
                             <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
                                 {{ $course->code }} - {{ $course->title }} ({{ $course->credit_units }} units)
+                                [{{ ucfirst($course->organization_type) }}]
                             </option>
                         @endforeach
                     </select>
@@ -313,33 +337,71 @@ document.addEventListener('DOMContentLoaded', function() {
     const semester = document.getElementById('semester');
     const year = document.getElementById('year');
 
+    // Function to update field visibility
+    function updateFieldVisibility(courseType) {
+        console.log('Course type:', courseType); // Debug log
+
+        if (courseType === 'semester') {
+            semesterGroup.style.display = 'block';
+            yearGroup.style.display = 'none';
+            semester.setAttribute('required', 'required');
+            year.removeAttribute('required');
+
+            // Update labels to be more descriptive
+            semesterGroup.querySelector('label').textContent = 'Semester (Semester-based Course)';
+        } else if (courseType === 'yearly') {
+            semesterGroup.style.display = 'none';
+            yearGroup.style.display = 'block';
+            year.setAttribute('required', 'required');
+            semester.removeAttribute('required');
+
+            // Update labels to be more descriptive
+            yearGroup.querySelector('label').textContent = 'Year (Yearly-based Course)';
+        } else {
+            // No course selected or unknown type
+            semesterGroup.style.display = 'block'; // Show semester by default
+            yearGroup.style.display = 'none';
+            semester.removeAttribute('required');
+            year.removeAttribute('required');
+
+            // Reset labels
+            semesterGroup.querySelector('label').textContent = 'Semester';
+            yearGroup.querySelector('label').textContent = 'Year';
+        }
+    }
+
     courseSelect.addEventListener('change', function() {
         const courseId = this.value;
 
+        if (!courseId) {
+            updateFieldVisibility(null);
+            return;
+        }
+
+        console.log('Fetching course type for course ID:', courseId); // Debug log
+
         fetch('/get-course-type?course_id=' + courseId)
-            .then(response => response.json())
-            .then(data => {
-                if (data.type === 'semester') {
-                    semesterGroup.style.display = 'block';
-                    yearGroup.style.display = 'none';
-                    semester.setAttribute('required', 'required');
-                    year.removeAttribute('required');
-                } else if (data.type === 'yearly') {
-                    semesterGroup.style.display = 'none';
-                    yearGroup.style.display = 'block';
-                    year.setAttribute('required', 'required');
-                    semester.removeAttribute('required');
-                } else {
-                    semesterGroup.style.display = 'none';
-                    yearGroup.style.display = 'none';
-                    semester.removeAttribute('required');
-                    year.removeAttribute('required');
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Received data:', data); // Debug log
+                updateFieldVisibility(data.type);
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Error fetching course type:', error);
+                // Fallback to showing semester field
+                updateFieldVisibility(null);
             });
     });
+
+    // Initialize on page load if a course is already selected
+    if (courseSelect.value) {
+        courseSelect.dispatchEvent(new Event('change'));
+    }
 });
 </script>
 @endsection

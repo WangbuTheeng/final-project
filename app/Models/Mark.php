@@ -121,8 +121,8 @@ class Mark extends Model
         }
 
         // Fallback to default grading system
-        $gradeScale = GradeScale::where('min_percent', '<=', $this->percentage)
-            ->where('max_percent', '>=', $this->percentage)
+        $gradeScale = GradeScale::where('min_percentage', '<=', $this->percentage)
+            ->where('max_percentage', '>=', $this->percentage)
             ->where('status', 'active')
             ->first();
 

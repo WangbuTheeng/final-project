@@ -287,8 +287,8 @@
                     </div>
                     @endif
 
-                    <!-- Status Messages -->
-                    @if(session('status'))
+                    <!-- Status Messages - Disabled -->
+                    {{-- @if(session('status'))
                     <div x-data="{ show: true }"
                          x-show="show"
                          x-init="setTimeout(() => show = false, 5000)"
@@ -314,10 +314,10 @@
                             </button>
                         </div>
                     </div>
-                    @endif
+                    @endif --}}
 
-                    <!-- Error Messages -->
-                    @if(session('error'))
+                    <!-- Error Messages - Disabled -->
+                    {{-- @if(session('error'))
                     <div x-data="{ show: true }"
                          x-show="show"
                          x-transition:enter="transition ease-out duration-300"
@@ -342,10 +342,10 @@
                             </button>
                         </div>
                     </div>
-                    @endif
+                    @endif --}}
 
-                    <!-- Warning Messages -->
-                    @if(session('warning'))
+                    <!-- Warning Messages - Disabled -->
+                    {{-- @if(session('warning'))
                     <div x-data="{ show: true }"
                          x-show="show"
                          x-transition:enter="transition ease-out duration-300"
@@ -367,10 +367,10 @@
                             </button>
                         </div>
                     </div>
-                    @endif
+                    @endif --}}
 
-                    <!-- Info Messages -->
-                    @if(session('info'))
+                    <!-- Info Messages - Disabled -->
+                    {{-- @if(session('info'))
                     <div x-data="{ show: true }"
                          x-show="show"
                          x-transition:enter="transition ease-out duration-300"
@@ -392,7 +392,7 @@
                             </button>
                         </div>
                     </div>
-                    @endif
+                    @endif --}}
 
                     <!-- Validation Errors -->
                     @if($errors->any())
@@ -1442,7 +1442,7 @@
     <!-- Performance Optimizer -->
     {{-- <script src="{{ asset('js/performance-optimizer.js') }}"></script> --}}
 
-    <!-- Toast Notification Container -->
-    <x-notifications.toast-container position="top-right" />
+    <!-- Toast Notification Container - Disabled -->
+    {{-- <x-notifications.toast-container position="top-right" /> --}}
 </body>
 </html>

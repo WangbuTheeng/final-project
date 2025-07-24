@@ -126,7 +126,7 @@
                     Enter Marks
                 </a>
                 
-                <a href="{{ route('exams.show', $selectedExam) }}" 
+                <a href="{{ route('examinations.show', $selectedExam) }}"
                    class="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
                     View Exam Details
                 </a>

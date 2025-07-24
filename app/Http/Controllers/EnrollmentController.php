@@ -45,9 +45,9 @@ class EnrollmentController extends Controller
         // Get available courses based on selected filters
         $availableCourses = collect();
         if ($selectedAcademicYear && $selectedFaculty) {
-            $courseQuery = Course::with('faculty')
+            $courseQuery = Course::with('department.faculty')
                 ->where('is_active', true)
-                ->where('faculty_id', $selectedFaculty)
+                ->byFaculty($selectedFaculty)
                 ->whereHas('classes', function ($query) use ($selectedAcademicYear) {
                     $query->where('academic_year_id', $selectedAcademicYear)
                           ->where('status', 'active');
@@ -68,7 +68,7 @@ class EnrollmentController extends Controller
         }
 
         // Build enrollment query
-        $enrollments = Enrollment::with(['student.user', 'student.department', 'student.faculty', 'class.course.faculty', 'academicYear'])
+        $enrollments = Enrollment::with(['student.user', 'student.department', 'student.faculty', 'class.course.department.faculty', 'academicYear'])
             ->where('academic_year_id', $selectedAcademicYear);
 
         if ($selectedDepartment) {
@@ -78,7 +78,7 @@ class EnrollmentController extends Controller
         }
 
         if ($selectedFaculty) {
-            $enrollments->whereHas('class.course', function ($query) use ($selectedFaculty) {
+            $enrollments->whereHas('class.course.department', function ($query) use ($selectedFaculty) {
                 $query->where('faculty_id', $selectedFaculty);
             });
         }
@@ -158,7 +158,7 @@ class EnrollmentController extends Controller
         $availableCourses = collect();
         if ($selectedFaculty && $selectedAcademicYear) {
             $availableCourses = Course::with('department')
-                ->where('faculty_id', $selectedFaculty)
+                ->byFaculty($selectedFaculty)
                 ->where('is_active', true)
                 ->whereHas('classes', function ($query) use ($selectedAcademicYear) {
                     $query->where('academic_year_id', $selectedAcademicYear)
@@ -200,7 +200,7 @@ class EnrollmentController extends Controller
         $this->authorize('manage-enrollments');
 
         // Get the class and course to determine examination system
-        $class = \App\Models\Classes::findOrFail($request->class_id);
+        $class = \App\Models\ClassSection::findOrFail($request->class_id);
         $course = $class->course;
 
         // Dynamic validation based on examination system
@@ -307,8 +307,7 @@ class EnrollmentController extends Controller
             'class_ids.*' => 'exists:classes,id',
             'enrollment_date' => 'required|date',
             'enrollment_type' => 'required|in:regular,late,makeup,readmission',
-            'payment_status' => 'required|in:pending,paid,partial,waived',
-            'semester' => 'nullable|in:first,second,summer' // Optional for annual system
+            'payment_status' => 'required|in:pending,paid,partial,waived'
         ]);
 
         try {
@@ -346,27 +345,16 @@ class EnrollmentController extends Controller
                         break;
                     }
 
-                    // Check examination system and semester requirement
-                    $course = $class->course;
-                    $semesterRequired = $course->examination_system === 'semester';
-
-                    if ($semesterRequired && !$request->semester) {
-                        $errors[] = "Semester is required for {$course->code} (semester system)";
-                        continue;
-                    }
-
                     // Check if student can enroll (enhanced validation)
-                    $existingEnrollmentQuery = Enrollment::where('student_id', $student->id)
+                    $course = $class->course;
+
+                    $existingEnrollment = Enrollment::where('student_id', $student->id)
                         ->where('class_id', $classId)
                         ->where('academic_year_id', $request->academic_year_id)
-                        ->where('status', 'enrolled');
+                        ->where('status', 'enrolled')
+                        ->exists();
 
-                    // Add semester check for semester system courses
-                    if ($semesterRequired && $request->semester) {
-                        $existingEnrollmentQuery->where('semester', $request->semester);
-                    }
-
-                    if ($existingEnrollmentQuery->exists()) {
+                    if ($existingEnrollment) {
                         continue; // Skip if already enrolled
                     }
 
@@ -385,18 +373,14 @@ class EnrollmentController extends Controller
                         'enrollment_type' => $request->enrollment_type,
                         'payment_status' => $request->payment_status,
                         'credit_hours' => $course->credit_units,
-                        'base_fee' => $baseFee,
-                        'credit_fee' => $creditFee,
-                        'late_fee' => $lateFee,
-                        'total_fee' => $totalFee,
-                        'attendance_requirement' => 75.0, // Nepal standard 75%
+                        'fee_amount' => $totalFee,
+                        'minimum_attendance_percentage' => 75.0, // Nepal standard 75%
+                        'attendance_required' => true,
+                        'prerequisites_met' => true, // Assume met for bulk enrollment
                         'status' => 'enrolled'
                     ];
 
-                    // Add semester only for semester system courses
-                    if ($semesterRequired && $request->semester) {
-                        $enrollmentData['semester'] = $request->semester;
-                    }
+
 
                     Enrollment::create($enrollmentData);
 
@@ -458,7 +442,7 @@ class EnrollmentController extends Controller
         }
 
         if ($facultyId) {
-            $query->whereHas('class.course', function ($q) use ($facultyId) {
+            $query->whereHas('class.course.department', function ($q) use ($facultyId) {
                 $q->where('faculty_id', $facultyId);
             });
         }

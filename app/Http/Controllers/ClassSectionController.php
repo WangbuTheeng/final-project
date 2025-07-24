@@ -104,19 +104,50 @@ class ClassSectionController extends Controller
         })->orderBy('name')->get();
         $semesters = [1, 2, 3, 4, 5, 6, 7, 8];
 
+        // Debug: Log course organization types
+        \Log::info('Courses available for class creation:', [
+            'total_courses' => $courses->count(),
+            'semester_courses' => $courses->where('organization_type', 'semester')->count(),
+            'yearly_courses' => $courses->where('organization_type', 'yearly')->count(),
+            'course_details' => $courses->map(function($course) {
+                return [
+                    'id' => $course->id,
+                    'code' => $course->code,
+                    'title' => $course->title,
+                    'organization_type' => $course->organization_type
+                ];
+            })->toArray()
+        ]);
+
         return view('classes.create', compact('courses', 'academicYears', 'instructors', 'semesters'));
     }
 
     public function getCourseType(Request $request)
     {
         $courseId = $request->input('course_id');
+
+        if (!$courseId) {
+            return response()->json([
+                'type' => null,
+                'message' => 'No course ID provided'
+            ]);
+        }
+
         $course = Course::find($courseId);
 
         if ($course) {
-            return response()->json(['type' => $course->organization_type]);
+            return response()->json([
+                'type' => $course->organization_type,
+                'course_name' => $course->title,
+                'course_code' => $course->code,
+                'message' => 'Course found'
+            ]);
         }
 
-        return response()->json(['type' => null]);
+        return response()->json([
+            'type' => null,
+            'message' => 'Course not found'
+        ]);
     }
 
     /**

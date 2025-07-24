@@ -132,7 +132,9 @@ class StudentController extends Controller
             'gender' => 'required|in:male,female,other',
 
             // Nepal-specific user fields
-            'citizenship_number' => 'required|string|max:50|unique:users,citizenship_number',
+            'citizenship_number' => 'nullable|string|max:50|unique:users,citizenship_number',
+            'alternative_id_type' => 'nullable|string|in:passport,national_id,driving_license,student_visa,other',
+            'alternative_id_number' => 'nullable|string|max:100',
             'permanent_address' => 'required|string',
             'temporary_address' => 'nullable|string',
             'district' => 'required|string|max:100',
@@ -184,6 +186,26 @@ class StudentController extends Controller
             'documents.*' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:5120',
         ]);
 
+        // Custom validation: Ensure either citizenship number or alternative ID is provided
+        if (empty($request->citizenship_number) && (empty($request->alternative_id_type) || empty($request->alternative_id_number))) {
+            return back()->withErrors([
+                'identification' => 'Please provide either a citizenship number or an alternative ID (passport, national ID, etc.)'
+            ])->withInput();
+        }
+
+        // Validate alternative ID fields together
+        if (!empty($request->alternative_id_type) && empty($request->alternative_id_number)) {
+            return back()->withErrors([
+                'alternative_id_number' => 'Alternative ID number is required when ID type is selected.'
+            ])->withInput();
+        }
+
+        if (!empty($request->alternative_id_number) && empty($request->alternative_id_type)) {
+            return back()->withErrors([
+                'alternative_id_type' => 'Alternative ID type is required when ID number is provided.'
+            ])->withInput();
+        }
+
         try {
             DB::beginTransaction();
 
@@ -215,6 +237,8 @@ class StudentController extends Controller
                 'status' => 'active',
                 // Nepal-specific fields
                 'citizenship_number' => $request->citizenship_number,
+                'alternative_id_type' => $request->alternative_id_type,
+                'alternative_id_number' => $request->alternative_id_number,
                 'permanent_address' => $request->permanent_address,
                 'temporary_address' => $request->temporary_address,
                 'district' => $request->district,

@@ -58,7 +58,7 @@ class AssignGradePermissions extends Command
         $user->givePermissionTo($permissions);
 
         // Also assign Admin role if user doesn't have sufficient permissions
-        if (!$user->hasRole(['Super Admin', 'Admin', 'Teacher', 'Examiner'])) {
+        if (!$user->hasRole('Super Admin') && !$user->hasRole('Admin') && !$user->hasRole('Teacher') && !$user->hasRole('Examiner')) {
             $adminRole = Role::firstOrCreate(['name' => 'Admin']);
             $user->assignRole($adminRole);
             $this->info("Assigned Admin role to {$user->name}");

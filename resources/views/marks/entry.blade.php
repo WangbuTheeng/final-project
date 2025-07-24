@@ -227,18 +227,6 @@
                                                     </div>
                                                 @endif
 
-                                                <div>
-                                                    <label class="text-xs text-gray-500">Internal</label>
-                                                    <input type="number" 
-                                                           name="marks[{{ $index }}_{{ $subject->id }}][internal_marks]"
-                                                           value="{{ $existingMark ? $existingMark->internal_marks : '' }}"
-                                                           max="20"
-                                                           min="0"
-                                                           step="0.01"
-                                                           class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                                                           placeholder="0">
-                                                </div>
-
                                                 @if($existingMark)
                                                     <div class="text-xs text-green-600 font-medium">
                                                         Total: {{ $existingMark->obtained_marks }}/{{ $totalMarks }}

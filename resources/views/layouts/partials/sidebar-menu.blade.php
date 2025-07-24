@@ -361,16 +361,16 @@
 
 
 
-        <!-- Exam Management -->
+        <!-- 🇳🇵 Nepal University Examination System -->
         @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Teacher') || auth()->user()->hasRole('Examiner'))
         <li>
-            <div x-data="{ open: {{ request()->routeIs('exams.*', 'bulk-marks.*', 'grades.*', 'marks.*', 'marksheets.*', 'results.*') ? 'true' : 'false' }} }" class="space-y-1">
+            <div x-data="{ open: {{ request()->routeIs('examinations.*', 'exam-results.*', 'exams.*', 'bulk-marks.*', 'grades.*', 'marks.*', 'marksheets.*', 'results.*') ? 'true' : 'false' }} }" class="space-y-1">
                 <button
                     @click="open = !open"
-                    class="{{ request()->routeIs('exams.*', 'bulk-marks.*', 'grades.*', 'marks.*', 'marksheets.*', 'results.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('exams.*', 'bulk-marks.*', 'grades.*', 'marks.*', 'marksheets.*', 'results.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}
+                    class="{{ request()->routeIs('examinations.*', 'exam-results.*', 'exams.*', 'bulk-marks.*', 'grades.*', 'marks.*', 'marksheets.*', 'results.*') ? 'text-white border-r-3' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }} group w-full flex items-center px-6 py-3 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('examinations.*', 'exam-results.*', 'exams.*', 'bulk-marks.*', 'grades.*', 'marks.*', 'marksheets.*', 'results.*') ? 'style=background-color:#37a2bc;border-right-color:#37a2bc;' : '' }}
                 >
-                    <i class="fas fa-file-alt mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('exams.*', 'bulk-marks.*', 'grades.*', 'marks.*', 'marksheets.*', 'results.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
-                    <span class="flex-1 text-left">Exam Management</span>
+                    <i class="fas fa-clipboard-list mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('examinations.*', 'exam-results.*', 'exams.*', 'bulk-marks.*', 'grades.*', 'marks.*', 'marksheets.*', 'results.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                    <span class="flex-1 text-left">🇳🇵 Examinations</span>
                     <i class="fas transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                 </button>
                 <div x-show="open"
@@ -381,21 +381,70 @@
                      x-transition:leave-start="transform opacity-100 translate-y-0"
                      x-transition:leave-end="transform opacity-0 -translate-y-2"
                      class="pl-12 space-y-1"
-                     {{ request()->routeIs('exams.*', 'bulk-marks.*', 'grades.*', 'marks.*', 'marksheets.*', 'results.*') ? '' : 'style="display: none;"' }}>
+                     {{ request()->routeIs('examinations.*', 'exam-results.*', 'exams.*', 'bulk-marks.*', 'grades.*', 'marks.*', 'marksheets.*', 'results.*') ? '' : 'style="display: none;"' }}>
 
-                    <a href="{{ route('exams.index') }}" class="{{ request()->routeIs('exams.*') && !request()->routeIs('bulk-marks.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('exams.*') && !request()->routeIs('bulk-marks.*') ? 'style=background-color:#37a2bc;' : '' }}>
-                        <i class="fas fa-file-alt mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('exams.*') && !request()->routeIs('bulk-marks.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
-                        @if(auth()->user()->hasRole('Teacher'))
-                            Upcoming Exams
-                        @else
-                            Exams
-                        @endif
+                    <!-- Nepal University Examination System -->
+                    <a href="{{ route('examinations.index') }}" class="{{ request()->routeIs('examinations.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('examinations.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-clipboard-list mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('examinations.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        All Examinations
                     </a>
 
                     @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
-                    <a href="{{ route('bulk-marks.index') }}" class="{{ request()->routeIs('bulk-marks.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('bulk-marks.*') ? 'style=background-color:#37a2bc;' : '' }}>
-                        <i class="fas fa-table mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('bulk-marks.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
-                        Bulk Marks Entry
+                    <a href="{{ route('examinations.create') }}" class="{{ request()->routeIs('examinations.create') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('examinations.create') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-plus mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('examinations.create') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Schedule Exam
+                    </a>
+                    @endif
+
+                    <!-- Assessment Types -->
+                    <div class="border-t border-gray-200 my-2"></div>
+                    <div class="px-6 py-1">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Assessment Types</p>
+                    </div>
+
+                    <a href="{{ route('examinations.index', ['assessment_type' => 'internal']) }}" class="{{ request()->get('assessment_type') === 'internal' ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->get('assessment_type') === 'internal' ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-edit mr-3 flex-shrink-0 h-4 w-4 {{ request()->get('assessment_type') === 'internal' ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Internal (40%)
+                    </a>
+
+                    <a href="{{ route('examinations.index', ['assessment_type' => 'final']) }}" class="{{ request()->get('assessment_type') === 'final' ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->get('assessment_type') === 'final' ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-graduation-cap mr-3 flex-shrink-0 h-4 w-4 {{ request()->get('assessment_type') === 'final' ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Final (60%)
+                    </a>
+
+                    <a href="{{ route('examinations.index', ['exam_type' => 'supplementary']) }}" class="{{ request()->get('exam_type') === 'supplementary' ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->get('exam_type') === 'supplementary' ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-redo mr-3 flex-shrink-0 h-4 w-4 {{ request()->get('exam_type') === 'supplementary' ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Supplementary
+                    </a>
+
+                    {{-- Legacy System (commented out - use new examination system) --}}
+                    {{--
+                    <div class="border-t border-gray-200 my-2"></div>
+                    <div class="px-6 py-1">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Legacy System</p>
+                    </div>
+
+                    <a href="{{ route('exams.index') }}" class="{{ request()->routeIs('exams.*') && !request()->routeIs('bulk-marks.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('exams.*') && !request()->routeIs('bulk-marks.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-file-alt mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('exams.*') && !request()->routeIs('bulk-marks.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Old Exam System
+                    </a>
+                    --}}
+
+                    <!-- Results & Reports -->
+                    <div class="border-t border-gray-200 my-2"></div>
+                    <div class="px-6 py-1">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Results & Reports</p>
+                    </div>
+
+                    @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
+                    <a href="{{ route('marksheets.index') }}" class="{{ request()->routeIs('marksheets.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('marksheets.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-certificate mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('marksheets.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Marksheets
+                    </a>
+
+                    <a href="{{ route('results.index') }}" class="{{ request()->routeIs('results.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('results.*') ? 'style=background-color:#37a2bc;' : '' }}>
+                        <i class="fas fa-chart-bar mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('results.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
+                        Results Dashboard
                     </a>
                     @endif
 <!--

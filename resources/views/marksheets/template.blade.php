@@ -21,19 +21,60 @@
         }
         .header {
             text-align: center;
-            border-bottom: 3px solid #2563eb;
+            border-bottom: 3px solid {{ $collegeSettings->primary_color ?? '#2563eb' }};
             padding-bottom: 20px;
             margin-bottom: 30px;
+            background: {{ $collegeSettings->header_background_color ?? '#f8fafc' }};
+            position: relative;
+        }
+        @if($collegeSettings->show_watermark && $collegeSettings->watermark_text)
+        .header::before {
+            content: "{{ $collegeSettings->watermark_text }}";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 48px;
+            color: rgba(0, 0, 0, 0.05);
+            font-weight: bold;
+            z-index: 0;
+        }
+        @endif
+        .college-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            object-fit: cover;
         }
         .college-name {
             font-size: 28px;
             font-weight: bold;
-            color: #1e40af;
+            color: {{ $collegeSettings->primary_color ?? '#1e40af' }};
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+        .college-code {
+            font-size: 12px;
+            color: {{ $collegeSettings->secondary_color ?? '#6b7280' }};
             margin-bottom: 5px;
         }
         .college-address {
             font-size: 14px;
-            color: #6b7280;
+            color: {{ $collegeSettings->secondary_color ?? '#6b7280' }};
+            margin-bottom: 15px;
+        }
+        .affiliation {
+            font-size: 12px;
+            color: {{ $collegeSettings->secondary_color ?? '#6b7280' }};
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+        .college-motto {
+            font-size: 11px;
+            color: {{ $collegeSettings->secondary_color ?? '#6b7280' }};
+            font-style: italic;
             margin-bottom: 15px;
         }
         .marksheet-title {
@@ -41,6 +82,8 @@
             font-weight: bold;
             color: #374151;
             margin-top: 15px;
+            position: relative;
+            z-index: 1;
         }
         .student-info {
             display: grid;
@@ -198,8 +241,23 @@
     <div class="marksheet">
         <!-- Header -->
         <div class="header">
+            @if($collegeSettings->show_college_logo && $collegeSettings->logo_path)
+                <img src="{{ asset('storage/' . $collegeSettings->logo_path) }}" alt="College Logo" class="college-logo">
+            @endif
             <div class="college-name">{{ $collegeSettings->college_name }}</div>
+            @if($collegeSettings->college_code)
+                <div class="college-code">College Code: {{ $collegeSettings->college_code }}</div>
+            @endif
             <div class="college-address">{{ $collegeSettings->college_address }}</div>
+            @if($collegeSettings->affiliation)
+                <div class="affiliation">Affiliated to: {{ $collegeSettings->affiliation }}</div>
+            @endif
+            @if($collegeSettings->university_name)
+                <div class="affiliation">{{ $collegeSettings->university_name }}</div>
+            @endif
+            @if($collegeSettings->college_motto)
+                <div class="college-motto">"{{ $collegeSettings->college_motto }}"</div>
+            @endif
             @if($collegeSettings->result_header)
                 <div style="margin: 10px 0; font-style: italic;">{{ $collegeSettings->result_header }}</div>
             @endif

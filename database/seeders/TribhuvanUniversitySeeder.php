@@ -24,9 +24,6 @@ class TribhuvanUniversitySeeder extends Seeder
         // Create Academic Years
         $this->command->info('Creating academic years...');
 
-        // Clear existing academic years
-        AcademicYear::truncate();
-
         $academicYears = [
             [
                 'name' => '2081-2082',
@@ -59,11 +56,14 @@ class TribhuvanUniversitySeeder extends Seeder
 
         $createdAcademicYears = [];
         foreach ($academicYears as $yearData) {
-            $createdAcademicYears[] = AcademicYear::create($yearData);
+            $createdAcademicYears[] = AcademicYear::updateOrCreate(
+                ['code' => $yearData['code']], // Find by code
+                $yearData // Update or create with this data
+            );
         }
 
         $academicYear = AcademicYear::where('is_current', true)->first();
-        $this->command->info('✅ Created ' . count($academicYears) . ' academic years');
+        $this->command->info('✅ Created/Updated ' . count($academicYears) . ' academic years');
 
         // Create Faculties
         $faculties = [
@@ -103,7 +103,10 @@ class TribhuvanUniversitySeeder extends Seeder
 
         $createdFaculties = [];
         foreach ($faculties as $facultyData) {
-            $createdFaculties[$facultyData['code']] = Faculty::create($facultyData);
+            $createdFaculties[$facultyData['code']] = Faculty::updateOrCreate(
+                ['code' => $facultyData['code']],
+                $facultyData
+            );
         }
 
         // Create Departments
@@ -169,7 +172,10 @@ class TribhuvanUniversitySeeder extends Seeder
 
         $createdDepartments = [];
         foreach ($departments as $deptData) {
-            $createdDepartments[$deptData['code']] = Department::create($deptData);
+            $createdDepartments[$deptData['code']] = Department::updateOrCreate(
+                ['code' => $deptData['code']],
+                $deptData
+            );
         }
 
         // Create Courses
@@ -241,52 +247,54 @@ class TribhuvanUniversitySeeder extends Seeder
 
         $createdCourses = [];
         foreach ($courses as $courseData) {
-            $createdCourses[$courseData['code']] = Course::create($courseData);
+            $createdCourses[$courseData['code']] = Course::updateOrCreate(
+                ['code' => $courseData['code']],
+                $courseData
+            );
         }
 
-        // Create some instructors
+        // Create some instructors (using 'faculty' role as per enum constraint)
         $instructors = [
             [
                 'name' => 'Dr. Ram Prasad Sharma',
                 'email' => 'ram.sharma@tu.edu.np',
                 'password' => Hash::make('password'),
-                'role' => 'instructor',
+                'role' => 'faculty',
                 'phone' => '+977-9841234567',
                 'address' => 'Kathmandu, Nepal',
-                'is_active' => true,
             ],
             [
                 'name' => 'Prof. Sita Devi Poudel',
                 'email' => 'sita.poudel@tu.edu.np',
                 'password' => Hash::make('password'),
-                'role' => 'instructor',
+                'role' => 'faculty',
                 'phone' => '+977-9841234568',
                 'address' => 'Lalitpur, Nepal',
-                'is_active' => true,
             ],
             [
                 'name' => 'Dr. Hari Bahadur Thapa',
                 'email' => 'hari.thapa@tu.edu.np',
                 'password' => Hash::make('password'),
-                'role' => 'instructor',
+                'role' => 'faculty',
                 'phone' => '+977-9841234569',
                 'address' => 'Bhaktapur, Nepal',
-                'is_active' => true,
             ],
             [
                 'name' => 'Ms. Gita Kumari Shrestha',
                 'email' => 'gita.shrestha@tu.edu.np',
                 'password' => Hash::make('password'),
-                'role' => 'instructor',
+                'role' => 'faculty',
                 'phone' => '+977-9841234570',
                 'address' => 'Kathmandu, Nepal',
-                'is_active' => true,
             ],
         ];
 
         $createdInstructors = [];
         foreach ($instructors as $instructorData) {
-            $createdInstructors[] = User::create($instructorData);
+            $createdInstructors[] = User::updateOrCreate(
+                ['email' => $instructorData['email']],
+                $instructorData
+            );
         }
 
         // Create Class Sections (Following TU structure)
@@ -335,7 +343,14 @@ class TribhuvanUniversitySeeder extends Seeder
             $classData['end_date'] = $academicYear->end_date;
             $classData['status'] = 'active';
 
-            $createdClasses[] = ClassSection::create($classData);
+            $createdClasses[] = ClassSection::updateOrCreate(
+                [
+                    'course_id' => $classData['course_id'],
+                    'semester' => $classData['semester'],
+                    'academic_year_id' => $classData['academic_year_id']
+                ],
+                $classData
+            );
         }
 
         $this->command->info('Created class sections successfully!');

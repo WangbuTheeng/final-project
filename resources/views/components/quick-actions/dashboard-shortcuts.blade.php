@@ -67,7 +67,7 @@
             'description' => 'Create new exam schedule',
             'icon' => 'fas fa-calendar-plus',
             'color' => 'red',
-            'url' => route('exams.create'),
+            'url' => route('examinations.create'),
             'permission' => 'create-exams',
             'category' => 'exams',
             'shortcut' => 'Ctrl+Shift+X'

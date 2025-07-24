@@ -237,7 +237,7 @@
                         No completed exams with marks found. Complete some exams and enter marks to generate results.
                     </p>
                     <div class="mt-6">
-                        <a href="{{ route('exams.index') }}"
+                        <a href="{{ route('examinations.index') }}"
                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
                             <i class="fas fa-plus mr-2"></i>
                             View Exams

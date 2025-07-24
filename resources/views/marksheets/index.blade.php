@@ -71,6 +71,23 @@
                         </select>
                         <p class="mt-1 text-xs text-gray-500">Select exam first</p>
                     </div>
+
+                    <!-- Grading System Selection -->
+                    <div>
+                        <label for="grading_system_id" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-graduation-cap text-gray-400 mr-1"></i>
+                            Select Grading System <span class="text-red-500">*</span>
+                        </label>
+                        <select id="grading_system_id"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                                required>
+                            <option value="">Loading grading systems...</option>
+                        </select>
+                        <p class="mt-1 text-xs text-gray-500">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Choose the grading scale to apply when generating marksheets
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Exam Info Display -->
@@ -111,6 +128,22 @@
                             <i class="fas fa-download mr-2"></i>
                             Download PDF
                         </button>
+
+                        <button type="button"
+                                id="nepali-preview-btn"
+                                class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-sm font-semibold rounded-lg hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled>
+                            <i class="fas fa-file-alt mr-2"></i>
+                            Nepali Format
+                        </button>
+
+                        <button type="button"
+                                id="nepali-download-btn"
+                                class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white text-sm font-semibold rounded-lg hover:from-red-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled>
+                            <i class="fas fa-download mr-2"></i>
+                            Download Nepali PDF
+                        </button>
                     </div>
 
                     <!-- Class-wide Actions -->
@@ -131,6 +164,14 @@
                                     disabled>
                                 <i class="fas fa-eye mr-2"></i>
                                 Preview All Students
+                            </button>
+
+                            <button type="button"
+                                    id="nepali-bulk-preview-btn"
+                                    class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-semibold rounded-lg hover:from-purple-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled>
+                                <i class="fas fa-file-alt mr-2"></i>
+                                Nepali Bulk Preview
                             </button>
 
                             <button type="button"
@@ -201,10 +242,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     const examSelect = document.getElementById('exam_id');
     const studentSelect = document.getElementById('student_id');
+    const gradingSystemSelect = document.getElementById('grading_system_id');
     const previewBtn = document.getElementById('preview-btn');
     const downloadBtn = document.getElementById('download-btn');
+    const nepaliPreviewBtn = document.getElementById('nepali-preview-btn');
+    const nepaliDownloadBtn = document.getElementById('nepali-download-btn');
     const bulkBtn = document.getElementById('bulk-btn');
     const bulkPreviewBtn = document.getElementById('bulk-preview-btn');
+    const nepaliBulkPreviewBtn = document.getElementById('nepali-bulk-preview-btn');
     const classPreviewBtn = document.getElementById('class-preview-btn');
     const resultsBtn = document.getElementById('results-btn');
     const examInfo = document.getElementById('exam-info');
@@ -219,8 +264,11 @@ document.addEventListener('DOMContentLoaded', function() {
         studentSelect.disabled = !examId;
         previewBtn.disabled = true;
         downloadBtn.disabled = true;
+        nepaliPreviewBtn.disabled = true;
+        nepaliDownloadBtn.disabled = true;
         bulkBtn.disabled = !examId;
         bulkPreviewBtn.disabled = !examId;
+        nepaliBulkPreviewBtn.disabled = !examId;
         classPreviewBtn.disabled = !examId;
         resultsBtn.disabled = !examId;
 
@@ -268,6 +316,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const hasSelection = examSelect.value && this.value;
         previewBtn.disabled = !hasSelection;
         downloadBtn.disabled = !hasSelection;
+        nepaliPreviewBtn.disabled = !hasSelection;
+        nepaliDownloadBtn.disabled = !hasSelection;
     });
 
     // Handle preview button
@@ -287,11 +337,49 @@ document.addEventListener('DOMContentLoaded', function() {
     downloadBtn.addEventListener('click', function() {
         const examId = examSelect.value;
         const studentId = studentSelect.value;
-        
+
         if (examId && studentId) {
             const url = `{{ route('marksheets.generate-pdf', ['exam' => ':exam', 'student' => ':student']) }}`
                 .replace(':exam', examId)
                 .replace(':student', studentId);
+            window.location.href = url;
+        }
+    });
+
+    // Handle Nepali format preview button
+    nepaliPreviewBtn.addEventListener('click', function() {
+        const examId = examSelect.value;
+        const studentId = studentSelect.value;
+        const gradingSystemId = gradingSystemSelect.value;
+
+        if (examId && studentId) {
+            let url = `{{ route('marksheets.nepali-format', ['exam' => ':exam', 'student' => ':student']) }}`
+                .replace(':exam', examId)
+                .replace(':student', studentId);
+
+            if (gradingSystemId) {
+                url += `?grading_system_id=${gradingSystemId}`;
+            }
+
+            window.open(url, '_blank');
+        }
+    });
+
+    // Handle Nepali format download button
+    nepaliDownloadBtn.addEventListener('click', function() {
+        const examId = examSelect.value;
+        const studentId = studentSelect.value;
+        const gradingSystemId = gradingSystemSelect.value;
+
+        if (examId && studentId) {
+            let url = `{{ route('marksheets.nepali-format-pdf', ['exam' => ':exam', 'student' => ':student']) }}`
+                .replace(':exam', examId)
+                .replace(':student', studentId);
+
+            if (gradingSystemId) {
+                url += `?grading_system_id=${gradingSystemId}`;
+            }
+
             window.location.href = url;
         }
     });
@@ -318,6 +406,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Handle Nepali bulk preview button
+    nepaliBulkPreviewBtn.addEventListener('click', function() {
+        const examId = examSelect.value;
+
+        if (examId) {
+            const url = `{{ route('marksheets.nepali-bulk-preview', ['exam' => ':exam']) }}`
+                .replace(':exam', examId);
+            window.open(url, '_blank');
+        }
+    });
+
     // Handle class preview button
     classPreviewBtn.addEventListener('click', function() {
         const examId = examSelect.value;
@@ -339,6 +438,31 @@ document.addEventListener('DOMContentLoaded', function() {
             window.open(url, '_blank');
         }
     });
+
+    // Load grading systems on page load
+    function loadGradingSystems() {
+        fetch('/api/grading-systems')
+            .then(response => response.json())
+            .then(data => {
+                gradingSystemSelect.innerHTML = '<option value="">Select Grading System</option>';
+                data.forEach(system => {
+                    const option = document.createElement('option');
+                    option.value = system.id;
+                    option.textContent = `${system.name} (${system.code})`;
+                    if (system.is_default) {
+                        option.selected = true;
+                    }
+                    gradingSystemSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading grading systems:', error);
+                gradingSystemSelect.innerHTML = '<option value="">Error loading grading systems</option>';
+            });
+    }
+
+    // Initialize grading systems
+    loadGradingSystems();
 });
 </script>
 @endpush

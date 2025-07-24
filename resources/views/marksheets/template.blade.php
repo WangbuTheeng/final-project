@@ -242,7 +242,7 @@
         <!-- Header -->
         <div class="header">
             @if($collegeSettings->show_college_logo && $collegeSettings->logo_path)
-                <img src="{{ asset('storage/' . $collegeSettings->logo_path) }}" alt="College Logo" class="college-logo">
+                <img src="{{ asset('storage/' . $collegeSettings->logo_path) }}" alt="College Logo" class="college-logo" onerror="this.style.display='none'">
             @endif
             <div class="college-name">{{ $collegeSettings->college_name }}</div>
             @if($collegeSettings->college_code)

@@ -708,9 +708,19 @@ Route::middleware(['auth'])->group(function () {
         Route::get('marksheets', [MarksheetController::class, 'index'])->name('marksheets.index');
         Route::get('marksheets/exam/{exam}/student/{student}', [MarksheetController::class, 'generate'])->name('marksheets.generate');
         Route::get('marksheets/exam/{exam}/student/{student}/pdf', [MarksheetController::class, 'generatePdf'])->name('marksheets.generate-pdf');
+        Route::get('marksheets/exam/{exam}/student/{student}/nepali', [MarksheetController::class, 'generateNepaliFormat'])->name('marksheets.nepali-format');
+        Route::get('marksheets/exam/{exam}/student/{student}/nepali/pdf', [MarksheetController::class, 'generateNepaliFormatPdf'])->name('marksheets.nepali-format-pdf');
         Route::get('marksheets/exam/{exam}/bulk', [MarksheetController::class, 'generateBulk'])->name('marksheets.bulk');
         Route::get('marksheets/exam/{exam}/bulk-preview', [MarksheetController::class, 'bulkPreview'])->name('marksheets.bulk-preview');
+        Route::get('marksheets/exam/{exam}/nepali-bulk-preview', [MarksheetController::class, 'bulkNepaliPreview'])->name('marksheets.nepali-bulk-preview');
         Route::get('marksheets/students-by-exam', [MarksheetController::class, 'getStudentsByExam'])->name('marksheets.students-by-exam');
+    });
+
+    // API Routes for AJAX requests
+    Route::prefix('api')->middleware(['auth'])->group(function () {
+        Route::get('grading-systems', function () {
+            return \App\Models\GradingSystem::active()->ordered()->get(['id', 'name', 'code', 'is_default']);
+        });
     });
 
     // Result Management Routes - Allow Super Admin, Admin, and Teacher access

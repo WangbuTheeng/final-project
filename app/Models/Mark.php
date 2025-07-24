@@ -107,12 +107,27 @@ class Mark extends Model
 
     /**
      * Determine grade based on percentage using exam's grading system
+     * Implements N/G logic for theory/practical failures
      */
-    public function determineGrade()
+    public function determineGrade($gradingSystemId = null)
     {
-        // Use exam's grading system if available
-        if ($this->exam) {
-            $gradeScale = $this->exam->getGradeByPercentage($this->percentage);
+        // Check for theory/practical component failures first
+        if ($this->hasTheoryPracticalFailure()) {
+            $this->grade_letter = 'N/G';
+            $this->grade_point = 0.00;
+            return $this->getNoGradeScale($gradingSystemId);
+        }
+
+        // Use specified grading system or exam's grading system
+        $gradingSystem = null;
+        if ($gradingSystemId) {
+            $gradingSystem = GradingSystem::find($gradingSystemId);
+        } elseif ($this->exam) {
+            $gradingSystem = $this->exam->getEffectiveGradingSystem();
+        }
+
+        if ($gradingSystem) {
+            $gradeScale = $gradingSystem->getGradeByPercentage($this->percentage);
             if ($gradeScale) {
                 $this->grade_letter = $gradeScale->grade_letter;
                 $this->grade_point = $gradeScale->grade_point;
@@ -132,6 +147,51 @@ class Mark extends Model
         }
 
         return $gradeScale;
+    }
+
+    /**
+     * Check if student failed in theory or practical component
+     */
+    public function hasTheoryPracticalFailure()
+    {
+        // Get subject's pass marks from exam_subjects pivot table
+        $examSubject = $this->exam->examSubjects()
+            ->where('subject_id', $this->subject_id)
+            ->first();
+
+        if (!$examSubject) {
+            return false;
+        }
+
+        // Check theory failure
+        if ($this->theory_marks !== null && $examSubject->pass_marks_theory > 0) {
+            if ($this->theory_marks < $examSubject->pass_marks_theory) {
+                return true;
+            }
+        }
+
+        // Check practical failure
+        if ($this->practical_marks !== null && $examSubject->pass_marks_practical > 0) {
+            if ($this->practical_marks < $examSubject->pass_marks_practical) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get N/G grade scale for the specified grading system
+     */
+    private function getNoGradeScale($gradingSystemId = null)
+    {
+        $query = GradeScale::where('grade_letter', 'N/G');
+
+        if ($gradingSystemId) {
+            $query->where('grading_system_id', $gradingSystemId);
+        }
+
+        return $query->first();
     }
 
     /**

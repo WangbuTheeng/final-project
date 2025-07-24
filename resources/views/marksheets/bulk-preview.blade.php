@@ -271,7 +271,7 @@
             <!-- Header -->
             <div class="marksheet-header">
                 @if($collegeSettings->logo_path)
-                    <img src="{{ asset('storage/' . $collegeSettings->logo_path) }}" alt="College Logo" class="college-logo">
+                    <img src="{{ asset('storage/' . $collegeSettings->logo_path) }}" alt="College Logo" class="college-logo" onerror="this.style.display='none'">
                 @endif
                 <div class="college-name">{{ $collegeSettings->college_name }}</div>
                 <div class="college-address">{{ $collegeSettings->college_address }}</div>

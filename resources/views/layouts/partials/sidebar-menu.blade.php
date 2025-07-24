@@ -424,10 +424,7 @@
                         <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Legacy System</p>
                     </div>
 
-                    <a href="{{ route('exams.index') }}" class="{{ request()->routeIs('exams.*') && !request()->routeIs('bulk-marks.*') ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-6 py-2 text-sm font-medium transition-all duration-150 ease-in-out" {{ request()->routeIs('exams.*') && !request()->routeIs('bulk-marks.*') ? 'style=background-color:#37a2bc;' : '' }}>
-                        <i class="fas fa-file-alt mr-3 flex-shrink-0 h-4 w-4 {{ request()->routeIs('exams.*') && !request()->routeIs('bulk-marks.*') ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}"></i>
-                        Old Exam System
-                    </a>
+
                     --}}
 
                     <!-- Results & Reports -->

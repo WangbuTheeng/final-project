@@ -1035,7 +1035,7 @@
             <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-900">Recent Exams</h3>
                 @can('manage-exams')
-                    <a href="{{ route('exams.index') }}" class="text-sm font-medium hover:underline" style="color: #37a2bc;">View All</a>
+                    <a href="{{ route('examinations.index') }}" class="text-sm font-medium hover:underline" style="color: #37a2bc;">View All</a>
                 @endcan
             </div>
             <div class="p-6">
@@ -1217,7 +1217,7 @@
         <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h3 class="text-lg font-semibold text-gray-900">Upcoming Exams</h3>
             @can('manage-exams')
-                <a href="{{ route('exams.index') }}" class="text-sm font-medium hover:underline" style="color: #37a2bc;">View All</a>
+                <a href="{{ route('examinations.index') }}" class="text-sm font-medium hover:underline" style="color: #37a2bc;">View All</a>
             @endcan
         </div>
         <div class="p-6">

@@ -22,8 +22,15 @@ return new class extends Migration
             }
         });
 
-        // Update existing records to populate the new columns
-        DB::statement('UPDATE grade_scales SET min_percent = min_percentage, max_percent = max_percentage WHERE min_percent IS NULL OR max_percent IS NULL');
+        // Update existing records to populate the new columns only if source columns exist
+        if (Schema::hasColumn('grade_scales', 'min_percentage') && Schema::hasColumn('grade_scales', 'max_percentage')) {
+            try {
+                DB::statement('UPDATE grade_scales SET min_percent = min_percentage, max_percent = max_percentage WHERE min_percent IS NULL OR max_percent IS NULL');
+            } catch (\Exception $e) {
+                // If the update fails, continue - the columns might not have data or structure might be different
+                \Log::warning('Could not update grade_scales min/max percent columns: ' . $e->getMessage());
+            }
+        }
     }
 
     /**

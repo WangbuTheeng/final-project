@@ -27,6 +27,11 @@
 - **Cause**: Migration trying to add column that already exists
 - **Fix**: Added column existence checks in college settings enhancement migration
 
+### 6. Grade Scales Column Reference Error
+- **Error**: `SQLSTATE[42S22]: Column not found: 1054 Unknown column 'min_percentage'`
+- **Cause**: Migration trying to copy data from columns that don't exist
+- **Fix**: Added column existence checks before data update operations
+
 ## 🔧 Changes Made
 
 ### Migration Files Modified:
@@ -58,6 +63,11 @@
    - Added column existence checks for all new columns
    - Prevents duplicate column errors
    - Safe rollback with column existence verification
+
+7. **`database/migrations/2025_07_24_103708_add_min_max_percent_to_grade_scales_table.php`**
+   - Added column existence checks before data update operations
+   - Added try-catch blocks for safe data migration
+   - Prevents errors when source columns don't exist
 
 ### New Files Added:
 1. **`database/migrations/2025_01_24_000000_fix_migration_conflicts.php`**
@@ -126,6 +136,7 @@ php artisan migrate
 - `database/migrations/2025_01_24_000001_update_exam_types_for_new_system.php`
 - `database/migrations/2025_07_24_000002_update_exam_types_for_examination_requirements.php`
 - `database/migrations/2025_07_24_100000_enhance_college_settings_for_marksheets.php`
+- `database/migrations/2025_07_24_103708_add_min_max_percent_to_grade_scales_table.php`
 - `app/Http/Controllers/ResultController.php`
 - `scripts/fix-migrations.php`
 

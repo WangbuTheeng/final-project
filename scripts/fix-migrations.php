@@ -137,6 +137,26 @@ try {
         }
     }
 
+    // Check for grade_scales column structure issues
+    if (Schema::hasTable('grade_scales')) {
+        echo "🔍 Checking grade_scales table column structure...\n";
+
+        $gradeScalesColumns = [
+            'min_percentage',
+            'max_percentage',
+            'min_percent',
+            'max_percent'
+        ];
+
+        foreach ($gradeScalesColumns as $column) {
+            if (Schema::hasColumn('grade_scales', $column)) {
+                echo "   Column '$column': ✅ EXISTS\n";
+            } else {
+                echo "   Column '$column': ➖ MISSING\n";
+            }
+        }
+    }
+
     echo "\n✅ Migration fix script completed!\n";
     echo "\nNext steps:\n";
     echo "1. Run: php artisan migrate\n";

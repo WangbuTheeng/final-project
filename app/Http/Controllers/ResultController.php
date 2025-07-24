@@ -102,8 +102,9 @@ class ResultController extends Controller
 
         // Sort by percentage and assign ranks
         $sortedResults = $studentResults->sortByDesc('percentage')->values();
-        $sortedResults->each(function ($result, $index) {
+        $sortedResults = $sortedResults->map(function ($result, $index) {
             $result['rank'] = $index + 1;
+            return $result;
         });
 
         // Calculate class statistics
@@ -292,8 +293,9 @@ class ResultController extends Controller
         });
 
         $sortedResults = $studentResults->sortByDesc('percentage')->values();
-        $sortedResults->each(function ($result, $index) {
+        $sortedResults = $sortedResults->map(function ($result, $index) {
             $result['rank'] = $index + 1;
+            return $result;
         });
 
         $classStats = [

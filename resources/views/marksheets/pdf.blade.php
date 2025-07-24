@@ -15,143 +15,135 @@
         .marksheet {
             width: 100%;
             max-width: 100%;
+            border: 2px solid #000;
+            padding: 20px;
         }
         .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .header-content {
+            flex: 1;
             text-align: center;
-            border-bottom: 2px solid #2563eb;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+        }
+        .college-logo {
+            width: 60px;
+            height: 60px;
+            margin-right: 15px;
+            object-fit: cover;
         }
         .college-name {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
-            color: #1e40af;
+            color: #000;
             margin-bottom: 3px;
         }
         .college-address {
-            font-size: 11px;
-            color: #6b7280;
-            margin-bottom: 10px;
+            font-size: 10px;
+            color: #000;
+            margin-bottom: 8px;
         }
         .marksheet-title {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
-            color: #374151;
-            margin-top: 10px;
+            color: #000;
+            margin-top: 8px;
+            text-decoration: underline;
         }
         .student-info {
-            width: 100%;
-            margin-bottom: 20px;
-            border-collapse: collapse;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 11px;
         }
-        .student-info td {
-            padding: 6px 8px;
-            border: 1px solid #d1d5db;
-            vertical-align: top;
+        .student-left, .student-right {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .info-row {
+            display: flex;
+            gap: 8px;
         }
         .info-label {
             font-weight: bold;
-            background-color: #f3f4f6;
-            width: 25%;
+            color: #000;
+            min-width: 60px;
         }
         .info-value {
-            width: 25%;
+            color: #000;
         }
         .marks-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #000;
         }
         .marks-table th {
-            background-color: #2563eb;
-            color: white;
-            padding: 8px 4px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 11px;
-            border: 1px solid #1e40af;
-        }
-        .marks-table td {
+            background-color: #fff;
+            color: #000;
             padding: 6px 4px;
             text-align: center;
-            border: 1px solid #d1d5db;
-            font-size: 11px;
+            font-weight: bold;
+            font-size: 10px;
+            border: 1px solid #000;
         }
-        .marks-table tr:nth-child(even) {
-            background-color: #f9fafb;
+        .marks-table td {
+            padding: 5px 4px;
+            text-align: center;
+            border: 1px solid #000;
+            font-size: 10px;
         }
         .subject-name {
             text-align: left !important;
             font-weight: 500;
         }
         .total-row {
-            background-color: #dbeafe !important;
             font-weight: bold;
-        }
-        .total-row td {
-            border-top: 2px solid #2563eb;
-            padding: 8px 4px;
         }
         .summary {
-            width: 100%;
-            margin-bottom: 20px;
-            border-collapse: collapse;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 11px;
         }
-        .summary td {
-            padding: 12px;
-            text-align: center;
-            border: 1px solid #d1d5db;
-            font-weight: bold;
+        .summary-left, .summary-right {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
         }
-        .percentage-cell {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-        .gpa-cell {
-            background-color: #e0e7ff;
-            color: #3730a3;
-        }
-        .summary-value {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 3px;
+        .summary-row {
+            display: flex;
+            gap: 8px;
         }
         .summary-label {
-            font-size: 10px;
-        }
-        .result-status {
-            text-align: center;
-            padding: 12px;
-            margin-bottom: 20px;
-            font-size: 16px;
             font-weight: bold;
-            border: 2px solid;
+            color: #000;
+            min-width: 80px;
         }
-        .result-pass {
-            background-color: #d1fae5;
-            color: #065f46;
-            border-color: #10b981;
+        .summary-value {
+            color: #000;
         }
-        .result-fail {
-            background-color: #fee2e2;
-            color: #991b1b;
-            border-color: #ef4444;
+        .grading-scale {
+            margin: 15px 0;
+            font-size: 10px;
+            text-align: center;
         }
         .signatures {
-            width: 100%;
+            display: flex;
+            justify-content: space-between;
             margin-top: 30px;
-            border-collapse: collapse;
-        }
-        .signatures td {
             text-align: center;
-            padding: 20px 5px 10px 5px;
-            border-top: 1px solid #374151;
-            width: 20%;
-            vertical-align: top;
+        }
+        .signature-block {
+            border-top: 1px solid #000;
+            padding-top: 8px;
+            width: 150px;
         }
         .signature-title {
             font-weight: bold;
-            color: #374151;
+            color: #000;
             font-size: 10px;
         }
         .footer {
@@ -181,215 +173,149 @@
         <!-- Header -->
         <div class="header">
             @if($collegeSettings->logo_path && ($collegeSettings->marksheet_settings['show_logo'] ?? true))
-                <div style="text-align: center; margin-bottom: 10px;">
-                    <img src="{{ public_path('storage/' . $collegeSettings->logo_path) }}" alt="College Logo" style="height: 60px; width: auto;">
-                </div>
+                <img src="{{ public_path('storage/' . $collegeSettings->logo_path) }}" alt="College Logo" class="college-logo">
             @endif
-            <div class="college-name">{{ $collegeSettings->college_name }}</div>
-            <div class="college-address">{{ $collegeSettings->college_address }}</div>
-            @if($collegeSettings->college_phone || $collegeSettings->college_email)
-                <div style="font-size: 10px; color: #6b7280; margin-bottom: 5px;">
-                    @if($collegeSettings->college_phone)
-                        Phone: {{ $collegeSettings->college_phone }}
-                    @endif
-                    @if($collegeSettings->college_phone && $collegeSettings->college_email) | @endif
-                    @if($collegeSettings->college_email)
-                        Email: {{ $collegeSettings->college_email }}
-                    @endif
-                </div>
-            @endif
-            @if($collegeSettings->result_header)
-                <div style="margin: 8px 0; font-style: italic; font-size: 11px;">{{ $collegeSettings->result_header }}</div>
-            @endif
-            <div class="marksheet-title">ACADEMIC TRANSCRIPT</div>
-            @if($collegeSettings->marksheet_settings['show_issue_date'] ?? true)
-                <div style="font-size: 10px; color: #6b7280; margin-top: 5px;">
-                    Issue Date: {{ now()->format('F d, Y') }}
-                </div>
-            @endif
+            <div class="header-content">
+                <div class="college-name">Bajra International College</div>
+                <div class="college-address">Boudha-Jorpati</div>
+                <div class="marksheet-title">Progress Report</div>
+            </div>
         </div>
 
         <!-- Student Information -->
-        <table class="student-info">
-            <tr>
-                <td class="info-label">Student Name</td>
-                <td class="info-value">{{ $student->user->first_name }} {{ $student->user->last_name }}</td>
-                <td class="info-label">Student ID</td>
-                <td class="info-value">{{ $student->student_id }}</td>
-            </tr>
-            <tr>
-                <td class="info-label">Course</td>
-                <td class="info-value">{{ $exam->class->course->title }}</td>
-                <td class="info-label">Class/Section</td>
-                <td class="info-value">{{ $exam->class->name }}</td>
-            </tr>
-            <tr>
-                <td class="info-label">Academic Year</td>
-                <td class="info-value">{{ $exam->academicYear->name }}</td>
-                <td class="info-label">Exam</td>
-                <td class="info-value">{{ $exam->title }} ({{ $exam->getExamTypeLabel() }})</td>
-            </tr>
-        </table>
+        <div class="student-info">
+            <div class="student-left">
+                <div class="info-row">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value">{{ $student->user->first_name }} {{ $student->user->last_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Class:</span>
+                    <span class="info-value">{{ $exam->class->name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Roll No:</span>
+                    <span class="info-value">{{ $student->student_id }}</span>
+                </div>
+            </div>
+            <div class="student-right">
+                <div class="info-row">
+                    <span class="info-label">Exam:</span>
+                    <span class="info-value">{{ $exam->title }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Year:</span>
+                    <span class="info-value">{{ $exam->academicYear->name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date:</span>
+                    <span class="info-value">{{ now()->format('Y-m-d') }}</span>
+                </div>
+            </div>
+        </div>
 
         <!-- Marks Table -->
         <table class="marks-table">
             <thead>
                 <tr>
-                    <th style="width: 40%;">Subject</th>
+                    <th style="width: 8%;">S.N</th>
+                    <th style="width: 40%;">Subjects</th>
+                    <th colspan="2" style="width: 24%;">Marks</th>
+                    <th style="width: 15%;">Total Marks</th>
+                    <th style="width: 13%;">Grades</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th></th>
                     <th style="width: 12%;">Theory</th>
                     <th style="width: 12%;">Practical</th>
-                    <th style="width: 12%;">Internal</th>
-                    <th style="width: 12%;">Total</th>
-                    <th style="width: 12%;">Grade</th>
+                    <th></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($marks as $mark)
+                @foreach($marks as $index => $mark)
+                    @php
+                        $theoryMax = $mark->subject->theory_marks ?? 60;
+                        $practicalMax = $mark->subject->practical_marks ?? 40;
+                    @endphp
                     <tr>
-                        <td class="subject-name">{{ $mark->subject->name }} ({{ $mark->subject->code }})</td>
-                        <td>{{ $mark->theory_marks ? number_format($mark->theory_marks, 1) : '-' }}</td>
-                        <td>{{ $mark->practical_marks ? number_format($mark->practical_marks, 1) : '-' }}</td>
-                        <td>{{ $mark->internal_marks ? number_format($mark->internal_marks, 1) : '-' }}</td>
-                        <td>{{ number_format($mark->obtained_marks, 1) }}/{{ number_format($mark->total_marks, 1) }}</td>
-                        <td>
-                            @if($mark->grade_letter)
-                                <span class="grade-badge grade-{{ strtolower(substr($mark->grade_letter, 0, 1)) }}">
-                                    {{ $mark->grade_letter }}
-                                </span>
-                            @else
-                                -
-                            @endif
-                        </td>
+                        <td>{{ $index + 1 }}</td>
+                        <td class="subject-name">{{ $mark->subject->name }}<br><small>(Theory: {{ $theoryMax }}, Practical: {{ $practicalMax }})</small></td>
+                        <td>{{ $mark->theory_marks ? number_format($mark->theory_marks, 0) : '-' }}</td>
+                        <td>{{ $mark->practical_marks ? number_format($mark->practical_marks, 0) : '-' }}</td>
+                        <td>{{ number_format($mark->obtained_marks, 0) }}/{{ number_format($mark->total_marks, 0) }}</td>
+                        <td>{{ $mark->grade_letter ?? 'A' }}</td>
                     </tr>
                 @endforeach
                 <tr class="total-row">
-                    <td class="subject-name">TOTAL</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>{{ number_format($totalObtained, 1) }}/{{ number_format($totalMaximum, 1) }}</td>
-                    <td>
-                        @if($overallGrade)
-                            <span class="grade-badge grade-{{ strtolower(substr($overallGrade->grade_letter, 0, 1)) }}">
-                                {{ $overallGrade->grade_letter }}
-                            </span>
-                        @endif
-                    </td>
+                    <td></td>
+                    <td class="subject-name">Total</td>
+                    <td>{{ number_format($marks->sum('theory_marks'), 0) }}</td>
+                    <td>{{ number_format($marks->sum('practical_marks'), 0) }}</td>
+                    <td>{{ number_format($totalObtained, 0) }}/{{ number_format($totalMaximum, 0) }}</td>
+                    <td>{{ number_format($totalMaximum, 0) }}</td>
                 </tr>
             </tbody>
         </table>
 
         <!-- Summary -->
-        <table class="summary">
-            <tr>
-                <td class="percentage-cell">
-                    <div class="summary-value">{{ number_format($overallPercentage, 2) }}%</div>
-                    <div class="summary-label">Overall Percentage</div>
-                </td>
-                <td class="gpa-cell">
-                    <div class="summary-value">{{ number_format($gpa, 2) }}</div>
-                    <div class="summary-label">Grade Point Average</div>
-                </td>
-            </tr>
-        </table>
-
-        <!-- Result Status -->
-        <div class="result-status {{ $resultStatus === 'FAIL' ? 'result-fail' : 'result-pass' }}">
-            {{ $resultStatus }}
+        <div class="summary">
+            <div class="summary-left">
+                <div class="summary-row">
+                    <span class="summary-label">Grand Total:</span>
+                    <span class="summary-value">{{ number_format($totalObtained, 0) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Percentage:</span>
+                    <span class="summary-value">{{ number_format($overallPercentage, 2) }}%</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Result:</span>
+                    <span class="summary-value">{{ $resultStatus }}</span>
+                </div>
+            </div>
+            <div class="summary-right">
+                <div class="summary-row">
+                    <span class="summary-label">Grade:</span>
+                    <span class="summary-value">{{ $overallGrade->grade_letter ?? 'A' }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">GPA:</span>
+                    <span class="summary-value">{{ number_format($gpa, 2) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Rank:</span>
+                    <span class="summary-value">-</span>
+                </div>
+            </div>
         </div>
 
         <!-- Grading Scale -->
-        @if($collegeSettings->marksheet_settings['show_grading_scale'] ?? false)
+        <div class="grading-scale">
             @php
                 $gradingSystem = $exam->getEffectiveGradingSystem();
                 $gradeScales = $gradingSystem ? $gradingSystem->gradeScales : collect();
             @endphp
-
             @if($gradeScales->count() > 0)
-                <div style="margin: 20px 0; padding: 15px; border: 1px solid #d1d5db; border-radius: 5px; background-color: #f9fafb;">
-                    <h4 style="font-size: 12px; font-weight: bold; margin-bottom: 10px; text-align: center;">
-                        Grading Scale: {{ $gradingSystem->name ?? 'Default System' }} ({{ ucfirst($exam->exam_type) }} Examination)
-                    </h4>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
-                        <thead>
-                            <tr style="background-color: #e5e7eb;">
-                                <th style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">Grade</th>
-                                <th style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">Percentage Range</th>
-                                <th style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">Grade Points</th>
-                                <th style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($gradeScales as $scale)
-                                <tr>
-                                    <td style="border: 1px solid #d1d5db; padding: 4px; text-align: center; font-weight: bold;">{{ $scale->grade_letter }}</td>
-                                    <td style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">{{ number_format($scale->min_percent, 1) }}% - {{ number_format($scale->max_percent, 1) }}%</td>
-                                    <td style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">{{ number_format($scale->grade_point, 2) }}</td>
-                                    <td style="border: 1px solid #d1d5db; padding: 4px; text-align: center;">{{ $scale->description ?: '-' }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                Grading Scale:
+                @foreach($gradeScales as $scale)
+                    {{ $scale->grade_letter }}({{ number_format($scale->min_percent, 0) }}-{{ number_format($scale->max_percent, 0) }}%){{ !$loop->last ? ', ' : '' }}
+                @endforeach
+            @else
+                Grading Scale: A(90-100%), A-(80-90%), B+(70-80%), B(60-70%), F(0-60%)
             @endif
-        @endif
+        </div>
 
         <!-- Signatures -->
-        @if($collegeSettings->marksheet_settings['show_signatures'] ?? true)
-            <table class="signatures">
-                <tr>
-                    @if($collegeSettings->class_teacher_name)
-                        <td>
-                            @if($collegeSettings->class_teacher_signature_path)
-                                <img src="{{ public_path('storage/' . $collegeSettings->class_teacher_signature_path) }}" alt="Class Teacher Signature" style="height: 30px; width: auto; margin-bottom: 5px;">
-                            @endif
-                            <div class="signature-title">{{ $collegeSettings->class_teacher_name }}</div>
-                            <div style="font-size: 9px; color: #6b7280;">Class Teacher</div>
-                        </td>
-                    @endif
-
-                    @if($collegeSettings->hod_name)
-                        <td>
-                            @if($collegeSettings->hod_signature_path)
-                                <img src="{{ public_path('storage/' . $collegeSettings->hod_signature_path) }}" alt="HOD Signature" style="height: 30px; width: auto; margin-bottom: 5px;">
-                            @endif
-                            <div class="signature-title">{{ $collegeSettings->hod_name }}</div>
-                            <div style="font-size: 9px; color: #6b7280;">Head of Department</div>
-                        </td>
-                    @endif
-
-                    @if($collegeSettings->exam_controller_name)
-                        <td>
-                            @if($collegeSettings->exam_controller_signature_path)
-                                <img src="{{ public_path('storage/' . $collegeSettings->exam_controller_signature_path) }}" alt="Exam Controller Signature" style="height: 30px; width: auto; margin-bottom: 5px;">
-                            @endif
-                            <div class="signature-title">{{ $collegeSettings->exam_controller_name }}</div>
-                            <div style="font-size: 9px; color: #6b7280;">Exam Controller</div>
-                        </td>
-                    @endif
-
-                    @if($collegeSettings->registrar_name)
-                        <td>
-                            @if($collegeSettings->registrar_signature_path)
-                                <img src="{{ public_path('storage/' . $collegeSettings->registrar_signature_path) }}" alt="Registrar Signature" style="height: 30px; width: auto; margin-bottom: 5px;">
-                            @endif
-                            <div class="signature-title">{{ $collegeSettings->registrar_name }}</div>
-                            <div style="font-size: 9px; color: #6b7280;">Registrar</div>
-                        </td>
-                    @endif
-
-                    @if($collegeSettings->principal_name)
-                        <td>
-                            @if($collegeSettings->principal_signature_path)
-                                <img src="{{ public_path('storage/' . $collegeSettings->principal_signature_path) }}" alt="Principal Signature" style="height: 30px; width: auto; margin-bottom: 5px;">
-                            @endif
-                            <div class="signature-title">{{ $collegeSettings->principal_name }}</div>
-                            <div style="font-size: 9px; color: #6b7280;">Principal</div>
-                        </td>
-                    @endif
-                </tr>
-            </table>
-        @endif
+        <div class="signatures">
+            <div class="signature-block">
+                <div class="signature-title">Class Teacher</div>
+            </div>
+            <div class="signature-block">
+                <div class="signature-title">Deepak Thakur</div>
+            </div>
+        </div>
 
         <!-- Footer -->
         <div class="footer">

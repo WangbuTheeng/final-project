@@ -114,14 +114,6 @@
                     <!-- Individual Student Actions -->
                     <div class="flex flex-col sm:flex-row gap-4">
                         <button type="button"
-                                id="preview-btn"
-                                class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm font-semibold rounded-lg hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled>
-                            <i class="fas fa-eye mr-2"></i>
-                            Preview Marksheet
-                        </button>
-
-                        <button type="button"
                                 id="download-btn"
                                 class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white text-sm font-semibold rounded-lg hover:from-green-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled>
@@ -243,7 +235,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const examSelect = document.getElementById('exam_id');
     const studentSelect = document.getElementById('student_id');
     const gradingSystemSelect = document.getElementById('grading_system_id');
-    const previewBtn = document.getElementById('preview-btn');
     const downloadBtn = document.getElementById('download-btn');
     const nepaliPreviewBtn = document.getElementById('nepali-preview-btn');
     const nepaliDownloadBtn = document.getElementById('nepali-download-btn');
@@ -262,7 +253,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset student select
         studentSelect.innerHTML = '<option value="">Select Student</option>';
         studentSelect.disabled = !examId;
-        previewBtn.disabled = true;
         downloadBtn.disabled = true;
         nepaliPreviewBtn.disabled = true;
         nepaliDownloadBtn.disabled = true;
@@ -314,23 +304,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle student selection
     studentSelect.addEventListener('change', function() {
         const hasSelection = examSelect.value && this.value;
-        previewBtn.disabled = !hasSelection;
         downloadBtn.disabled = !hasSelection;
         nepaliPreviewBtn.disabled = !hasSelection;
         nepaliDownloadBtn.disabled = !hasSelection;
-    });
-
-    // Handle preview button
-    previewBtn.addEventListener('click', function() {
-        const examId = examSelect.value;
-        const studentId = studentSelect.value;
-        
-        if (examId && studentId) {
-            const url = `{{ route('marksheets.generate', ['exam' => ':exam', 'student' => ':student']) }}`
-                .replace(':exam', examId)
-                .replace(':student', studentId);
-            window.open(url, '_blank');
-        }
     });
 
     // Handle download button

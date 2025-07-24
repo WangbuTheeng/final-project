@@ -13,46 +13,106 @@ return new class extends Migration
     {
         Schema::table('college_settings', function (Blueprint $table) {
             // Add more fields for enhanced marksheet formatting
-            $table->string('college_code')->nullable()->after('college_name');
-            $table->string('affiliation')->nullable()->after('college_address');
-            $table->string('university_name')->nullable()->after('affiliation');
-            $table->text('college_motto')->nullable()->after('university_name');
-            
+            if (!Schema::hasColumn('college_settings', 'college_code')) {
+                $table->string('college_code')->nullable()->after('college_name');
+            }
+            if (!Schema::hasColumn('college_settings', 'affiliation')) {
+                $table->string('affiliation')->nullable()->after('college_address');
+            }
+            if (!Schema::hasColumn('college_settings', 'university_name')) {
+                $table->string('university_name')->nullable()->after('affiliation');
+            }
+            if (!Schema::hasColumn('college_settings', 'college_motto')) {
+                $table->text('college_motto')->nullable()->after('university_name');
+            }
+
             // Enhanced signature fields
-            $table->string('vice_principal_name')->nullable()->after('principal_signature_path');
-            $table->string('vice_principal_signature_path')->nullable()->after('vice_principal_name');
-            $table->string('academic_coordinator_name')->nullable()->after('registrar_signature_path');
-            $table->string('academic_coordinator_signature_path')->nullable()->after('academic_coordinator_name');
-            
+            if (!Schema::hasColumn('college_settings', 'vice_principal_name')) {
+                $table->string('vice_principal_name')->nullable()->after('principal_signature_path');
+            }
+            if (!Schema::hasColumn('college_settings', 'vice_principal_signature_path')) {
+                $table->string('vice_principal_signature_path')->nullable()->after('vice_principal_name');
+            }
+            if (!Schema::hasColumn('college_settings', 'academic_coordinator_name')) {
+                $table->string('academic_coordinator_name')->nullable()->after('registrar_signature_path');
+            }
+            if (!Schema::hasColumn('college_settings', 'academic_coordinator_signature_path')) {
+                $table->string('academic_coordinator_signature_path')->nullable()->after('academic_coordinator_name');
+            }
+
             // Marksheet formatting options
-            $table->boolean('show_college_logo')->default(true)->after('logo_path');
-            $table->boolean('show_watermark')->default(false)->after('show_college_logo');
-            $table->string('watermark_text')->nullable()->after('show_watermark');
-            $table->enum('marksheet_layout', ['standard', 'compact', 'detailed'])->default('standard')->after('watermark_text');
-            $table->boolean('show_subject_codes')->default(false)->after('marksheet_layout');
-            $table->boolean('show_attendance')->default(false)->after('show_subject_codes');
-            $table->boolean('show_remarks')->default(true)->after('show_attendance');
-            $table->boolean('show_grade_scale')->default(true)->after('show_remarks');
-            
+            if (!Schema::hasColumn('college_settings', 'show_college_logo')) {
+                $table->boolean('show_college_logo')->default(true)->after('logo_path');
+            }
+            if (!Schema::hasColumn('college_settings', 'show_watermark')) {
+                $table->boolean('show_watermark')->default(false)->after('show_college_logo');
+            }
+            if (!Schema::hasColumn('college_settings', 'watermark_text')) {
+                $table->string('watermark_text')->nullable()->after('show_watermark');
+            }
+            if (!Schema::hasColumn('college_settings', 'marksheet_layout')) {
+                $table->enum('marksheet_layout', ['standard', 'compact', 'detailed'])->default('standard')->after('watermark_text');
+            }
+            if (!Schema::hasColumn('college_settings', 'show_subject_codes')) {
+                $table->boolean('show_subject_codes')->default(false)->after('marksheet_layout');
+            }
+            if (!Schema::hasColumn('college_settings', 'show_attendance')) {
+                $table->boolean('show_attendance')->default(false)->after('show_subject_codes');
+            }
+            if (!Schema::hasColumn('college_settings', 'show_remarks')) {
+                $table->boolean('show_remarks')->default(true)->after('show_attendance');
+            }
+            if (!Schema::hasColumn('college_settings', 'show_grade_scale')) {
+                $table->boolean('show_grade_scale')->default(true)->after('show_remarks');
+            }
+
             // Print settings
-            $table->enum('paper_size', ['A4', 'Letter', 'Legal'])->default('A4')->after('show_grade_scale');
-            $table->enum('orientation', ['portrait', 'landscape'])->default('portrait')->after('paper_size');
-            $table->integer('margin_top')->default(20)->after('orientation');
-            $table->integer('margin_bottom')->default(20)->after('margin_top');
-            $table->integer('margin_left')->default(20)->after('margin_bottom');
-            $table->integer('margin_right')->default(20)->after('margin_left');
-            
+            if (!Schema::hasColumn('college_settings', 'paper_size')) {
+                $table->enum('paper_size', ['A4', 'Letter', 'Legal'])->default('A4')->after('show_grade_scale');
+            }
+            if (!Schema::hasColumn('college_settings', 'orientation')) {
+                $table->enum('orientation', ['portrait', 'landscape'])->default('portrait')->after('paper_size');
+            }
+            if (!Schema::hasColumn('college_settings', 'margin_top')) {
+                $table->integer('margin_top')->default(20)->after('orientation');
+            }
+            if (!Schema::hasColumn('college_settings', 'margin_bottom')) {
+                $table->integer('margin_bottom')->default(20)->after('margin_top');
+            }
+            if (!Schema::hasColumn('college_settings', 'margin_left')) {
+                $table->integer('margin_left')->default(20)->after('margin_bottom');
+            }
+            if (!Schema::hasColumn('college_settings', 'margin_right')) {
+                $table->integer('margin_right')->default(20)->after('margin_left');
+            }
+
             // Colors and styling
-            $table->string('primary_color')->default('#2563eb')->after('margin_right');
-            $table->string('secondary_color')->default('#6b7280')->after('primary_color');
-            $table->string('header_background_color')->default('#f8fafc')->after('secondary_color');
-            
+            if (!Schema::hasColumn('college_settings', 'primary_color')) {
+                $table->string('primary_color')->default('#2563eb')->after('margin_right');
+            }
+            if (!Schema::hasColumn('college_settings', 'secondary_color')) {
+                $table->string('secondary_color')->default('#6b7280')->after('primary_color');
+            }
+            if (!Schema::hasColumn('college_settings', 'header_background_color')) {
+                $table->string('header_background_color')->default('#f8fafc')->after('secondary_color');
+            }
+
             // Additional information fields
-            $table->text('examination_rules')->nullable()->after('header_background_color');
-            $table->text('grade_calculation_method')->nullable()->after('examination_rules');
-            $table->string('contact_person_name')->nullable()->after('grade_calculation_method');
-            $table->string('contact_person_phone')->nullable()->after('contact_person_name');
-            $table->string('contact_person_email')->nullable()->after('contact_person_phone');
+            if (!Schema::hasColumn('college_settings', 'examination_rules')) {
+                $table->text('examination_rules')->nullable()->after('header_background_color');
+            }
+            if (!Schema::hasColumn('college_settings', 'grade_calculation_method')) {
+                $table->text('grade_calculation_method')->nullable()->after('examination_rules');
+            }
+            if (!Schema::hasColumn('college_settings', 'contact_person_name')) {
+                $table->string('contact_person_name')->nullable()->after('grade_calculation_method');
+            }
+            if (!Schema::hasColumn('college_settings', 'contact_person_phone')) {
+                $table->string('contact_person_phone')->nullable()->after('contact_person_name');
+            }
+            if (!Schema::hasColumn('college_settings', 'contact_person_email')) {
+                $table->string('contact_person_email')->nullable()->after('contact_person_phone');
+            }
         });
     }
 
@@ -62,7 +122,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('college_settings', function (Blueprint $table) {
-            $table->dropColumn([
+            $columnsToCheck = [
                 'college_code',
                 'affiliation',
                 'university_name',
@@ -93,7 +153,18 @@ return new class extends Migration
                 'contact_person_name',
                 'contact_person_phone',
                 'contact_person_email'
-            ]);
+            ];
+
+            $columnsToRemove = [];
+            foreach ($columnsToCheck as $column) {
+                if (Schema::hasColumn('college_settings', $column)) {
+                    $columnsToRemove[] = $column;
+                }
+            }
+
+            if (!empty($columnsToRemove)) {
+                $table->dropColumn($columnsToRemove);
+            }
         });
     }
 };

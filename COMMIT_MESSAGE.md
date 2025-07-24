@@ -22,6 +22,11 @@
 - **Cause**: Migration trying to use ExamType model before table exists
 - **Fix**: Added table existence checks in exam type migrations
 
+### 5. Duplicate Column Error in College Settings
+- **Error**: `SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'show_college_logo'`
+- **Cause**: Migration trying to add column that already exists
+- **Fix**: Added column existence checks in college settings enhancement migration
+
 ## 🔧 Changes Made
 
 ### Migration Files Modified:
@@ -48,6 +53,11 @@
    - Added table existence check before using ExamType model
    - Added try-catch blocks for safe model operations
    - Added fallback to direct DB operations
+
+6. **`database/migrations/2025_07_24_100000_enhance_college_settings_for_marksheets.php`**
+   - Added column existence checks for all new columns
+   - Prevents duplicate column errors
+   - Safe rollback with column existence verification
 
 ### New Files Added:
 1. **`database/migrations/2025_01_24_000000_fix_migration_conflicts.php`**
@@ -115,6 +125,7 @@ php artisan migrate
 - `database/migrations/2025_06_17_000000_update_fees_table_structure.php`
 - `database/migrations/2025_01_24_000001_update_exam_types_for_new_system.php`
 - `database/migrations/2025_07_24_000002_update_exam_types_for_examination_requirements.php`
+- `database/migrations/2025_07_24_100000_enhance_college_settings_for_marksheets.php`
 - `app/Http/Controllers/ResultController.php`
 - `scripts/fix-migrations.php`
 

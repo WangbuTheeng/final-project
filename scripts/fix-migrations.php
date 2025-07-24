@@ -118,6 +118,25 @@ try {
         }
     }
     
+    // Check for duplicate column issues in college_settings
+    if (Schema::hasTable('college_settings')) {
+        echo "🔍 Checking college_settings table for duplicate columns...\n";
+
+        $duplicateColumns = [
+            'show_college_logo',
+            'logo_path',
+            'result_footer'
+        ];
+
+        foreach ($duplicateColumns as $column) {
+            if (Schema::hasColumn('college_settings', $column)) {
+                echo "   Column '$column': ✅ EXISTS\n";
+            } else {
+                echo "   Column '$column': ➖ MISSING\n";
+            }
+        }
+    }
+
     echo "\n✅ Migration fix script completed!\n";
     echo "\nNext steps:\n";
     echo "1. Run: php artisan migrate\n";
